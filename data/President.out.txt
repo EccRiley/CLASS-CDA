@@ -1,0 +1,86 @@
+> vote=matrix(c(794,86,150,570),nr=2,dimnames=list("1st Survey"=c("Approve","Disapprove"),"2nd Survey"=c("Approve","Disapprove")))
+> vote
+            2nd Survey
+1st Survey   Approve Disapprove
+  Approve        794        150
+  Disapprove      86        570
+> ##Set correct=F to apply McNemar without continuity correction
+> mcnemar.test(vote,correct=F)
+
+	McNemar's Chi-squared test
+
+data:  vote 
+McNemar's chi-squared = 17.3559, df = 1, p-value = 3.099e-05
+
+> ##Set correct=t to apply McNemar with continuity correction
+> ##Note: we don't really need the correction here since the sample size is large
+> mcnemar.test(vote,correct=T)
+
+	McNemar's Chi-squared test with continuity correction
+
+data:  vote 
+McNemar's chi-squared = 16.8178, df = 1, p-value = 4.115e-05
+
+> 
+> ### Simple Kappa Coefficient
+> 
+> ### Using the original formula to calculate the Simple Kappa Coefficient
+> prop=vote/sum(vote)
+> Po=sum(diag(prop))
+> Pe=rowSums(prop)[1]*colSums(prop)[1]+rowSums(prop)[2]*colSums(prop)[2]
+> kappa=(Po-Pe)/(1-Pe)
+> kappa
+  Approve 
+0.6995927 
+> 
+> ### Using a function Kappa() in package vcd. 
+> ### Please first load packages VR, colorspace and grid and finally load vcd.
+> #install.packages("vcd")
+> library(vcd)
+> kappa=Kappa(vote)
+> CI_kappa=cbind(0.69959267-qnorm(0.975)*0.01805518,0.69959267+qnorm(0.975)*0.01805518)
+> CI_kappa
+          [,1]      [,2]
+[1,] 0.6642052 0.7349802
+> ### or use confint() function
+> confint(kappa)
+            
+Kappa              lwr       upr
+  Unweighted 0.6642052 0.7349802
+  Weighted   0.6329452 0.7662402
+> 
+> ###agreement plot
+> ####observed and expected diagonal elements are represented by superposed black and white rectangles, respectively.
+> agreementplot(vote)
+> 
+> 
+> ####Consider cross-sectional design 
+> vote=matrix(c(944,880,656,720),nr=2,dimnames=list(c("1st Survey","2nd Survey"),c("Approve","Disapprove")))
+> vote
+           Approve Disapprove
+1st Survey     944        656
+2nd Survey     880        720
+> ##The ususal chi-sq. test
+> chisq.test(vote, correct=F)
+
+	Pearson's Chi-squared test
+
+data:  vote 
+X-squared = 5.2224, df = 1, p-value = 0.0223
+
+> ##Set correct=F to apply McNemar without continuity correction
+> mcnemar.test(vote,correct=F)
+
+	McNemar's Chi-squared test
+
+data:  vote 
+McNemar's chi-squared = 32.6667, df = 1, p-value = 1.094e-08
+
+> ##Set correct=t to apply McNemar with continuity correction
+> ##Note: we don't really need the correction here since the sample size is large
+> mcnemar.test(vote,correct=T)
+
+	McNemar's Chi-squared test with continuity correction
+
+data:  vote 
+McNemar's chi-squared = 32.3757, df = 1, p-value = 1.271e-08

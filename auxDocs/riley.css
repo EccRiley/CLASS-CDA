@@ -1,0 +1,559 @@
+/* Title: Tufte-Style APA Formatting Stylesheet for Critic Markup Rmarkdown Documents */
+/*-------------------------------------------------------------------------------------------------------------------------------*/
+/* Author By: Riley M. Smith - github/EccRiley */
+/* Based On: GitHub stylesheet for MarkdownPad (http://markdownpad.com),
+                        Version: b13fe65ca28d2e568c6ed5d7f06581183df8f2ff ,
+                        by Nicolas Hery - http://nicolashery.com,
+                        Source: https://github.com/nicolahery/markdownpad-github */
+/*===================================================================================================*/
+
+/* Import ET Book styles
+   adapted from https://github.com/edwardtufte/et-book/blob/gh-pages/et-book.css */
+
+@charset "UTF-8";
+
+@font-face { font-family: "et-book";
+             src: url("et-book/et-book-roman-old-style-figures/et-book-roman-old-style-figures.eot");
+             src: url("et-book/et-book-roman-old-style-figures/et-book-roman-old-style-figures.eot?#iefix") format("embedded-opentype"), url("et-book/et-book-roman-old-style-figures/et-book-roman-old-style-figures.woff") format("woff"), url("et-book/et-book-roman-old-style-figures/et-book-roman-old-style-figures.ttf") format("truetype"), url("et-book/et-book-roman-old-style-figures/et-book-roman-old-style-figures.svg#etbookromanosf") format("truetype");
+             font-weight: normal;
+             font-style: normal; }
+
+@font-face { font-family: "et-book";
+             src: url("et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.eot");
+             src: url("et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.eot?#iefix") format("embedded-opentype"), url("et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.woff") format("woff"), url("et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.ttf") format("truetype"), url("et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.svg#etbookromanosf") format("truetype");
+             font-weight: normal;
+             font-style: italic; }
+
+@font-face { font-family: "et-book";
+             src: url("et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.eot");
+             src: url("et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.eot?#iefix") format("embedded-opentype"), url("et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.woff") format("woff"), url("et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.ttf") format("truetype"), url("et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.svg#etbookromanosf") format("truetype");
+             font-weight: bold;
+             font-style: normal; }
+
+@font-face { font-family: "et-book-roman-line-figures";
+             src: url("et-book/et-book-roman-line-figures/et-book-roman-line-figures.eot");
+             src: url("et-book/et-book-roman-line-figures/et-book-roman-line-figures.eot?#iefix") format("embedded-opentype"), url("et-book/et-book-roman-line-figures/et-book-roman-line-figures.woff") format("woff"), url("et-book/et-book-roman-line-figures/et-book-roman-line-figures.ttf") format("truetype"), url("et-book/et-book-roman-line-figures/et-book-roman-line-figures.svg#etbookromanosf") format("svg");
+             font-weight: normal;
+             font-style: normal; }
+
+
+@font-face { font-family: "et-book-bold-line-figures";
+             src: url("et-book/et-book-bold-line-figures/et-book-bold-line-figures.eot");
+             src: url("et-book/et-book-bold-line-figures/et-book-bold-line-figures.eot?#iefix") format("embedded-opentype"), url("et-book/et-book-bold-line-figures/et-book-bold-line-figures.woff") format("woff"), url("et-book/et-book-bold-line-figures/et-book-bold-line-figures.ttf") format("truetype"), url("et-book/et-book-bold-line-figures/et-book-bold-line-figures.svg#etbookromanosf") format("svg");
+             font-weight: bold;
+             font-style: normal; }
+
+
+
+/* RESET
+--------------------------------------------------------------------------------------------------------------------------*/
+
+html, body, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strong, sub, sup, var, b, u, i, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+/* BODY
+--------------------------------------------------------------------------------------------------------------------------*/
+body {
+    font-family: et-book, Palatino, "Palatino Linotype", "Palatino LT STD", "Book Antiqua", serif;
+    font-size: 11pt;
+    line-height: 1.2;
+    color: #333;
+    font-weight: normal;
+    counter-reset: sidenote-counter;
+    /*background-color: #f9fafb;*/
+    /*margin-left: 25px;*/
+    max-width: 95%;
+}
+
+/* HEADERS
+--------------------------------------------------------------------------------------------------------------------------*/
+h1, h2, h3, h4, h5, h6 {
+    padding: 0; margin-right: 5rem; line-height: 1; -webkit-font-smoothing: antialiased; font-family: "et-bembo"
+}
+h2, h3, h4, h5, h6 {
+    margin-bottom: 0;
+}
+
+h1 tt, h1 code, h2 tt, h2 code, h3 tt, h3 code, h4 tt, h4 code, h5 tt, h5 code, h6 tt, h6 code {
+    font-size: inherit;
+}
+h1 {
+    color: #44505b;
+    font-weight: 200;
+    margin-top: 4rem;
+    margin-bottom: 1.5rem;
+    font-size: 3.2rem;
+    font-style: italic;
+}
+h2 {
+    color: #2e363e;
+    font-style: italic;
+    font-weight: 400;
+    margin-top: 2.1rem;
+    font-size: 2.2rem;
+    font-style: italic;
+}
+h3 {
+    color: #2e363e;
+    font-weight: normal;
+    font-size: 1.7rem;
+    margin-top: 2rem;
+    font-style: normal;
+    font-variant: small-caps;
+}
+h4 {
+    color: #2e363e;
+    font-weight: normal;
+    font-size: 2.75rem;
+    margin-top: 2rem;
+    font-style: normal;
+    font-variant: small-caps;
+}
+
+p.subtitle {
+    color: #2e363e;
+    font-style: italic;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    margin-right: 15rem;
+    font-size: 1.8rem;
+    display: block;
+    line-height: 1;
+}
+
+.numeral {
+    color: #44505b;
+    font-family: "et-book"; et-book, Palatino, "Palatino Linotype", "Palatino LT STD", "Book Antiqua", serif;
+}
+
+/*
+h1 {
+font-size: 12pt;
+color: #44505b;
+font-weight: bold;
+text-decoration: none;
+text-align: center;
+}
+
+h2 {
+font-size: 12pt;
+color: #44505b;
+font-weight: bold;
+text-decoration: none;
+text-align: left;
+}
+
+/* APA Style Headings (uncomment to implement) */
+
+h3 {
+font-size: 12pt;
+font-weight: bold;
+text-decoration: none;
+color: #2e363e;
+text-indent: 15px;
+}
+*/
+/*h4 {
+    font-size: 12pt;
+    font-weight: bold;
+    text-decoration: none;
+    color: #2e363e;
+    text-indent: 25px;
+}
+h5 {
+    font-size: 12pt;
+    font-weight: bold;
+    text-decoration: none;
+    font-style: italic;
+    color: #2e363e;
+    text-indent: 50px;
+}
+h6 {
+    color: #2e363e;
+    font-size: 12pt;
+    font-weight: bold;
+    text-decoration: none;
+}*/
+
+body>h2:first-child, body>h1:first-child, body>h1:first-child+h2, body>h3:first-child, body>h4:first-child, body>h5:first-child, body>h6:first-child {
+    margin-top: 0;
+    padding-top: 0;
+}
+a:first-child h1, a:first-child h2, a:first-child h3, a:first-child h4, a:first-child h5, a:first-child h6 {
+    margin-top: 0;
+    padding-top: 0;
+}
+h1+p, h2+p, h3+p, h4+p, h5+p, h6+p {
+    margin-top: 10px;
+}
+p {
+    margin-bottom: 15px;
+}
+
+/* LINKS
+--------------------------------*/
+a {
+    color: #021860;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: none;
+}
+
+/* LISTS
+--------------------------------*/
+ul, ol {
+    padding-left: 30px;
+    font-size: 11pt;
+    max-width: 90%;
+}
+ul li >:first-child, ol li >:first-child, ul li ul:first-of-type, ol li ol:first-of-type, ul li ol:first-of-type, ol li ul:first-of-type {
+    margin-top: 0px;
+}
+ul ul, ul ol, ol ol, ol ul {
+    margin-bottom: 10px;
+}
+dl {
+    padding: 0;
+}
+dl dt {
+    font-size: 11pt;
+    font-weight: bold;
+    font-style: italic;
+    padding: 0;
+    /*margin: 15px 0 5px;*/
+}
+dl dt:first-child {
+    padding: 0;
+}
+dl dt>:first-child {
+    margin-top: 0px;
+}
+dl dt>:last-child {
+    margin-bottom: 0px;
+}
+dl dd {
+    margin: 0 0 15px;
+    padding: 0 15px;
+}
+dl dd>:first-child {
+    margin-top: 0px;
+}
+dl dd>:last-child {
+    margin-bottom: 0px;
+}
+
+/* CODE
+--------------------------------*/
+pre, code, tt {
+    background-color: #f2f2f2  /* #e0eaff; */
+/*    font-size: 10px;*/
+    font-family: Menlo;
+    overflow-x: hidden;
+    white-space: pre-wrap;
+    padding: 0px;
+}
+
+code, tt {
+    font-family: Menlo;
+background-color: #f2f2f2  /* #e0eaff; */
+/*    font-size: 10px;*/
+    padding: 0px;
+    white-space: pre-wrap;
+    overflow-x: hidden;
+}
+
+pre>code {
+    font-family: Menlo;
+background-color: #f2f2f2  /* #e0eaff; */
+/*    font-size: 10px;*/
+    padding: 0px;
+    margin-left: 35px;
+    white-space: pre-wrap;
+    overflow-x: hidden;
+}
+pre {
+    font-family: Menlo;
+background-color: #f2f2f2  /* #e0eaff; */
+/*    border: 1px solid #333c44;*/
+    overflow-x: hidden;
+    padding: 0px;
+    margin-left: 35px;
+}
+pre code, pre tt {
+    font-family: Menlo;
+    padding: 0px;
+    margin-left: 35px;
+background-color: #f2f2f2  /* #e0eaff; */
+    overflow-x: hidden;
+}
+
+kbd {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #f4f7ff;
+    background-image: linear-gradient(#f4f7ff, #e0eaff);
+    background-repeat: repeat-x;
+    border-color: #000f2f;
+    border-style: solid;
+    border-width: 1px;
+    line-height: 1;
+    padding: 0;
+    font-family: Menlo;
+}
+
+/* QUOTES
+--------------------------------*/
+blockquote {
+    color: #44505a;
+    font-style: italic;
+    width: 85%;
+    border-left: 5px solid gray;
+    padding: 10px;
+    margin-left: 35px;
+}
+blockquote footer {
+    width: 50%;
+    font-size: 10rem;
+    font-style: italic;
+    text-align: right;
+}
+blockquote>:first-child {
+    margin-top: 0px;
+}
+blockquote>:last-child {
+    margin-bottom: 5px;
+}
+
+/* HORIZONTAL RULES
+--------------------------------*/
+hr {
+    clear: both;
+    margin: 15px 0;
+    height: 0px;
+    overflow: hidden;
+    border: none;
+    background: #fff;
+    border-bottom: 4px solid #ddd;
+    padding: 0;
+}
+
+/* TABLES
+--------------------------------*/
+table {
+    /*border-collapse: collapse; /*no space b/w cells*/
+    table-layout: auto;
+    max-width: 95%;
+    border-collapse: separate; /*space b/w cells*/
+    border-spacing: 15px 1px;
+    /*border-top: 2px solid #000000;
+    border-bottom: 2px solid #000000;*/
+    border-top: 1px solid rgba(0, 0, 0, 0.5);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+    margin-bottom: 25px;
+}
+table th {
+    font-weight: bold;
+    border-bottom: 1px solid #000000;
+    white-space: nowrap;
+    padding: 5px;
+}
+
+table td {
+    border: none;
+    font-weight: normal;
+    vertical-align: top;
+}
+
+.table-caption {
+    float: right;
+    clear: right;
+    margin-right: -20%;
+    width: 20%;
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 1.0rem;
+    line-height: 1.6;
+}
+
+p, footer, table, div.table-wrapper-small, div.supertable-wrapper > p, div.booktabs-wrapper {
+    width: 90%;
+}
+
+div.fullwidth, table.fullwidth {
+    width: 95%;
+}
+
+div.table-wrapper {
+    overflow-x: auto;
+    font-family: inherit
+}
+
+/* IMAGES
+--------------------------------*/
+img { max-width: 50%; }
+
+figure {
+    padding: 0;
+    font-size: 95%;
+    font: inherit;
+    vertical-align: baseline;
+    max-width: 90%;
+    -webkit-margin-start: 0;
+    -webkit-margin-end: 0;
+    padding: 10px;
+    border: 1px solid gray;
+    margin-left: 10px;
+}
+figcaption {
+    float: right;
+    clear: right;
+    margin-right: -48%;
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 0.75rem;
+    line-height: 1.6;
+    vertical-align: baseline;
+    position: relative;
+    max-width: 80%;
+}
+
+/*Hanging Indent References
+--------------------------------*/
+div.refs {
+    padding-left: 2em;
+    text-indent: -2em;
+}
+
+/*Critic Markup
+--------------------------------*/
+del {
+    background: #2e363e;
+    color: #d1d6dc;
+    max-width: 80%;
+}
+ins {
+    background: #ffffff;
+    color: #74006f;
+    max-width: 80%;
+}
+mark {
+    background: #a700a0;
+    color: #ffffff;
+    max-width: 80%;;
+}
+
+aside {
+    background: #d2d7dc;
+    color: #021860;
+    font-family: Menlo;
+    font-size: 10pt;
+}
+
+/*COPIED DIRECTLY FROM ["tufte.css"](https://github.com/edwardtufte/tufte-css)*/
+/* Sidenotes, margin notes, figures, captions */
+img { max-width: 95%; }
+
+.sidenote, .marginnote { float: right;
+                         clear: right;
+                         margin-right: -25%;
+                         width: 20%;
+                         margin-top: -0.25rem;
+                         margin-bottom: 2rem;
+                         font-size: 0.95rem;
+                         line-height: 1;
+                         vertical-align: baseline;
+                         position: relative; }
+
+.sidenote-number { counter-increment: sidenote-counter; }
+
+.sidenote-number:after, .sidenote:before { content: counter(sidenote-counter) " ";
+                                           font-family: et-book;
+                                           position: relative;
+                                           vertical-align: baseline; }
+
+.sidenote-number:after { content: counter(sidenote-counter);
+                         font-size: 1rem;
+                         top: -0.5rem;
+                         left: 0.1rem; }
+
+.sidenote:before { content: counter(sidenote-counter) " ";
+                   top: -0.5rem; }
+
+blockquote .sidenote, blockquote .marginnote { margin-right: -82%;
+                                               min-width: 29%;
+                                               text-align: left; }
+
+/*p, footer, table { width: 55%; }*/
+
+div.fullwidth, table.fullwidth { width: 95%; }
+
+div.table-wrapper { overflow-x: auto;
+                    font-family: "Trebuchet MS", "Gill Sans", "Gill Sans MT", sans-serif; }
+
+.sans { font-family: "Gill Sans", "Gill Sans MT", Calibri, sans-serif;
+        letter-spacing: .03em; }
+
+code { font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+       font-size: 1.0rem;
+       /*line-height: 1.42; */
+}
+
+.sans > code { font-size: 1.2rem; }
+
+h1 > code, h2 > code, h3 > code { font-size: 0.80em; }
+
+.marginnote > code, .sidenote > code { font-size: 1rem; }
+
+pre.code { font-size: 0.9rem;
+           /*width: 52.5%;*/
+           margin-left: 2.5%;
+           overflow-x: auto; }
+
+pre.code.fullwidth { width: 90%; }
+
+.fullwidth { max-width: 95%;
+             clear:both; }
+
+.newthought { font-variant: small-caps;
+                  font-size: 1.2em;
+                   margin-top: 5em;
+                    margin-bottom: 0;} /* RMS added top margin */
+
+input.margin-toggle { display: none; }
+
+label.sidenote-number { display: inline; }
+
+label.margin-toggle:not(.sidenote-number) { display: none; }
+
+@media (max-width: 760px) { body { width: 90%;
+                                   padding-left: 8%;
+                                   padding-right: 8%; }
+                            p, footer { width: 95%; }
+                            pre.code { width: 97%; }
+                            ul { width: 95%; }
+                            figure { max-width: 90%; }
+                            figcaption, figure.fullwidth figcaption { margin-right: 0%;
+                                                                      max-width: none; }
+                            blockquote { margin-left: 1.5em;
+                                         margin-right: 0em; }
+                            blockquote p, blockquote footer { width: 95%; }
+                            label.margin-toggle:not(.sidenote-number) { display: inline; }
+                            .sidenote, .marginnote { display: none; }
+                            .margin-toggle:checked + .sidenote,
+                            .margin-toggle:checked + .marginnote { display: block;
+                                                                   float: left;
+                                                                   left: 1rem;
+                                                                   clear: both;
+                                                                   width: 95%;
+                                                                   margin: 1rem 2.5%;
+                                                                   vertical-align: baseline;
+                                                                   position: relative; }
+                            label { cursor: pointer; }
+                            div.table-wrapper, table { width: 85%; }
+                            img { width: 95%; } }

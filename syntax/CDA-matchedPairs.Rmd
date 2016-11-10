@@ -1,0 +1,75 @@
+---
+title: "Matched Pairs Analysis"
+author: "Riley Smith"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+---
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE, cache=FALSE}
+source("SETUP.R")
+options(width = 70)
+knitr::opts_chunk$set(
+    tidy = FALSE,
+    echo = TRUE,
+    cache = FALSE,
+    fig.keep = 'high',
+    fig.show = 'asis',
+    results = 'asis',
+    autodep = T,
+    Rplot = TRUE,
+    dev = 'pdf',
+    fig.path = 'graphics/matchedPairs/rplot-',
+    fig.width = 7,
+    fig.asp = 1,
+    out.width = "\\linewidth"
+    )
+library(foreign) ## read.spss() ##
+library(car) ## recode() ##
+```
+
+`r tufte::margin_note("Data: \\textit{\\color{dkpatriarch}{\\texttt{data/dep.sav}}}")`
+
+$$ McNemar's \chi^{2} = \frac{(n_{21} - n_{12})^{2}}{n_{21} + n_{12}} $$
+
+\Rrule
+
+```{r}
+cnt <- array( ## What we want to generate directly from the data ##
+    c(146, 155, 47, 303),
+    dim = c(2, 2),
+    dimnames = list(w1dep = c("not", "depressed"),
+                    w2dep = c("not", "depressed"))
+    )
+cnt
+
+## What the results of the McNemar's Test should be: ##
+mcnemar.test(cnt, correct = FALSE)
+
+dat <- read.spss("data/dep.sav", to.data.frame = T)
+sapply(dat, R.isna) ## THANK YOU!!!! (no NAs to deal with) ##
+#   ## ... except the factor labels are kind of obnoxious for output... ##
+dat <- within(dat, {
+    levels(w1dep) <- c("not", "depressed")
+    levels(w2dep) <- c("not", "depressed")
+})
+names(dat) <- c("T1", "T2", "T3")
+
+ft <- with(dat, {
+    ftable(dat, row.vars = 1, col.vars = 2)
+})
+ft
+
+ftc <- matrix(ft, nrow = 2, byrow = T)
+ftc
+ftc.a <- array(ftc, dim = c(2, 2), dimnames = list(
+    T1 = c("not", "depressed"),
+    T2 = c("not", "depressed")))
+ftc.a
+mcnemar.test(ftc.a, correct = FALSE)
+mosaicplot(ftc.a, type = "deviance", las = 2, color = mypal.a75[c(5, 16)])
+
+```
+
+\Rrule
+
+\newpage
+# References`r R.cite_r("../auxDocs/REFs.bib", footnote = TRUE)`

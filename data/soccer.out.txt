@@ -1,0 +1,372 @@
+> 
+> ##### World Cup Soccer Data 'soccer.txt" ######
+> 
+> ## read the datafile into R
+> ## header=TRUE will take the first row of the data as the label for the columns
+> soccer<-read.table("soccer2002.txt", header=TRUE) 
+> soccer
+  Goals Freq
+1     0   23
+2     1   37
+3     2   20
+4     3   11
+5     4    2
+6     5    1
+7     6    0
+8     7    0
+9     8    1
+> 
+> ## compute the sample size 
+> sampleN=sum(soccer$Freq)
+> sampleN
+[1] 95
+> 
+> ## compute the sample mean 
+> ## this is also the MLE of lambda
+> smean=(1/sampleN)*(sum(soccer$Goals*soccer$Freq))
+> smean
+[1] 1.378947
+> 
+> ## compute the Poisson probability for X=1, P(X=1) 
+> dpois(1, lambda=smean)
+[1] 0.3472789
+> 
+> ## Poisson probabilities for X=0, 1, ..., 8 with LAMBDA=smean 
+> ## these are estimates of cell probabilities 
+> pihat<-dpois(0:8, lambda=smean)
+> pihat
+[1] 2.518435e-01 3.472789e-01 2.394397e-01 1.100582e-01 3.794113e-02 1.046376e-02 2.404830e-03 4.737335e-04
+[9] 8.165669e-05
+> 
+> 
+> ## compute expected frequencies for each cell j, E(Xj)=n pi_j
+> efreq<-sampleN*pihat
+> efreq
+[1] 23.925133642 32.991500074 22.746771104 10.455533385  3.604407562  0.994057664  0.228458867  0.045004679
+[9]  0.007757385
+> 
+> ## plot observed and expected frequencies versus the number of goals scored, but save direclty into a file "soccerCounts.pdf"###
+> ## if you do NOT want to save into the file direclty, remove the first and the last line of this section of the code ####
+> pdf("soccerCounts.pdf")
+> plot(soccer$Goals, soccer$Freq, type="p",col="red", xlab="goals scored",ylab="frequencies",main="World Cup Soccer data")
+> points(soccer$Goals, efreq, col="blue", pch=22)
+> legend(list(x=4,y=30), legend=c("Observed count", "Expeced count"), pch=21:22, col=c("red", "blue"))
+> dev.off()
+null device 
+          1 
+> 
+> ########### Goodness of Fit ###############################
+> ### (I) Goodness of fit ignoring LAMBDA estimate ####
+> 
+> ## this tests if the observed values fit a model that all cells are equally likley
+> ex<-chisq.test(soccer$Freq)
+> ex
+
+	Chi-squared test for given probabilities
+
+data:  soccer$Freq 
+X-squared = 134.7368, df = 8, p-value < 2.2e-16
+
+> ex$statistic ##gives the Chi-Squared test statistic only
+X-squared 
+ 134.7368 
+> ex$p.value ## gives the pvalue of the above statistic only
+[1] 2.944172e-25
+> ex$residuals ## gives the Pearson residuals
+[1]  3.8303192  8.1394283  2.9069387  0.1367971 -2.6333444 -2.9411379 -3.2489314 -3.2489314 -2.9411379
+> 
+> out<-round(cbind(0:8, ex$observed, ex$expected, ex$residuals),3)
+> out<-as.data.frame(out)
+> names(out)<-c("goals", "O_j", "E_j", "res_j")
+> out
+  goals O_j    E_j  res_j
+1     0  23 10.556  3.830
+2     1  37 10.556  8.139
+3     2  20 10.556  2.907
+4     3  11 10.556  0.137
+5     4   2 10.556 -2.633
+6     5   1 10.556 -2.941
+7     6   0 10.556 -3.249
+8     7   0 10.556 -3.249
+9     8   1 10.556 -2.941
+> 
+> ## to get G2, but the problem is devision by zero
+>  
+> G2<-2*sum(ex$observed*log(ex$observed/ex$expected))
+> G2
+[1] NaN
+> 1-pchisq(G2,8)
+[1] NaN
+> 
+> ## deviance residuals
+> devres=sqrt(abs(2*ex$observed*log(ex$observed/ex$expected)))*sign(ex$observed-ex$expected)
+> 
+> ##one solution add a small count such as 1/2 to each cell
+> ex1=chisq.test(soccer$Freq+0.5)
+> ex1
+
+	Chi-squared test for given probabilities
+
+data:  soccer$Freq + 0.5 
+X-squared = 128.6432, df = 8, p-value < 2.2e-16
+
+> G2<-2*sum(ex1$observed*log(ex1$observed/ex1$expected))
+> G2
+[1] 127.6603
+> 1-pchisq(G2,8)
+[1] 0
+> 
+> ##deviance residuals
+> devres=sqrt(abs(2*ex1$observed*log(ex1$observed/ex1$expected)))*sign(ex1$observed-ex1$expected)
+> 
+> ## another (less common) solutions is to do the calculations with all values greater than zero for G2
+> ## but that fixes the zero cell counts to so we are estimating two less paramaters in this example
+> ## thus the degrees of freedom should be adjusted
+> ##option na.rm=TRUE removes all zero values from the calculation
+> 
+> G2<-2*sum(ex$observed*log(ex$observed/ex$expected), na.rm=TRUE)
+> G2
+[1] 139.0323
+> 1-pchisq(G2,6)
+[1] 0
+> 
+> 
+> 
+> ### (II) Goodness of fit using LAMBDA estimate ####
+> ## This tests if the observed values fit the Poisson model with estimated/given LAMBDA ###
+> 
+> ex2<-chisq.test(soccer$Freq, p=pihat, rescale.p=TRUE)
+Warning message:
+In chisq.test(soccer$Freq, p = pihat, rescale.p = TRUE) :
+  Chi-squared approximation may be incorrect
+> 
+> ##Notice the warningn msg. That is because there are some expected probabilities which are very small, e.g. less than 0.2; see zero cell counts. ##
+> 
+> ex2
+
+	Chi-squared test for given probabilities
+
+data:  soccer$Freq 
+X-squared = 128.7858, df = 8, p-value < 2.2e-16
+
+> ex2$statistic
+X-squared 
+ 128.7858 
+> ex2$p.value 
+[1] 5.049692e-24
+> ex2$residuals
+[1] -0.18920680  0.69779193 -0.57598546  0.16833493 -0.84510124  0.00594559 -0.47797717 -0.21214460
+[9] 11.26566922
+> 
+> 
+> ######## What's the problem here??? ###### 
+> ## DFs (9-1) are not correct, since we first estimated lambda and then pihats
+> ## DFs=(9-1)-1=7
+> 
+> 1-pchisq(ex2$statistic,7)
+X-squared 
+        0 
+> 
+> out<-round(cbind(0:8, ex2$observed, ex2$expected, ex2$residuals),3)
+> out<-as.data.frame(out)
+> names(out)<-c("goals", "O_j", "E_j", "res_j") 
+> out   ##notice that the model actually fits well except for the last cell with a very large residual
+  goals O_j    E_j  res_j
+1     0  23 23.925 -0.189
+2     1  37 32.992  0.698
+3     2  20 22.747 -0.576
+4     3  11 10.456  0.168
+5     4   2  3.604 -0.845
+6     5   1  0.994  0.006
+7     6   0  0.228 -0.478
+8     7   0  0.045 -0.212
+9     8   1  0.008 11.266
+> 
+> 
+> 
+> ##### World Cup Soccer Data 'soccer.txt" ######
+> 
+> ## read the datafile into R
+> ## header=TRUE will take the first row of the data as the label for the columns
+> soccer<-read.table("soccer2002.txt", header=TRUE) 
+> soccer
+  Goals Freq
+1     0   23
+2     1   37
+3     2   20
+4     3   11
+5     4    2
+6     5    1
+7     6    0
+8     7    0
+9     8    1
+> 
+> ## compute the sample size 
+> sampleN=sum(soccer$Freq)
+> sampleN
+[1] 95
+> 
+> ## compute the sample mean 
+> ## this is also the MLE of lambda
+> smean=(1/sampleN)*(sum(soccer$Goals*soccer$Freq))
+> smean
+[1] 1.378947
+> 
+> ## compute the Poisson probability for X=1, P(X=1) 
+> dpois(1, lambda=smean)
+[1] 0.3472789
+> 
+> ## Poisson probabilities for X=0, 1, ..., 8 with LAMBDA=smean 
+> ## these are estimates of cell probabilities 
+> pihat<-dpois(0:8, lambda=smean)
+> pihat
+[1] 2.518435e-01 3.472789e-01 2.394397e-01 1.100582e-01 3.794113e-02 1.046376e-02 2.404830e-03 4.737335e-04
+[9] 8.165669e-05
+> 
+> 
+> ## compute expected frequencies for each cell j, E(Xj)=n pi_j
+> efreq<-sampleN*pihat
+> efreq
+[1] 23.925133642 32.991500074 22.746771104 10.455533385  3.604407562  0.994057664  0.228458867  0.045004679
+[9]  0.007757385
+> 
+> ## plot observed and expected frequencies versus the number of goals scored, but save direclty into a file "soccerCounts.pdf"###
+> ## if you do NOT want to save into the file direclty, remove the first and the last line of this section of the code ####
+> pdf("soccerCounts.pdf")
+> plot(soccer$Goals, soccer$Freq, type="p",col="red", xlab="goals scored",ylab="frequencies",main="World Cup Soccer data")
+> points(soccer$Goals, efreq, col="blue", pch=22)
+> legend(list(x=4,y=30), legend=c("Observed count", "Expeced count"), pch=21:22, col=c("red", "blue"))
+> dev.off()
+null device 
+          1 
+> 
+> ########### Goodness of Fit ###############################
+> ### (I) Goodness of fit ignoring LAMBDA estimate ####
+> 
+> ## this tests if the observed values fit a model that all cells are equally likley
+> ex<-chisq.test(soccer$Freq)
+> ex
+
+	Chi-squared test for given probabilities
+
+data:  soccer$Freq 
+X-squared = 134.7368, df = 8, p-value < 2.2e-16
+
+> ex$statistic ##gives the Chi-Squared test statistic only
+X-squared 
+ 134.7368 
+> ex$p.value ## gives the pvalue of the above statistic only
+[1] 2.944172e-25
+> ex$residuals ## gives the Pearson residuals
+[1]  3.8303192  8.1394283  2.9069387  0.1367971 -2.6333444 -2.9411379 -3.2489314 -3.2489314 -2.9411379
+> 
+> out<-round(cbind(0:8, ex$observed, ex$expected, ex$residuals),3)
+> out<-as.data.frame(out)
+> names(out)<-c("goals", "O_j", "E_j", "res_j")
+> out
+  goals O_j    E_j  res_j
+1     0  23 10.556  3.830
+2     1  37 10.556  8.139
+3     2  20 10.556  2.907
+4     3  11 10.556  0.137
+5     4   2 10.556 -2.633
+6     5   1 10.556 -2.941
+7     6   0 10.556 -3.249
+8     7   0 10.556 -3.249
+9     8   1 10.556 -2.941
+> 
+> ## to get G2, but the problem is devision by zero
+>  
+> G2<-2*sum(ex$observed*log(ex$observed/ex$expected))
+> G2
+[1] NaN
+> 1-pchisq(G2,8)
+[1] NaN
+> 
+> ## deviance residuals
+> devres=sqrt(abs(2*ex$observed*log(ex$observed/ex$expected)))*sign(ex$observed-ex$expected)
+> devres
+[1]  5.9855432  9.6340881  5.0560062  0.9525466 -2.5795388 -2.1710147        NaN        NaN -2.1710147
+> 
+> ##one solution add a small count such as 1/2 to each cell
+> ex1=chisq.test(soccer$Freq+0.5)
+> ex1
+
+	Chi-squared test for given probabilities
+
+data:  soccer$Freq + 0.5 
+X-squared = 128.6432, df = 8, p-value < 2.2e-16
+
+> G2<-2*sum(ex1$observed*log(ex1$observed/ex1$expected))
+> G2
+[1] 127.6603
+> 1-pchisq(G2,8)
+[1] 0
+> 
+> ##deviance residuals
+> devres=sqrt(abs(2*ex1$observed*log(ex1$observed/ex1$expected)))*sign(ex1$observed-ex1$expected)
+> devres
+[1]  5.9532483  9.5710809  5.0316165  0.9521141 -2.7263917 -2.4479387 -1.7595682 -1.7595682 -2.4479387
+> 
+> ## another (less common) solutions is to do the calculations with all values greater than zero for G2
+> ## but that fixes the zero cell counts to so we are estimating two less paramaters in this example
+> ## thus the degrees of freedom should be adjusted
+> ##option na.rm=TRUE removes all zero values from the calculation
+> 
+> G2<-2*sum(ex$observed*log(ex$observed/ex$expected), na.rm=TRUE)
+> G2
+[1] 139.0323
+> 1-pchisq(G2,6)
+[1] 0
+> 
+> 
+> 
+> ### (II) Goodness of fit using LAMBDA estimate ####
+> ## This tests if the observed values fit the Poisson model with estimated/given LAMBDA ###
+> 
+> ex2<-chisq.test(soccer$Freq, p=pihat, rescale.p=TRUE)
+Warning message:
+In chisq.test(soccer$Freq, p = pihat, rescale.p = TRUE) :
+  Chi-squared approximation may be incorrect
+> 
+> ##Notice the warningn msg. That is because there are some expected probabilities which are very small, e.g. less than 0.2; see zero cell counts. ##
+> 
+> ex2
+
+	Chi-squared test for given probabilities
+
+data:  soccer$Freq 
+X-squared = 128.7858, df = 8, p-value < 2.2e-16
+
+> ex2$statistic
+X-squared 
+ 128.7858 
+> ex2$p.value 
+[1] 5.049692e-24
+> ex2$residuals
+[1] -0.18920680  0.69779193 -0.57598546  0.16833493 -0.84510124  0.00594559 -0.47797717 -0.21214460
+[9] 11.26566922
+> 
+> 
+> ######## What's the problem here??? ###### 
+> ## DFs (9-1) are not correct, since we first estimated lambda and then pihats
+> ## DFs=(9-1)-1=7
+> 
+> 1-pchisq(ex2$statistic,7)
+X-squared 
+        0 
+> 
+> out<-round(cbind(0:8, ex2$observed, ex2$expected, ex2$residuals),3)
+> out<-as.data.frame(out)
+> names(out)<-c("goals", "O_j", "E_j", "res_j") 
+> out   ##notice that the model actually fits well except for the last cell with a very large residual
+  goals O_j    E_j  res_j
+1     0  23 23.925 -0.189
+2     1  37 32.992  0.698
+3     2  20 22.747 -0.576
+4     3  11 10.456  0.168
+5     4   2  3.604 -0.845
+6     5   1  0.994  0.006
+7     6   0  0.228 -0.478
+8     7   0  0.045 -0.212
+9     8   1  0.008 11.266

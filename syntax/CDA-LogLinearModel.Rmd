@@ -1,0 +1,65 @@
+---
+title: "Loglinear Model Analysis"
+author: "Riley Smith"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+---
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE, cache=FALSE}
+source("SETUP.R")
+options(width = 70)
+knitr::opts_chunk$set(
+    tidy = FALSE,
+    echo = TRUE,
+    cache = FALSE,
+    fig.keep = 'high',
+    fig.show = 'asis',
+    results = 'asis',
+    autodep = T,
+    Rplot = TRUE,
+    dev = 'pdf',
+    fig.path = 'graphics/loglm/rplot-',
+    fig.width = 7,
+    fig.asp = 1,
+    out.width = "\\linewidth"
+    )
+library(foreign) ## read.spss() ##
+library(car) ## recode() ##
+```
+
+`r tufte::margin_note("Data: \\textit{\\color{dkpatriarch}{\\texttt{data/reuters.sav}}}")`
+
+$$ \log(\mu_{ij}) = \lambda + \lambda_{i}^{X} + \lambda_{j}^{Y} + \lambda_{ij}^{XY} $$
+
+\Rrule
+
+```{r}
+dat <- R.rspss("data/reuters.sav", vlabs = F)
+R.msmm(dat)
+dat <- dat[, -3]
+dat <- subset(dat, response < 2)
+dat <- within(dat, {
+    ind.f <- factor(ind,
+                    levels = unique(ind),
+                    labels = c("Independent",
+                               "Affililate"))
+    response.f <- factor(response,
+                        levels = c(0, 1),
+                        labels = c("Trump",
+                                   "Clinton"))
+})
+
+tbl <- table(dat$ind.f, dat$response.f)
+dimnames(tbl) <- list(ind = levels(dat$ind.f),
+                      response = levels(dat$response.f))
+mosaicplot(tbl, type = "deviance", las = 2, color = mypal.a75[c(5, 16)])
+
+library(MASS)
+logmodel <- loglm( ~ ind + response, digits = 4, data = tbl)
+
+
+```
+
+\Rrule
+
+\newpage
+# References`r R.cite_r("auxDocs/REFs.bib", footnote = TRUE)`
