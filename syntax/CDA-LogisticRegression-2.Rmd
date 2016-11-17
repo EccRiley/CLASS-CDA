@@ -1,0 +1,139 @@
+---
+title: "Logistic Regression R Notebook (2)"
+author: "Rachel M. Smith"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+---
+
+```{r setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache=FALSE}
+source("SETUP.R")
+options(width = 70)
+knitr::opts_chunk$set(
+    tidy = FALSE,
+    echo = TRUE,
+    cache = FALSE,
+    fig.keep = 'high',
+    fig.show = 'asis',
+    results = 'asis',
+    # autodep = T,
+    Rplot = TRUE,
+    dev = 'pdf',
+    fig.path = 'graphics/reuters/rplot_',
+    fig.width = 7,
+    fig.asp = 1,
+    out.width = "\\linewidth",
+    collapse = TRUE
+)
+```
+
+# Data Summary
+
+```{r dat}
+dat <- read.spss("data/reuters.sav", to.data.frame = TRUE)
+dat$party <- sapply(dat$party, R.na, v = 99)
+dat$response <- recode_factor(dat$response, 
+                              "other/no opinion" = NA_character_)
+dat <- na.omit(dat)
+summary(dat)
+
+```
+
+# Logistic Regression Model
+
+$$ \ln\left(\frac{\pi}{1 - \pi}\right) = \alpha + \beta X $$
+
+$$ \pi = \frac{e^{\alpha + \beta X}}{1 + e^{\alpha + \beta X}} $$
+
+
+```{r lrm}
+lrm <- glm(response ~ ind, data = dat, family = "binomial")
+# summary(lrm)
+xtable::xtable(lrm)
+nulldev <- lrm$null.deviance
+nulldev.df <- lrm$df.null
+nulldev.p <- c(round(nulldev, 2), nulldev.df)
+# **Null Deviance**
+dev <- lrm$deviance
+dev.df <- lrm$df.residual
+dev.p <- c(round(dev, 2), dev.df)
+# **Observed Deviance**
+aic <- lrm$aic
+aic.p <- c(round(aic, 2), " ")
+# **AIC**
+fits <- as.data.frame(rbind(nulldev.p, dev.p, aic.p))
+rownames(fits) <- c("**Null Deviance**", "**Residual Deviance**", "**AIC**")
+names(fits) <- c("Estimate", "Degrees of Freedom")
+```
+
+```{r echo=FALSE}
+kable(fits, caption = "Logistic Regression Model Fit Statistics")
+
+R.msmm(residuals(lrm))[-5] %>%
+    kable(caption = "Logistic Regression: Deviance Residuals Summary [note]") %>%
+    add_footnote("_**M** = Mean, **SD** = Standard Deviation, **Min** = Minimum, \\& **Max** = Maximimum_", threeparttable = TRUE)
+```
+
+## Logit Model: Confidence Intervals (CI) \& Odds Ratios (OR)
+
+`r tufte::newthought("Odds Ratio")`
+
+
+```{r lrmOR}
+OR <- exp(coef(lrm)) 
+```
+
+
+`r tufte::newthought("Confidence Intervals.")` The _first CI computed below (`'CI.b'`)_ is that of the _standardized coefficient ($\beta$)_, which is based on the coefficient's _standard errors (SE)_. The _second computed CI (`'CI.phi'`_ is based on the logistic regression model's _profiled log-likelihood function_, making it the _odds ratio ($\Phi$) CI_. 
+
+
+```{r lrmCI}
+## CIs using standard errors ##
+CI.b <- confint(lrm, trace = FALSE)
+
+## CIs using profiled log-likelihood ##
+CI.phi <- confint(lrm)
+
+```
+
+
+
+```{r echo=FALSE}
+CIb <- cbind(coef(lrm), CI.b)
+CIb.labs <- c("**$\\beta$**", dimnames(confint(lrm))[[2]])
+CIb <- rbind(CIb.labs, round(CIb, 4))
+dimnames(CIb)[[1]][1] <- " "
+dimnames(CIb)[[2]] <- c(" ", "$CI_{\\beta}$", " ")
+
+## odds ratios and 95% CI ##
+ORCI <- exp(cbind(coef(lrm), CI.phi))
+ORCI.labs <- c("**$\\Phi$**", dimnames(confint(lrm))[[2]])
+ORCI <- rbind(ORCI.labs, round(ORCI, 4))
+dimnames(ORCI)[[1]][1] <- " "
+dimnames(ORCI)[[2]] <- c(" ", "$CI_{\\Phi}$", " ")
+
+
+kable(CIb, align = rep('r', ncol(CIb)), 
+      caption = "Logistic Regression Coefficients ($\\beta$) \\& 
+      Coresponding Confidence Intervals (_CI_)")
+
+kable(ORCI, align = rep('r', ncol(ORCI)), 
+      caption = "Logistic Regression Odds Ratios ($\\Phi$) \\& 
+      Coresponding Confidence Intervals (_CI_) [note]") %>%
+    add_footnote("Confidence intervals are based on the logistic regression 
+                 model's profiled log-likelihood function, 
+                 rather than the standard errors", 
+                 threeparttable = TRUE)
+```
+
+
+## Wald's Chi-Square Test
+
+
+```{r lrmchsq1}
+library(aod) ## "wald.test()" ##
+wald.test(b = coef(lrm), Sigma = vcov(lrm), Terms = 2)
+```
+
+
+\newpage
+# References`r R.cite_r("../auxDocs/REFs.bib", footnote = TRUE)`
+

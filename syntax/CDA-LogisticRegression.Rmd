@@ -1,0 +1,186 @@
+---
+title: "R Notebook: Logistic Regression Examples"
+author: "Riley Smith"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+url: "http://www.ats.ucla.edu/stat/r/dae/logit.htm"
+---
+
+```{r setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache=FALSE}
+source("SETUP.R")
+
+knitr::opts_chunk$set(
+    tidy = FALSE,
+    echo = TRUE,
+    cache = FALSE,
+    fig.keep = 'high',
+    fig.show = 'asis',
+    results = 'asis',
+    autodep = T,
+    Rplot = TRUE,
+    dev = 'pdf',
+    fig.path = 'graphics/logistic/rplot-',
+    fig.width = 7,
+    fig.height = 7,
+    out.width = "\\linewidth"
+    )
+```
+
+The Following analyses are based on the [R data analysis examples](http://www.ats.ucla.edu/stat/r/dae/logit.htm) provided by [UCLA's Institute for Digital Research and Education](https://idre.ucla.edu) [@ucla2016r].
+
+> "Logistic regression, also called a logit model, is used to model dichotomous outcome variables. In the logit model the log odds of the outcome is modeled as a linear combination of the predictor variables."
+>
+> `r tufte::quote_footer("- [@ucla2016r]")`
+
+# The Logistic Equation
+
+$$ \ln\left(\frac{\pi}{1 - \pi}\right) = \alpha + \beta X $$
+
+`r tufte::margin_note("$\\pi$: $p(Y = 1)$")`
+
+`r tufte::margin_note("$1 - \\pi$: $p(Y = 0)$")`
+
+$$ \pi = \frac{\epsilon^{\alpha + \beta X}}{1 + \epsilon^{\alpha + \beta X}} $$
+
+-----
+
+`r tufte::newthought("Logistic Equation Intercept")`
+
+`r tufte::margin_note("\\textsc{The Logistic Intercept:} Estimate of $Y = 1$ when $X = 0$")`
+
+$$ \pi = \frac{\epsilon^{\alpha}}{1 + \epsilon^{\alpha}} $$
+
+\newpage
+# Example Data Description
+
+> "[Suppose] a researcher is interested in how variables, such as GRE (Graduate Record Exam scores), GPA (grade point average) and prestige of the undergraduate institution, effect admission into graduate school. The response variable, admit/don't admit, is a binary variable.
+>
+> This dataset has a binary response (outcome, dependent) variable called admit. There are three predictor variables: gre, gpa and rank. We will treat the variables gre and gpa as continuous. The variable rank takes on the values 1 through 4. Institutions with a rank of 1 have the highest prestige, while those with a rank of 4 have the lowest."
+> 
+> `r tufte::quote_footer("- [@ucla2016r]")`
+
+
+```{r dat}
+dat <- read.csv("http://www.ats.ucla.edu/stat/data/binary.csv")
+R.msmm(dat) ## Summary of numeric variables ## 
+xtabs(~ admit + rank, data = dat) ## cross-taulation ##
+```
+
+
+# Example Data Analysis: The Logit Model
+
+
+
+```{r lrm}
+dat$rank <- factor(dat$rank) 
+lrm <- glm(admit ~ gre + gpa + rank, data = dat, family = "binomial")
+```
+
+
+```{r lrmXtbl, echo=FALSE}
+xtable::xtable(lrm)
+nulldev <- lrm$null.deviance
+nulldev.df <- lrm$df.null
+nulldev.p <- c(round(nulldev, 2), nulldev.df)
+# **Null Deviance**
+dev <- lrm$deviance
+dev.df <- lrm$df.residual
+dev.p <- c(round(dev, 2), dev.df)
+# **Observed Deviance**
+aic <- lrm$aic
+aic.p <- c(round(aic, 2), " ")
+# **AIC**
+fits <- as.data.frame(rbind(nulldev.p, dev.p, aic.p))
+rownames(fits) <- c("**Null Deviance**", "**Residual Deviance**", "**AIC**")
+names(fits) <- c("Estimate", "Degrees of Freedom")
+
+kable(fits, caption = "Logistic Regression Model Fit Statistics")
+
+R.msmm(residuals(lrm))[-5] %>%
+    kable(caption = "Logistic Regression: Deviance Residuals Summary [note]") %>%
+    add_footnote("_**M** = Mean, **SD** = Standard Deviation, **Min** = Minimum, \\& **Max** = Maximimum_", threeparttable = TRUE)
+
+```
+
+`r tufte::margin_note("\\textsc{Deviance residuals:} A measure of model fit.")`
+
+`r tufte::newthought("The summary tables above provide")` the _model coefficients_ with corresponding _standard errors_, _(Wald) z-statistics_, and _p-values_; as well as summary statistics for the distribution of _deviance residuals_ for individual cases used in computing the logistic regression model [@ucla2016r]. 
+
+`r tufte::margin_note("\\textsc{Logistic regression coefficients} ($\\beta's$): Level of change in the log odds of the outcome per one unit increase in the predictor.")`
+
+## Logit Model: Confidence Intervals (CI) \& Odds Ratios (OR)
+
+`r tufte::newthought("Confidence Intervals")`
+
+```{r lrmCI}
+## CIs using profiled log-likelihood ##
+CI <- confint(lrm)
+
+## CIs using standard errors ##
+CI.se <- confint.default(lrm)
+```
+
+
+`r tufte::newthought("Odds Ratio")`
+
+
+```{r lrmOR}
+library(aod) ## "wald.test()" ##
+wald.test(b = coef(lrm), Sigma = vcov(lrm), Terms = 4:6)
+
+l <- cbind(0,0,0,1,-1,0)
+wald.test(b = coef(lrm), Sigma = vcov(lrm), L = l)
+
+## odds ratios##
+OR <- exp(coef(lrm)) 
+```
+
+
+```{r echo=FALSE}
+## odds ratios and 95% CI
+ORCI <- exp(cbind(coef(lrm), confint(lrm)))
+ORCI.labs <- c("**$\\Phi$**", dimnames(confint(lrm))[[2]])
+ORCI <- rbind(ORCI.labs, round(ORCI, 4))
+dimnames(ORCI)[[1]][1] <- " "
+dimnames(ORCI)[[2]] <- c(" ", "_CI_", " ")
+kable(ORCI, align = rep('r', ncol(ORCI)), 
+      caption = "Logistic Regression Odds Ratios ($\\Phi$) \\& 
+      Confidence Intervals (_CI_) [note]") %>%
+    add_footnote("Confidence intervals are based on the logistic regression 
+                 model's profiled log-likelihood function, 
+                 rather than the standard errors", 
+                 threeparttable = TRUE)
+```
+
+```{r}
+dat.p1 <- with(dat,
+  data.frame(gre = mean(gre), gpa = mean(gpa), rank = factor(1:4)))
+dat.p1
+
+dat.p1$rankP <- predict(lrm, newdata = dat.p1, type = "response")
+dat.p1
+
+dat.p2 <- with(dat,
+  data.frame(gre = rep(seq(from = 200, to = 800, length.out = 100), 4),
+  gpa = mean(gpa), rank = factor(rep(1:4, each = 100))))
+
+dat.p3 <- cbind(dat.p2, predict(lrm, newdata = dat.p2, type = "link", se = TRUE))
+
+dat.p3 <- within(dat.p3, {
+  PredictedProb <- plogis(fit)
+  LL <- plogis(fit - (1.96 * se.fit))
+  UL <- plogis(fit + (1.96 * se.fit))
+})
+
+## view first few rows of final dataset
+head(dat.p3)
+
+ggplot(dat.p3, aes(x = gre, y = PredictedProb)) + theme_tufte() +
+    geom_ribbon(aes(ymin = LL, ymax = UL, fill = rank), alpha = .2) +
+    geom_line(aes(colour = rank), size = 1) +
+    scale_colour_manual(values = cols2(4)) + 
+    scale_fill_manual(values = cols2(4)) + 
+    labs(x = "GRE", y = "Predicted Probability", colour = "Rank", fill = "Rank")
+```
+
+
+# References
