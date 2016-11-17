@@ -51,7 +51,7 @@
 %   Color: Gray
 %
 \usepackage{setspace}
-\expandafter\def\expandafter\quote\expandafter{\quote\scriptsize\singlespacing\color{myblack!65}\vspace{-0.5\baselineskip}}
+\expandafter\def\expandafter\quote\expandafter{\quote\small\singlespacing\color{myblack!65}\vspace{-0.5\baselineskip}}
 %
 % ------------------- %
 % Make Links Standout
@@ -74,6 +74,9 @@
 % ----------------------------- %
 %
 \newcommand{\todo}{\textbf{\color{red}{\texttt{[ToDo]}}}}
+\newcommand{\inprogress}{\textbf{\textit{\color{blue}{\texttt{[In Progress]}}}}}
+\newcommand{\complete}{\sout{\textit{\color{slgray}{\texttt{[Complete]}}}}}
+
 \usepackage{enumitem,amssymb}
 \newlist{todolist}{itemize}{2}
 \setlist[todolist]{label=$\square$}
@@ -99,4 +102,60 @@
 \newcommand{\hlkwd}[1]{\textcolor[rgb]{0.78,0.227,0.412}{#1}}%
 
 \let\hlipl\hlkwb
-\newcommand{\Rrule}{{\textcolor[rgb]{0.063,0.58,0.627}{\rule{\linewidth}{0.35mm}}}\newline}
+% \newcommand{\Rrule}{\textcolor[HTML]{0a09a3}{\rule{\linewidth}{0.05mm}}\newline\includegraphics[width=0.5cm]{auxDocs/Rlogo.png}}
+\usepackage{dashrule}
+
+\newcommand{\Rrule}{
+    % \setlength{\parindent}{-10pt}
+    \vspace*{20pt}
+    \noindent
+    \hspace{-1em}
+    \includegraphics[width=0.5cm]{auxDocs/Rlogo.png}
+    \textcolor[HTML]{0a09a3}{
+        \rule[0.1in]{0.9\textwidth}{0.02mm}
+        $\urcorner$
+    }
+}
+
+\newcommand{\Rerule}{
+    % \setlength{\parindent}{-0.5in}
+    \noindent
+    \hspace{-1em}
+    \textcolor[HTML]{0a09a3}{
+        $\llcorner$\rule[-0.4mm]{\textwidth}{0.02mm}
+                % \hfill
+                % $\lrcorner$
+    }
+}
+
+% \newcommand{\Rrule}{
+%     \noindent
+%     \textcolor[HTML]{0a09a3}{
+%         $\ulcorner\textregistered$\hdashrule[0.015in]{
+%             0.9\linewidth
+%             }
+%             {1pt}{1pt}
+%         $\textregistered\urcorner$
+%         }}
+% \newcommand{\Rerule}{
+%     \noindent
+%     \textcolor[HTML]{0a09a3}{
+%         $\llcorner\textregistered$\hdashrule[0.025in]{
+%             0.9\linewidth
+%             }
+%             {1pt}{1pt}
+%         $\textregistered\lrcorner$
+%         }}
+% \newcommand{\Rerule}{\noindent\textcolor[HTML]{0a09a3}{\vdash\hdashrule[-0.015in]{\linewidth}{1pt}{1pt}\dashv}
+
+% \vdash - \dashv
+% \perp
+% \ll - \gg
+% +
+% \pm
+% \mp
+% \ \newcommand{\Rrule}{\noindent\includegraphics[width=0.5cm]{auxDocs/Rlogo.png}\textcolor[HTML]{0a09a3}{\hdashrule[0.25in]{\linewidth}{1pt}{1pt}}}
+% \newcommand{\Rrule}{\noindent\includegraphics[width=0.5cm]{auxDocs/Rlogo.png}\textcolor[HTML]{0a09a3}{\rule[0.25in]{\linewidth}{0.05mm}}}
+
+% \newcommand{\Rerule}{\textcolor[HTML]{0a09a3}{\rule{\linewidth}{0.05mm}}}
+% \hdashrule [⟨raise⟩] [⟨leader⟩] {⟨width⟩} {⟨height⟩} {⟨dash⟩}
