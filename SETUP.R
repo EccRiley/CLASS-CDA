@@ -91,12 +91,40 @@ quartz.options(family = "ETBembo")
 
 #' The following command sets the `{knitr} chunk options`, which controls how `{knitr}`, and subsequently `Pandoc` handles output from chunks of `R-code`.
 #'
-knitr::opts_knit$set(unnamed.chunk.label = "chunk")
+#'
+options(
+    # unnamed.chunk.label = "chunk",
+    bib.loc = "auxDocs/REFs.bib",
+    citation_format = "pandoc",
+    knitr.table.format = 'pandoc',
+    xtable.floating = FALSE,
+    scipen = 5,
+    digits = 4,
+    zero.print = ".",
+    formatR.arrow = TRUE,
+    DT.options = list(
+        pageLength = 200,
+        language = list(search = 'Filter:')
+    ),
+    bib.loc = "auxDocs/REFs.bib",
+    citation_format = "pandoc",
+    knitr.table.format = 'pandoc',
+    formatR.arrow = TRUE,
+    xtable.comment = FALSE,
+    xtable.booktabs = TRUE,
+    xtable.caption.placement = "top",
+    xtable.caption.width = "\\linewidth",
+    xtable.sanitize.text.function = function(x) {x},
+    xtable.table.placement = "hb",
+    xtable.floating = FALSE
+)
+
+# knitr::opts_knit$set(unnamed.chunk.label = "chunk")
 knitr::opts_chunk$set(warning = FALSE,
                       message = FALSE,
                       comment = '>>',
                       fig.showtext = TRUE,
-                      highlight = FALSE,
+                      highlight = TRUE,
                       background = "#f2f2f2",
                       size = "footnotesize")
 #'
@@ -129,17 +157,14 @@ Rx <- rnorm(1000)
 # plot(Rx, main = expression(paste(sum(codes))), col = mypal, xlab = expression(paste(N[Items])), ylab = expression(paste('%'[Codebook])))
 #'
 #'
-#' ## Output-Related R-Options
-#'
-options(bib.loc = "auxDocs/REFs.bib", citation_format = "pandoc", knitr.table.format = 'pandoc',
-        xtable.floating = FALSE, formatR.arrow = TRUE, DT.options = list(pageLength = 200))#, language = list(search = 'Filter:')))
 #'
 #' ## Pander Options
 #'
 panderOptions('keep.line.breaks', TRUE)
 panderOptions('table.style', 'multiline')
 panderOptions('table.alignment.default', 'left')
-#panderOptions('digits', 2)
+panderOptions('missing', ' ')
+panderOptions('digits', 4)
 #'
 #' ## Citation Options
 #'
@@ -1116,6 +1141,28 @@ R.newthought <- function(text) {
 #'
 #' -----
 #'
+#' ## **`R.regTEX()`**
+#'
+#'
+R.regTEX <- function(txt, op = 1) { ## '`op`' = The output format for which
+    ## the text should be re-decorated
+    ## before being sent to `pandoc`.
+    ## Input for `op` can be one of:
+    ## `1 [DEFAULT] (LaTeX)` or
+    ## `2 (HTML)` ##
+    if (op == 1) {
+        TX <- gsub("\\*\\*(.*?)\\*\\*", "\\\\textbf\\{\\1\\}", txt, perl = TRUE)
+        TX <- gsub("_(.*?)_", "\\\\textit\\{\\1\\}", TX, perl = TRUE)
+        TX <- gsub("\`(.*?)\`", "\\\\texttt\\{\\1\\}", TX, perl = TRUE)
+    }
+    else {
+        TX <- gsub("\\\\textbf\\{(.*?)\\}", "\\*\\*\\1\\*\\*", txt, perl = TRUE)
+        TX <- gsub("\\\\textit\\{(.*?)\\}", "_\\1_", TX, perl = TRUE)
+        TX <- gsub("\\\\texttt\\{(.*?)\\}", "\`\\1\`", TX, perl = TRUE)
+    }
+    return(TX)
+}
+#'
 #' ## **`R.rspss()`**
 #'
 #' `r margin_note("Another laziness function.")`
@@ -1136,6 +1183,54 @@ knitr::knit_hooks$set(Rplot = function(before, options, envir) { ## SETTING UP A
         palette(mypal)
         par(bg = "transparent", font.main = 3, family = "ETBembo")
     }})
+knitr::knit_hooks$set(Rrule = function(before, options, envir) {
+    if (before) {
+        "\\Rrule\n\n"
+    } else {
+        "\n\n\\Rerule"
+    }
+})
+knitr::opts_hooks$set(echoRule = function(options) {
+    if (options$echo == FALSE) {
+        options$Rrule = NULL
+    } else {
+        options$Rrule = TRUE
+    }
+    options
+})
+
+knitr::opts_chunk$set(echoRule = TRUE)
+
+
+#'
+#' -----
+#'
+#' #' ## **`R.glmdf()`**
+#'
+#' A function for restructuring output from "summary.glm()" as a dataframe
+#'
+R.glmdf <- function(x){ ## "x" must be an object of class "summary.glm"...
+    ## ... currently only works for simple logistic
+    ## regression (i.e., only one predictor) ##
+    se.cmpn <- x[c("dispersion", "cov.unscaled")]
+    ## ^- "cmpn" = "components" abbreviated ##
+    ## see "`r names(summary(<SOME GLM OBJECT>))`" ##
+    se.a <- se.cmpn[[1]]
+    se.b <- se.cmpn[[2]]
+    se.ab <- se.a*se.b ## "covmat" ##
+    se.c <- diag(se.ab) ## "var.cf" ##
+    se.x <- sqrt(se.c) ## "s.err" ##
+    z.a <- c(x$coefficients[[1]], x$coefficients[[2]])
+    z.x <- z.a / se.x
+    p.x <- 2 * pnorm(-abs(z.x))
+    x.df <- data.frame(Estimate = c(x$coefficients[[1]],
+                                    x$coefficients[[2]]),
+                       SE = se.x,
+                       Z = z.x,
+                       p.value = p.x)
+    return(x.df)
+}
+
 #'
 #' ## Rmarkdown Rendering Shortcuts
 #'
