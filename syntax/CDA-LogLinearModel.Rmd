@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
     autodep = T,
     Rplot = TRUE,
     dev = 'pdf',
-    fig.path = 'graphics/loglm/rplot-',
+    fig.path = 'graphics/reuters/rplot_',
     fig.width = 7,
     fig.asp = 1,
     out.width = "\\linewidth"
@@ -29,8 +29,6 @@ library(car) ## recode() ##
 `r tufte::margin_note("Data: \\textit{\\color{dkpatriarch}{\\texttt{data/reuters.sav}}}")`
 
 $$ \log(\mu_{ij}) = \lambda + \lambda_{i}^{X} + \lambda_{j}^{Y} + \lambda_{ij}^{XY} $$
-
-\Rrule
 
 ```{r}
 dat <- R.rspss("data/reuters.sav", vlabs = F)
@@ -56,10 +54,7 @@ mosaicplot(tbl, type = "deviance", las = 2, color = mypal.a75[c(5, 16)])
 library(MASS)
 logmodel <- loglm( ~ ind + response, digits = 4, data = tbl)
 
-
 ```
 
-\Rrule
-
 \newpage
-# References`r R.cite_r("auxDocs/REFs.bib", footnote = TRUE)`
+# References`r R.cite_r("../auxDocs/REFs.bib", footnote = TRUE)`

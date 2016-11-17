@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
     autodep = T,
     Rplot = TRUE,
     dev = 'pdf',
-    fig.path = 'graphics/dataVis/rplot-',
+    fig.path = 'graphics/reuters/rplot_',
     fig.width = 7,
     fig.asp = 1,
     out.width = "\\linewidth"
@@ -33,7 +33,6 @@ dat <- within(dat, {recode(response, c("1=0", "2=1", "3=2"))})
 
 ## Data-Cleaning \\& Preparation
 
-\Rrule
 
 ```{r isNA, results='markup'}
 Risna <- function(x) sum(is.na(x))
@@ -48,8 +47,6 @@ R.na <- function(x, v = 0){
     }
 ```
 
-\Rrule
-
 ```{marginfigure}
 **`R.na():`** _"If `x` = NA (`is.na()`), replace `x` with `v`, otherwise leave `x` alone."_
 ```
@@ -59,22 +56,16 @@ kable(R.msmm(dat$party), caption = "Summary information for '**party**'
         data column _before_ recoding \\texttt{NA}s")
 ```
 
-\Rrule
-
 ```{r}
 unique(dat$party)
 dat$party <- sapply(dat$party, R.na, v = 99)
 ```
-
-\Rrule
 
 ```{r echo=FALSE}
 kable(R.msmm(dat$party), caption = "Summary information for '**party**'
         data column _after_ recoding \\texttt{NA}s")
 unique(dat$party)
 ```
-
-\Rrule
 
 ```{r}
 dat$response <- recode_factor(dat$response,
@@ -88,15 +79,10 @@ sapply(dat, R.isna) ## bye-bye NAs! ... again ##
     ## dataframe entirely, though the original datafile remains untouched).
 ```
 
-\Rrule
-
-
 `r tufte::newthought("Now")` the data are, in my opinion, ready for analysis \& plotting.
 
 
 ## \textsc{Bar Plot} of polling data (using `R`'s Base Graphics)
-
-\Rrule
 
 ```{r}
 poll.t <- table(dat$response)
@@ -114,15 +100,11 @@ barplot(poll.t, ylab = "Count",
         col = electpal, main = "Polling Responses")
 ```
 
-\Rrule
-
 ## \textsc{Dot Plot} of polling data using the `ggplot2` package.
 
 ```{marginfigure}
 This would actually be interesting to do with repeated-measures data with the candidates on the `Y-axis` and time (in months/weeks) on the `X-axis`.
 ```
-
-\Rrule
 
 ```{r}
 poll.df <- as.data.frame(poll.t)
@@ -137,12 +119,7 @@ bpoll <- ggplot( poll.df, aes(x = Frequency, y = Response)) +
 bpoll
 ```
 
-\Rrule
-
-
 `r newthought("Don't forget to set the x-and-y-limits!")` Otherwise, you could be presenting a potentially misleading visualization of the data. Since these are polling data, there is a true "zero" such that `0` would reflect `0` votes for a given candidate in a given poll.^[\\textit{This has happened for one of the two current major party presidential candidates in the very recent past - I will not say who.}] The data should thus be represented according to its appropriate scale limits.
-
-\Rrule
 
 ```{r}
 bpoll + xlim(0, max( poll.df$Frequency)) +
@@ -155,12 +132,7 @@ bpoll + xlim(0, max( poll.df$Frequency)) +
                                                "%",")")))
 ```
 
-\Rrule
-
-
 Further, in plots like these, where discrete data with a relatively small number of categories^[My persona rule of thumb for what constitutes a "relatively small category" is $N_{categories} \leq 5$] are juxtaposed with a continuous scale, setting the continuous axis' limits (in this case the `x-axis`) can help to further disambiguate the information.
-
-\Rrule
 
 ```{r}
 bpoll2 <- bpoll + scale_x_continuous(breaks = c(0, n),
@@ -175,11 +147,7 @@ bpoll2 + geom_text(vjust = -1.5, hjust = 0.5, stat = 'identity',
                                                           digits = 2))))
 ```
 
-\Rrule
-
 ## \textsc{Mosaic Plots} for polling data
-
-\Rrule
 
 ```{r plot_mosaic}
 
@@ -199,11 +167,8 @@ mosaic(tbl)
 mosaicplot(tbl,main = "Reuters Poll Data")
 
 ```
-\Rrule
 
 `r tufte::newthought("Three-Way")` Mosaic Plot
-
-\Rrule
 
 ```{r}
 dat <- R.rspss("data/cnnpoll.sav", vlabs = T)
@@ -224,8 +189,6 @@ mosaicplot(ftc.a, type = "deviance", las = 2, color = mypal.a75[c(5, 16)])
 
 ```
 
-\Rrule
-
 \newpage
 # @azen2011categorical's (Chapter 3) Proficiency Data
 
@@ -244,19 +207,13 @@ mosaicplot(ftc.a, type = "deviance", las = 2, color = mypal.a75[c(5, 16)])
 
 The `prof` variable should be read by `R` as a `string variable`.
 
-\Rrule
-
 ```{r dat, warning=FALSE, message=FALSE}
 library(foreign) ## read.spss() ##
 dat <- read.spss("data/proficient.sav", to.data.frame = TRUE)
 ```
 
-\Rrule
-
 
 ## Data Inspection \& Cleaning
-
-\Rrule
 
 ```{r}
 str(dat)
@@ -274,13 +231,9 @@ Risna <- function(x) sum(is.na(x))
 sapply(dat, Risna)
 ```
 
-\Rrule
-
 It appears that there are several instances of `NA` in the `level` column. However, since I do not know these data too well just yet, I am apprehensive, to say the least, to just outright remove those rows containing `NAs`. Instead, I'm going to assign an arbitruary, but meaningful to me, value to all instances of `NA` throughout the dataset. `r margin_note("The output from \\texttt{sapply()} above indicates that the \\texttt{level} column is the only one with \\texttt{NAs}. So, in the next set of analyses, we should only see changes to that column in the end.")`
 
 To ensure that I do not accidentally override an existing value for the `level` variable by assigning an arbitruary value to `NA's`, I first call `unique(dat$level)` below to get a list of the numeric values currently assigned to the levels of `dat$level`. Then, I create a quick function (`R.na()`) to replace `NA` values within a given `R-object`.
-
-\Rrule
 
 ```{r cleanDat}
 unique(dat$level)
@@ -308,13 +261,9 @@ sapply(dat, R.isna)
 
 ```
 
-\Rrule
-
 ## Setting up for binomial analysis
 
 Based on their description (and the fact that the example pertains primarily to the Bernoulli Distribution), it appears that @azen2011categorical used a dichotomized version of the `level` variable in their analysis example. However, I am curious about the level of extant intformation available from this variable's original 4-categories^[i.e., `r levels(dat$level)`], as well as the difference, if any, between the two categorical data structuring methods.
-
-\Rrule
 
 ```{r datDich}
 rec <- "c('proficient', 'advanced') = 1; c('Unknown', 'minimal', 'basic') = 0"
@@ -323,11 +272,7 @@ dat$lev.D <- car::recode(dat$level, rec)
 summary(dat$lev.D)
 ```
 
-\Rrule
-
 `r newthought("Quick aside:")` Instead of the above dichotomization, I could have done the following:
-
-\Rrule
 
 ```{r}
 rec1 <- c("'minimal'=1; 'basic'=2; 'proficient'=3; 'advanced'=4; 'Unknown'=0")
@@ -340,18 +285,12 @@ summary(dat$lev.D1)
 
 ```
 
-\Rrule
-
 `r tufte::newthought("However")`, as you can see by the differences in the summary outputs above and the barplots below resulting from these different dichotomizing procedures, when I simply "cut()" the factor levels, I get a nicely split (i.e., "cut") factor. Unfortunately, the proportions of the newly dichotomized factor's levels do not necessarily reflect the actual proportions in the data.`r margin_note("Moral of the story - be careful when cutting and never assume that \\texttt{R} knows what you are trying to do (\\texttt{R}'s purpose is not to Harry Huidini your data by reading your mind (or your prof's/advisor's mind), but rather to provide you with a set (to put it mildly) of tools to help you do the work ... but you still have to do the actual thinking work).")`
-
-\Rrule
 
 ```{r}
 dat$level <- relevel(dat$level, ref = "Unknown")
     ## re-ordering levels for presentation ##
 ```
-
-\Rrule
 
 ```{r barChart1, echo=FALSE, eval=FALSE}
 table(dat$level) %>% ## see {dplyr} package ##
@@ -368,17 +307,11 @@ table(dat$lev.D1)
 
 ```
 
-
-
 `r tufte::newthought("Below")` are the exact same plots, except with a random sample of $n = 10$ cases from the proficiency data per the example in @azen2011categorical (Chapter 3).
-
-\Rrule
 
 ```{r dat.s}
 dat.s <- sample_n(dat, 10)
 ```
-
-\Rrule
 
 ```{r barChart2, echo=FALSE, eval=FALSE}
 table(dat.s$level) %>% ## see {dplyr} package ##
@@ -395,4 +328,4 @@ table(dat.s$lev.D1)
 ```
 
 \newpage
-# References`r R.cite_r("auxDocs/REFs.bib", footnote = TRUE)`
+# References`r R.cite_r("../auxDocs/REFs.bib", footnote = TRUE)`

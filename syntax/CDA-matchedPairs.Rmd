@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
     autodep = T,
     Rplot = TRUE,
     dev = 'pdf',
-    fig.path = 'graphics/matchedPairs/rplot-',
+    fig.path = 'graphics/reuters/rplot_',
     fig.width = 7,
     fig.asp = 1,
     out.width = "\\linewidth"
@@ -29,8 +29,6 @@ library(car) ## recode() ##
 `r tufte::margin_note("Data: \\textit{\\color{dkpatriarch}{\\texttt{data/dep.sav}}}")`
 
 $$ McNemar's \chi^{2} = \frac{(n_{21} - n_{12})^{2}}{n_{21} + n_{12}} $$
-
-\Rrule
 
 ```{r}
 cnt <- array( ## What we want to generate directly from the data ##
@@ -68,8 +66,6 @@ mcnemar.test(ftc.a, correct = FALSE)
 mosaicplot(ftc.a, type = "deviance", las = 2, color = mypal.a75[c(5, 16)])
 
 ```
-
-\Rrule
 
 \newpage
 # References`r R.cite_r("../auxDocs/REFs.bib", footnote = TRUE)`

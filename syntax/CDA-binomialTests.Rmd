@@ -11,7 +11,6 @@ knitr::knit_theme$set("bclear")
 
 # Setting Things Up in `R`
 
-\Rrule
 
 ```{r setup, echo=TRUE, message=FALSE, warning=FALSE, cache=FALSE}
 source("SETUP.R")
@@ -26,7 +25,7 @@ knitr::opts_chunk$set(
     # autodep = T,
     Rplot = TRUE,
     dev = 'pdf',
-    fig.path = 'graphics/binomials/rplot-',
+    fig.path = 'graphics/reuters/rplot_',
     fig.width = 7,
     fig.asp = 1,
     out.width = "\\linewidth",
@@ -39,14 +38,13 @@ dat <- within(dat, {recode(response, c("1=0", "2=1", "3=2"))})
 
 ```
 
-\Rrule
 
 
 `r tufte::newthought("Notes on the \\texttt{R-code} above")`: `SETUP.R` is the default `R-script` I source in the `"setup" code-chunk`^[see \texttt{help(package = knitr)}] at the beginning of all `R markdown` documents. It contains global arguments for loading commonly used packages, setting options, and defining various R-object utilities and functions. I also use this script as a record of functions I create while working in `R`. The script is heavily commented throughout for explanatory purposes, as well as for giving credit where it is due (I've tried to keep up with all of the `R-code`, `LaTex`, and `R markdown` sources, but may have missed some along the way).
 
 `r tufte::newthought("After sourcing \\texttt{SETUP.R}")` and setting a few output options (`options()` \& `opts_chunk$set()`), I load the `{foreign}` and `{car}` packages for the `read.spss()` and `recode()` functions, respectively. Then I read in (`read.spss()`) the Reuters polling dataset, "`reuters.sav`" and store it in `R` as a `dataframe` named "`dat`". Finally, I re-code the values for the "`dat$response`" variable, using the `{car}` package's `recode()` function to undo default numeric values 1,2,3 and label values.
 
-```{marginfigure}
+```{marginfigure, echoRule=NULL}
 _**Note:** This last recoding step seems unneccessary to me. I included it here based on Jason Newsom's code and in-class explanation, but when I run the rest of the analysis below without recoding, the results are the same. Is there a specific situation in which setting a discrete variable's values to '`0, 1, 2, ...`', versus '`1, 2, 3, ...`' is consequential to the analysis? Or is this a matter of personal preference for coding discrete variables? I think it would make more logical sense to me if, in this case, '`0`' strictly reflected '`No Response`', but that is not the case here, as '`0`' reflects both '`Other`' and '`No Response`'. Further, should '`Other`' responses not be coded as separate from '`No Response`', given that an '`Other`' response is absolutely qualitatively distinct from '`No Response`'?_
 ```
 
@@ -54,7 +52,7 @@ _**Note:** This last recoding step seems unneccessary to me. I included it here 
 
 ## Data-Cleaning \& Preparation
 
-```{marginfigure}
+```{marginfigure, echoRule=NULL}
 Note that the common method for binomial tests in `R` is to use `exact.test = TRUE`, which is actually the most conservative approach and also no ideal for binomial tests. Use `prop.test()` for _approximate_ tests. _(source: Jason Newsom)_
 ```
 
@@ -62,12 +60,11 @@ A few things need to happen to help optimize the information we put into and get
 
 `r newthought("However")`, there are also some existing "`NAs`" in "`dat$party`", which need to be re-coded as well to avoid excluding rows with acceptable data values in `dat$response`.
 
-```{marginfigure}
+```{marginfigure, echoRule=NULL}
 `sapply()`, `apply()`, and `vapply()` are great function to get to know if you find yourself doing a ton of data cleaning/mining.
 ```
 
 
-\Rrule
 
 ```{r isNA, results='asis'}
 Risna <- function(x) sum(is.na(x))
@@ -82,7 +79,7 @@ R.na <- function(x, v = 0){
     }
 ```
 
-```{marginfigure}
+```{marginfigure, echoRule=NULL}
 **`R.na():`** _"If `x` = NA (`is.na()`), replace `x` with `v`, otherwise leave `x` alone."_
 ```
 
@@ -91,7 +88,6 @@ kable(R.msmm(dat$party), caption = "Summary information for '**party**'
         data column _before_ recoding \\texttt{NA}s")
 ```
 
-\Rrule
 
 ```{r}
 unique(dat$party)
@@ -100,14 +96,12 @@ unique(dat$party)
 
 ```
 
-\Rrule
 
 ```{r echo=FALSE}
 kable(R.msmm(dat$party), caption = "Summary information for '**party**'
         data column _after_ recoding \\texttt{NA}s")
 ```
 
-\Rrule
 
 ```{r}
 
@@ -122,7 +116,6 @@ sapply(dat, R.isna) ## bye-bye NAs! ... again ##
     ## dataframe entirely, though the original datafile remains untouched).
 ```
 
-\Rrule
 
 
 Now the data are, in my opinion, ready for analysis.
@@ -130,7 +123,6 @@ Now the data are, in my opinion, ready for analysis.
 \newpage
 # Single-Sample Binomial Tests: Differences in proportions of (non-"other") polling responses.
 
-\Rrule
 
 ```{r}
 levels(dat$response)
@@ -138,7 +130,6 @@ poll.t <- table(dat$response)
 ## Why not make a table of the poll response counts for each candidate? ... ##
 ```
 
-\Rrule
 
 ```{r echo=FALSE}
 kable(as.data.frame(poll.t), caption = "Frequency Table of Polling Data", 
@@ -172,7 +163,6 @@ _**Arguments (`R.binom_test()`):**_
 
 _Value (`R.binomTest()`):_ Returns a `data.frame` object containing the values returned by either `prop.test()` or `binom.test()`, depending on the value set for `exact`.
 
-\Rrule
 
 ```{r}
 R.binom_test <- function(p, N, pi0 = 0.5, exact = FALSE, correct = FALSE, 
@@ -205,12 +195,10 @@ R.binom_test <- function(p, N, pi0 = 0.5, exact = FALSE, correct = FALSE,
 }
 ```
 
-\Rrule
 
 
 ## Approximate Test (`prop.test()`)
 
-\Rrule
 
 ```{r}
 pt <- R.binom_test(p = poll.t["Clinton"], N = nrow(dat), pi0 = 0.5)
@@ -219,7 +207,6 @@ pt <- R.binom_test(p = poll.t["Clinton"], N = nrow(dat), pi0 = 0.5)
         ## creating the table will come in handy later on too. ##
 ```
 
-\Rrule
 
 ```{r echo=FALSE}
 kable(pt, caption = "1-sample proportions test without continuity 
@@ -231,7 +218,6 @@ kable(pt, caption = "1-sample proportions test without continuity
 
 ## Exact Test (`binom.test()`)
 
-\Rrule
 
 ```{r}
 et <- R.binom_test(p = poll.t["Clinton"], 
@@ -239,7 +225,6 @@ et <- R.binom_test(p = poll.t["Clinton"],
                    exact = TRUE)
 ```
 
-\Rrule
 
 ```{r echo=F}
 kable(et, caption = "1-sample _exact_ binomial test with continuity 
@@ -248,7 +233,6 @@ kable(et, caption = "1-sample _exact_ binomial test with continuity
                     "$n_{successes}$", "_p-value_", "CI"), format.args = list(digits = 2))
 ```
 
-\Rrule
 
 ```{r}
 poll.df <- as.data.frame(poll.t)
@@ -277,7 +261,6 @@ bpoll2 + geom_text(vjust = -1.5, hjust = 0.5, stat = 'identity',
                                                           digits = 2))))
 ```
 
-\Rrule
 
 
 \newpage
@@ -425,4 +408,4 @@ $$ \Longrightarrow `r csq1c` + `r csq2c` $$
 $$ \chi^{2} = \textbf{`r chisq`} $$
 
 \newpage
-# References`r R.cite_r(file = "auxDocs/REFs.bib")`
+# References`r R.cite_r(file = "../auxDocs/REFs.bib")`

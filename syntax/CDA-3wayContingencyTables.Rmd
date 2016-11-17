@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
     autodep = T,
     Rplot = TRUE,
     dev = 'pdf',
-    fig.path = 'graphics/3way/rplot-',
+    fig.path = 'graphics/reuters/rplot_',
     fig.width = 7,
     fig.asp = 1,
     out.width = "\\linewidth"
@@ -26,7 +26,6 @@ library(foreign) ## read.spss() ##
 library(car) ## recode() ##
 ```
 
-\Rrule
 
 ```{r}
 cnt <- array( ## What we want to generate directly from the data ##
@@ -73,7 +72,6 @@ mantelhaen.test(ftc.a, correct = FALSE)
 
 ```
 
-\Rrule
 
 \newpage
-# References`r R.cite_r("auxDocs/REFs.bib", footnote = TRUE)`
+# References`r R.cite_r("../auxDocs/REFs.bib", footnote = TRUE)`
