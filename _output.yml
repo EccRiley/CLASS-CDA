@@ -5,27 +5,6 @@
 #     ~/Dropbox/rstudio/CDA                        #
 # ================================================ #
 
-# PDF Tufte Handout {tufte} #
-tufte::tufte_handout:
-  fig_caption: yes
-  latex_engine: pdflatex
-  # highlight: null
-  # theme: null
-  highlight: monochrome # kate # monochrome # espresso # zenburn # haddock # pygments # tango
-  toc: yes
-  toc_depth: 1
-  keep_tex: yes
-  md_extensions: +footnotes+autolink_bare_uris+blank_before_blockquote+implicit_figures+hard_line_breaks+escaped_line_breaks+header_attributes+inline_notes+table_captions+multiline_tables+pipe_tables
-  pandoc_args: [
-    # "--filter", "pandoc-tablenos",
-    # "--filter", "pandoc-fignos",
-    "--filter", "pandoc-citeproc",
-    "--csl", "auxDocs/chicago.csl", #chicago-ad.csl
-    "--bibliography", "auxDocs/REFs.bib"
-  ]
-  includes:
-    in_header: auxDocs/header.tex
-
 # ========================================== #
 
 # HTML Notebook {Rmarkdown
@@ -37,8 +16,8 @@ html_notebook:
   md_extensions: +footnotes+autolink_bare_uris+blank_before_blockquote+implicit_figures+hard_line_breaks+escaped_line_breaks+header_attributes+inline_notes+table_captions+multiline_tables+pipe_tables
   toc: yes
   pandoc_args: [
-    "--filter", "pandoc-tablenos",
-    "--filter", "pandoc-fignos",
+    # "--filter", "pandoc-tablenos",
+    # "--filter", "pandoc-fignos",
     "--filter", "pandoc-citeproc",
     "--csl", "auxDocs/chicago.csl",
     "--bibliography", "auxDocs/REFs.bib"
@@ -126,22 +105,25 @@ pdf_syllabus:
 ###############################################################
 
 # PDF Tufte Handout {tufte} #
-# tufte::tufte_handout:
-#   fig_caption: yes
-#   latex_engine: pdflatex
-#   highlight: kate
-#   toc: yes
-#   keep_tex: no
-#   pandoc_args: [
-#     # "--filter", "pandoc-tablenos",
-#     # "--filter", "pandoc-fignos",
-#     "--filter", "pandoc-citeproc",
-#     "--csl", "auxDocs/chicago.csl", #chicago-ad.csl
-#     "--bibliography", "auxDocs/REFs.bib"
-#   ]
-#   includes:
-#     in_header: auxDocs/header.tex
-
+tufte::tufte_handout:
+  fig_caption: yes
+  latex_engine: pdflatex
+  # highlight: null
+  # theme: null
+  highlight: monochrome # kate # monochrome # espresso # zenburn # haddock # pygments # tango
+  toc: yes
+  toc_depth: 1
+  keep_tex: yes
+  md_extensions: +footnotes+autolink_bare_uris+blank_before_blockquote+implicit_figures+hard_line_breaks+escaped_line_breaks+header_attributes+inline_notes+table_captions+multiline_tables+pipe_tables
+  pandoc_args: [
+    # "--filter", "pandoc-tablenos",
+    # "--filter", "pandoc-fignos",
+    "--filter", "pandoc-citeproc",
+    "--csl", "auxDocs/chicago.csl", #chicago-ad.csl
+    "--bibliography", "auxDocs/REFs.bib"
+  ]
+  includes:
+    in_header: auxDocs/header.tex
 # PDF Tufte Book {tufte} #
 tufte::tufte_book:
   number_sections: yes
@@ -180,11 +162,12 @@ bookdown::tufte_book2:
 # HTML Tufte Handout {tufte} #
 tufte::tufte_html:
   keep_md: yes
+  highlight: monochrome
   pandoc_args: [
     "--filter", "pandoc-tablenos",
     "--filter", "pandoc-fignos",
     "--filter", "pandoc-citeproc",
-#    "--csl", "auxDocs/apa.csl",
+   "--csl", "auxDocs/chicago.csl",
     "--bibliography", "auxDocs/REFs.bib",
   ]
 
