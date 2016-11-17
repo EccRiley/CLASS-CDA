@@ -1,0 +1,32 @@
+---
+title: "Diagnostics for Logistic Regression"
+author: "Riley Smith"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+---
+
+```{r setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache=FALSE}
+source("SETUP.R")
+knitr::opts_chunk$set(
+    tidy = FALSE,
+    echo = TRUE,
+    cache = TRUE,
+    fig.keep = 'all',
+    fig.show = 'all',
+    results = 'asis'
+    # autodep = T,
+    # Rplot = TRUE,
+    # dev = 'pdf',
+    # fig.path = 'graphics/HW2/rplot_',
+    # fig.width = 7,
+    # fig.height = 7,
+    # out.width = "\\linewidth"
+    )
+```
+
+```{r}
+dat <- read.spss("data/heart.sav")
+library(LogisticDx)
+logmod <- glm(w1hheart ~ w1sex + w1activ + w1cesd9 + w1neg, data = dat, family = "binomial")
+dx(logmod)
+plot(logmod)
+```
