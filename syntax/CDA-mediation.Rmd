@@ -1,0 +1,48 @@
+---
+title: "Mediation Analysis with Logistic Regression"
+author: "Riley Smith"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+---
+
+```{r setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache=FALSE}
+source("SETUP.R")
+knitr::opts_chunk$set(
+    tidy = FALSE,
+    echo = TRUE,
+    cache = FALSE,
+    fig.keep = 'high',
+    fig.show = 'asis',
+    results = 'asis',
+    autodep = T,
+    Rplot = TRUE,
+    dev = 'pdf',
+    fig.path = 'graphics/mediation/rplot-',
+    fig.width = 7,
+    fig.height = 7,
+    out.width = "\\linewidth"
+    )
+```
+
+
+```{r medmodel}
+set.seed(42)
+dat <- R.rspss("data/heart.sav", vlabs = TRUE)
+library(mediation)
+dat <- na.omit(dat)
+# dat$w1neg.d <- sapply(dat$w1neg, R.dich)
+treatment <- c("w1neg")
+mediators <- c("w1cesd9")
+outcome <- c("w1hheart")
+datasets <- list(dat = dat)
+m.model <- mediations(datasets, treatment, mediators, outcome,
+                      families = c("gaussian", "binomial"), 
+                      interaction = FALSE,
+                      conf.level = .95, sims = 50)
+summary(m.model)
+plot.mediations(m.model, labels = c("Indirect", "Direct", "Total"))
+```
+
+
+
+\newpage
+# References`r R.cite_r("../auxDocs/REFs.bib", footnote = TRUE)`
