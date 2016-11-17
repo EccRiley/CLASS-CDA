@@ -1,0 +1,91 @@
+---
+title: "Maximum Likelihood Estimation (MLE)"
+author: "Riley Smith"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+url: "web.pdx.edu/~newsomj/cdaclass"
+---
+
+```{r setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache=FALSE}
+source("SETUP.R")
+knitr::opts_chunk$set(
+    tidy = FALSE,
+    echo = TRUE,
+    cache = FALSE,
+    fig.keep = 'high',
+    fig.show = 'asis',
+    results = 'asis',
+    autodep = T,
+    Rplot = TRUE,
+    dev = 'pdf',
+    fig.path = 'graphics/rplot_',
+    fig.width = 7,
+    fig.height = 7,
+    out.width = "\\linewidth"
+    )
+```
+
+`r tufte::margin_note("See \\rhref{http://web.pdx.edu/~newsomj/cdaclass}{Newsom 2016-CDA Handout-4}")`
+
+# Binomial Probability Estimation
+
+$$ P(Y = k; n, \pi) = \binom{n}{k}\pi^{k}(1-\pi)^{n-k} $$
+
+For _MLE_, the first term on the right side of the _binomial coefficient_[^$\binom{n}{k}$] is ignored, as it does not inform the estimation of $\pi$, which is what _MLE_ is interested in finding. The rest of the right side of the _binomial estimation_ is the _"kernel"_ in _MLE_[@agresti2013categorical; @eliason1993maximum; @fisher1950contrib; @myung2003tutorial].
+
+`r margin_note("\\rhref{http://www.ics.uci.edu/~staceyah/111-202/discussion/Prob_Distns.html}{\\texttt{R-Code} Source}")`
+
+
+`r tufte::margin_note("\\textbf{\\texttt{eq.pbn()}}: Binomial Probability Equation")`
+
+`r tufte::margin_note("\\textbf{\\texttt{h.bn()}}: Plot a relative frequency histogram of the binomial distribution")`
+
+```{r fig.fullwidth=TRUE, Rplot=TRUE}
+par(family = "ETBembo")
+eq.pbn <- expression(paste("P(", Y == k, "; n,", pi, ") = ",
+                           bgroup("(", atop(n, x), ")"), pi^k, 
+                           " (", 1 - pi^{n - k}, ")"))
+
+x5 <- for (n in 0:5) choose(n, k = 0:n) ## n = 10 ##
+x10 <- seq(1:10) ## n = 10 ##
+x100 <- seq(1:100) ## n = 100 ##
+
+ppi <- 0.5
+
+nk <- c(5, 10, 100)
+
+x1 <- matrix(c(0:5, dbinom(0:5, 5, 0.5)), ncol = 2,
+             dimnames = list(NULL, c("n", "P")))
+
+h.bn <- function(n, p, ...) {
+        k <- 0:n
+        p <- dbinom(k, n, p)
+        names(p) <- as.character(0:n)
+}
+
+h.bn(5, 0.5)
+
+```
+
+-----
+
+```{r fig.margin=TRUE}
+clinton <- c(22, 40, 11, 33, 27, 30, 25, 25, 20, 19, 44, 27, 
+             28, 30, 34, 24, 28, 29, 31, 19, 24, 29, 33, 32, 25)
+k <- clinton
+n <- 50
+p <- k/n
+
+p
+
+ll <- function(p) sum(dbinom(k, n, p, log = TRUE))
+p.sq <- seq(0.01, 0.99, 0.01)
+p.sql <- sapply(p.sq,ll)
+
+par(family = "ETBembo", pch = 20);
+plot(p.sq, p.sql, type = "l", xlab = "x", ylab = "y",
+    main = "CDF - Hillary Clinton")
+hist(p, freq = TRUE, xlab = "x", ylab = "y", col = mypal[16])
+```
+
+\newpage
+# References`r R.cite_r("../auxDocs/REFs.bib", footnote = TRUE)`
