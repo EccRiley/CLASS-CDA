@@ -248,63 +248,90 @@ dl dd>:last-child {
 
 /* CODE
 --------------------------------*/
-pre, code, tt {
-    background-color: #f2f2f2  /* #e0eaff; */
-/*    font-size: 10px;*/
-    font-family: Menlo;
-    overflow-x: hidden;
-    white-space: pre-wrap;
-    padding: 0px;
-}
+/*pre, code, tt {
+    background-color: #44505a;
+}*/
+    /*background-color: #f2f2f2;
+    /*font-size: 10px;*/
+    /*font-family: Menlo;*/
+    /*overflow-x: hidden;*/
+    /*white-space: pre-wrap;*/
+    /*padding: 0px;*/
+/*}*/
 
-code, tt {
-    font-family: Menlo;
-background-color: #f2f2f2  /* #e0eaff; */
+/*code, tt {*/
+    /*font-family: "Menlo";*/
+    /*background-color: #f2f2f2;
 /*    font-size: 10px;*/
-    padding: 0px;
-    white-space: pre-wrap;
-    overflow-x: hidden;
-}
+    /*padding: 0px;*/
+    /*white-space: pre-wrap;*/
+    /*overflow-x: hidden;*/
+    /*border-color: #000f2f;
+    border-style: solid;
+    border-width: 1px;*/
+/*}*/
 
-pre>code {
-    font-family: Menlo;
-background-color: #f2f2f2  /* #e0eaff; */
+/*pre>code {*/
+    /*font-family: "Menlo";*/
+    /*background-color: #f2f2f2;
 /*    font-size: 10px;*/
-    padding: 0px;
-    margin-left: 35px;
-    white-space: pre-wrap;
-    overflow-x: hidden;
-}
-pre {
-    font-family: Menlo;
-background-color: #f2f2f2  /* #e0eaff; */
+    /*padding: 0px;*/
+    /*margin-left: 35px;*/
+    /*white-space: pre-wrap;*/
+    /*overflow-x: hidden;*/
+    /*border-color: #000f2f;
+    border-style: solid;
+    border-width: 1px;*/
+/*}*/
+/*pre {*/
+    /*font-family: "Menlo";*/
+    /*background-color: #f2f2f2;
 /*    border: 1px solid #333c44;*/
-    overflow-x: hidden;
-    padding: 0px;
-    margin-left: 35px;
+    /*overflow-x: hidden;*/
+    /*padding: 0px;*/
+    /*margin-left: 35px;*/
+    /*border-color: #000f2f;
+    border-style: solid;
+    border-width: 1px;*/
+/*}*/
+pre {
+    background-color: #f4f7ff;
+    width: 52.5%;
+    overflow-x: auto;
+    border-color: #000f2f;
+    border-style: solid;
+    border-width: 1px;
 }
-pre code, pre tt {
-    font-family: Menlo;
-    padding: 0px;
-    margin-left: 35px;
-background-color: #f2f2f2  /* #e0eaff; */
-    overflow-x: hidden;
-}
+
+/*pre code, pre tt {
+    background-color: #f4f7ff;
+}*/
+    /*font-family: "Menlo";*/
+    /*padding: 0px;*/
+    /*margin-left: 35px;*/
+    /*background-color: #f2f2f2;
+    /*overflow-x: hidden;*/
+    /*border-color: #000f2f;
+    border-style: solid;
+    border-width: 1px;*/
+/*}*/
 
 kbd {
     -moz-border-bottom-colors: none;
     -moz-border-left-colors: none;
     -moz-border-right-colors: none;
     -moz-border-top-colors: none;
-    background-color: #f4f7ff;
-    background-image: linear-gradient(#f4f7ff, #e0eaff);
-    background-repeat: repeat-x;
+    background-color: #44505a;
+    /*background-image: linear-gradient(#f4f7ff, #e0eaff);*/
+    /*background-repeat: repeat-x;*/
     border-color: #000f2f;
     border-style: solid;
     border-width: 1px;
-    line-height: 1;
-    padding: 0;
-    font-family: Menlo;
+    line-height: 1px;
+    font-family: "Menlo";
+    padding: 10px;
+    margin-bottom: 5rem;
+    margin-top: 5rem;
 }
 
 /* QUOTES
