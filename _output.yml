@@ -5,13 +5,11 @@
 #     ~/Dropbox/rstudio/CDA                        #
 # ================================================ #
 
-# ========================================== #
-
 # HTML Notebook {Rmarkdown
 #   some features require [RStudio >= v1.0.40 Preview](https://www.rstudio.com/products/rstudio/download/preview/))} #
 html_notebook:
   highlight: monochrome
-  css: auxDocs/riley.css
+  css: auxDocs/tufte.css
   fig_caption: yes
   md_extensions: +footnotes+autolink_bare_uris+blank_before_blockquote+implicit_figures+hard_line_breaks+escaped_line_breaks+header_attributes+inline_notes+table_captions+multiline_tables+pipe_tables
   toc: yes
