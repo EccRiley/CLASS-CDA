@@ -3,6 +3,8 @@
 .RData
 .Ruserdata
 
-_output.yml
+auxDocs/tufte.css
 
-*.yml
+auxDocs/tufteR.css
+
+auxDocs/tufterhandout.css
