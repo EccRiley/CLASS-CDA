@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
     autodep = T,
     Rplot = TRUE,
     dev = 'pdf',
-    fig.path = 'graphics/reuters/rplot_',
+    fig.path = 'graphics/3wayctbls/rplot-',
     fig.width = 7,
     fig.asp = 1,
     out.width = "\\linewidth"
@@ -26,6 +26,7 @@ library(foreign) ## read.spss() ##
 library(car) ## recode() ##
 ```
 
+`r margin_note("This is a test margin note.")`
 
 ```{r}
 cnt <- array( ## What we want to generate directly from the data ##
@@ -64,14 +65,13 @@ mosaicplot(ftc.a, type = "deviance", las = 2,
            main = "Visual 2-x-2-x-2 Cross-Tabulation:\n
            Party Affiliate-x-Gender-x-Response")
 
-str(BreslowDayTest(ftc.a, correct = FALSE))
+BreslowDayTest(ftc.a, correct = FALSE)
 mantelhaen.test(ftc.a, correct = TRUE) ## For comparison only, since JTN's handout
                                     ## uses the default MH test method, which
                                     ## includes Yate's correction ##
 mantelhaen.test(ftc.a, correct = FALSE)
 
 ```
-
 
 \newpage
 # References`r R.cite_r("../auxDocs/REFs.bib", footnote = TRUE)`
