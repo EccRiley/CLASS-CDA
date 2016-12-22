@@ -328,4 +328,4 @@ table(dat.s$lev.D1)
 ```
 
 \newpage
-# References`r R.cite_r("../auxDocs/REFs.bib", footnote = TRUE)`
+# References`r R.cite_r("~/GitHub/auxDocs/REFs.bib", footnote = TRUE)`

@@ -17,8 +17,8 @@ html_notebook:
     # "--filter", "pandoc-tablenos",
     # "--filter", "pandoc-fignos",
     "--filter", "pandoc-citeproc",
-    "--csl", "auxDocs/chicago.csl",
-    "--bibliography", "auxDocs/REFs.bib"
+    "--csl", "~/GitHub/auxDocs/chicago.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
   ]
 
 # MS Word (Tufte-like Styling) #
@@ -29,15 +29,15 @@ word_TUFTE:
   fig_width: 6
   keep_md: no
   md_extensions: +footnotes+autolink_bare_uris+blank_before_blockquote+implicit_figures+hard_line_breaks+escaped_line_breaks+header_attributes+inline_notes+table_captions+multiline_tables+pipe_tables
-  reference_docx: auxDocs/reference_Rtft2.docx
+  reference_docx: auxDocs/tft.docx
   toc: yes
   toc_depth: 2
   pandoc_args: [
     "--filter", "pandoc-tablenos",
     "--filter", "pandoc-fignos",
     "--filter", "pandoc-citeproc",
-    "--csl", "auxDocs/chicago.csl", #chicago-ad.csl,
-    "--bibliography", "auxDocs/REFs.bib"
+    "--csl", "~/GitHub/auxDocs/chicago.csl", #chicago-ad.csl,
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
   ]
 
 # MS Word (APA Compliant) #
@@ -55,8 +55,8 @@ word_document:
     "--filter", "pandoc-tablenos",
     "--filter", "pandoc-fignos",
     "--filter", "pandoc-citeproc",
-    "--csl", "auxDocs/apa.csl",
-    "--bibliography", "auxDocs/REFs.bib"
+    "--csl", "~/GitHub/auxDocs/apa.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
   ]
 
 # PDF Standard #
@@ -72,8 +72,8 @@ pdf_document:
     "--variable", "sansfont=GillSansMT",
     "--variable", "monofont=Menlo",
     "--filter", "pandoc-citeproc",
-    "--csl", "auxDocs/chicago.csl",
-    "--bibliography", "auxDocs/REFs.bib"
+    "--csl", "~/GitHub/auxDocs/chicago.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
   ]
 
 # PDF Syllabus #
@@ -93,8 +93,8 @@ pdf_syllabus:
     "--variable", "sansfont=GillSansMT",
     "--variable", "monofont=Menlo",
     "--filter", "pandoc-citeproc",
-    "--csl", "auxDocs/chicago.csl",
-    "--bibliography", "auxDocs/REFs.bib"
+    "--csl", "~/GitHub/auxDocs/chicago.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
   ]
 
 
@@ -117,8 +117,8 @@ tufte::tufte_handout:
     # "--filter", "pandoc-tablenos",
     # "--filter", "pandoc-fignos",
     "--filter", "pandoc-citeproc",
-    "--csl", "auxDocs/chicago.csl", #chicago-ad.csl
-    "--bibliography", "auxDocs/REFs.bib"
+    "--csl", "~/GitHub/auxDocs/chicago.csl", #chicago-ad.csl
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
   ]
   includes:
     in_header: auxDocs/header.tex
@@ -134,8 +134,8 @@ tufte::tufte_book:
     "--filter", "pandoc-fignos",
     "--filter", "pandoc-tablenos",
     "--filter", "pandoc-citeproc",
-    "--csl", "auxDocs/chicago.csl",
-    "--bibliography", "auxDocs/REFs.bib"
+    "--csl", "~/GitHub/auxDocs/chicago.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
   ]
   includes:
     in_header: auxDocs/header.tex
@@ -152,7 +152,7 @@ bookdown::tufte_book2:
     "--filter", "pandoc-tablenos",
     "--filter", "pandoc-fignos",
     "--filter", "pandoc-citeproc",
-    "--csl", "auxDocs/chicago.csl"
+    "--csl", "~/GitHub/auxDocs/chicago.csl"
   ]
   includes:
     in_header: auxDocs/header.tex
@@ -165,8 +165,8 @@ tufte::tufte_html:
     "--filter", "pandoc-tablenos",
     "--filter", "pandoc-fignos",
     "--filter", "pandoc-citeproc",
-   "--csl", "auxDocs/chicago.csl",
-    "--bibliography", "auxDocs/REFs.bib",
+   "--csl", "~/GitHub/auxDocs/chicago.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib",
   ]
 
 # HTML Tufte Book {tufte} #
@@ -179,8 +179,8 @@ bookdown::tufte_html_book:
     "--filter", "pandoc-tablenos",
     "--filter", "pandoc-fignos",
     "--filter", "pandoc-citeproc",
-    "--csl", "auxDocs/chicago.csl",
-    "--bibliography", "auxDocs/REFs.bib"
+    "--csl", "~/GitHub/auxDocs/chicago.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
   ]
 
 # PDF Tufte Book2 {bookdown} #
@@ -194,8 +194,8 @@ bookdown::tufte_html2:
     "--filter", "pandoc-tablenos",
     "--filter", "pandoc-fignos",
     "--filter", "pandoc-citeproc",
-    "--csl", "auxDocs/chicago.csl",
-    "--bibliography", "auxDocs/REFs.bib"
+    "--csl", "~/GitHub/auxDocs/chicago.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
   ]
 
 
@@ -217,8 +217,8 @@ beamer_presentation:
     "--variable", "monofont=Menlo",
     "--variable", "fontsize=9pt",
     "--filter", "pandoc-citeproc",
-    "--csl", "auxDocs/apa.csl",
-    "--bibliography", "auxDocs/REFs.bib"
+    "--csl", "~/GitHub/auxDocs/apa.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
   ]
 
 # HTML ioslides #
@@ -233,8 +233,8 @@ ioslides_presentation:
     "--filter", "pandoc-tablenos",
     "--filter", "pandoc-fignos",
     "--filter", "pandoc-citeproc",
-    "--csl", "auxDocs/apa.csl",
-    "--bibliography", "auxDocs/REFs.bib",
+    "--csl", "~/GitHub/auxDocs/apa.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib",
   ]
 
 # HTML slidy #
@@ -249,8 +249,8 @@ slidy_presentation:
     "--filter", "pandoc-tablenos",
     "--filter", "pandoc-fignos",
     "--filter", "pandoc-citeproc",
-    "--csl", "auxDocs/apa.csl",
-    "--bibliography", "auxDocs/REFs.bib",
+    "--csl", "~/GitHub/auxDocs/apa.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib",
   ]
 
 ########################################################
@@ -268,8 +268,8 @@ html_document:
     "--filter", "pandoc-tablenos",
     "--filter", "pandoc-fignos",
     "--filter", "pandoc-citeproc",
-    "--csl", "auxDocs/chicago.csl",
-    "--bibliography", "auxDocs/REFs.bib"
+    "--csl", "~/GitHub/auxDocs/chicago.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
   ]
 
 
@@ -283,8 +283,8 @@ bookdown::html_document2:
     "--filter", "pandoc-tablenos",
     "--filter", "pandoc-fignos",
     "--filter", "pandoc-citeproc",
-    "--csl", "auxDocs/chicago.csl",
-    "--bibliography", "auxDocs/REFs.bib"
+    "--csl", "~/GitHub/auxDocs/chicago.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
   ]
 
 
@@ -298,8 +298,8 @@ markdowntemplates::kube:
     "--filter", "pandoc-tablenos",
     "--filter", "pandoc-fignos",
     "--filter", "pandoc-citeproc",
-    "--csl", "auxDocs/apa.csl",
-    "--bibliography", "auxDocs/REFs.bib",
+    "--csl", "~/GitHub/auxDocs/apa.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib",
   ]
 
 
@@ -319,8 +319,8 @@ bookdown::epub_book:
     "--filter", "pandoc-tablenos",
     "--filter", "pandoc-fignos",
     "--filter", "pandoc-citeproc",
-    "--csl", "auxDocs/chicago.csl",
-    "--bibliography", "auxDocs/REFs.bib"
+    "--csl", "~/GitHub/auxDocs/chicago.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
   ]
 
 

@@ -94,7 +94,7 @@ quartz.options(family = "ETBembo")
 #'
 options(
     # unnamed.chunk.label = "chunk",
-    bib.loc = "auxDocs/REFs.bib",
+    bib.loc = "~/GitHub/auxDocs/REFs.bib",
     citation_format = "pandoc",
     knitr.table.format = 'pandoc',
     xtable.floating = FALSE,
@@ -106,7 +106,7 @@ options(
         pageLength = 200,
         language = list(search = 'Filter:')
     ),
-    bib.loc = "auxDocs/REFs.bib",
+    bib.loc = "~/GitHub/auxDocs/REFs.bib",
     citation_format = "pandoc",
     knitr.table.format = 'pandoc',
     formatR.arrow = TRUE,

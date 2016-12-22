@@ -88,4 +88,4 @@ hist(p, freq = TRUE, xlab = "x", ylab = "y", col = mypal[16])
 ```
 
 \newpage
-# References`r R.cite_r("../auxDocs/REFs.bib", footnote = TRUE)`
+# References`r R.cite_r("~/GitHub/auxDocs/REFs.bib", footnote = TRUE)`

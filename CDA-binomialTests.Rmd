@@ -408,4 +408,4 @@ $$ \Longrightarrow `r csq1c` + `r csq2c` $$
 $$ \chi^{2} = \textbf{`r chisq`} $$
 
 \newpage
-# References`r R.cite_r(file = "../auxDocs/REFs.bib")`
+# References`r R.cite_r(file = "~/GitHub/auxDocs/REFs.bib")`

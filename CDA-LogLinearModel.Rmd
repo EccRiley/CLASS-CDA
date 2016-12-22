@@ -57,4 +57,4 @@ logmodel <- loglm( ~ ind + response, digits = 4, data = tbl)
 ```
 
 \newpage
-# References`r R.cite_r("../auxDocs/REFs.bib", footnote = TRUE)`
+# References`r R.cite_r("~/GitHub/auxDocs/REFs.bib", footnote = TRUE)`

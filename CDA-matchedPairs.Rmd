@@ -68,4 +68,4 @@ mosaicplot(ftc.a, type = "deviance", las = 2, color = mypal.a75[c(5, 16)])
 ```
 
 \newpage
-# References`r R.cite_r("../auxDocs/REFs.bib", footnote = TRUE)`
+# References`r R.cite_r("~/GitHub/auxDocs/REFs.bib", footnote = TRUE)`
