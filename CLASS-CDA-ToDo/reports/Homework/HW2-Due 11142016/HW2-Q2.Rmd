@@ -1,0 +1,291 @@
+---
+title: "HW-2: Question-2 R Notebook"
+author: "Rachel M. Smith"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+---
+
+```{r setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache=FALSE}
+source("../SETUP.R")
+knitr::opts_chunk$set(
+    tidy = TRUE,
+    echo = FALSE,
+    cache = FALSE,
+    fig.keep = 'high',
+    fig.show = 'hold',
+    results = 'hide',
+    autodep = T,
+    Rplot = TRUE,
+    dev = 'pdf',
+    fig.path = 'graphics/HW2/rplot-q2-',
+    fig.width = 7,
+    fig.height = 7,
+    out.width = "\\linewidth"
+)
+```
+
+# Question-2 \inprogress
+
+`r margin_note("\\textit{Q-2 Data:} \\texttt{'child.sav'} \\& \\texttt{'child2.sav'}")`
+
+```{r q2Dat}
+library(foreign) ## "read.spss()" ##
+dat <- read.spss("data/child.sav", to.data.frame = TRUE)
+dat <- na.omit(dat)
+```
+
+# $2.a.$ Three-Way Loglinear Model^[\inprogress]
+
+$$ \log(\mu_{ijk}) = \lambda + \lambda_{i}^{X} + \lambda_{j}^{Y} + \lambda_{k}^{z} + \lambda_{ij}^{XY} + \lambda_{ik}^{XZ} + \lambda_{jk}^{YZ} + \lambda_{ijk}^{XYZ} $$
+
+<!--`r tufte::newthought("Conduct a loglinear analysis of to examine the three-way contingency table")` ($`ABUSE` × `BOYFRIEND` × `PROGRAM`$) to investigate whether the relationship between abuse (`ABUSE`) and the boyfriend variable (`BOYFRIEND`) differed by program group. Describe whichever counts and percentages are needed to explain the results in the text of your write-up, and give the appropriate statistical values that indicate whether the program made a significant difference in the likelihood that abuse would occur in households with a boyfriend.-->
+
+```{r fig.margin=TRUE}
+library(MASS)
+tbl <- with(dat, {
+    table(abuse, boyfriend, program)
+})
+dimnames(tbl) <- list(Abuse = c("no", "yes"),
+                      Boyfriend = c("no", "yes"),
+                      Program = c("no", "yes")
+                      )
+noquote(tbl)
+
+par(family = 'serif')
+mosaicplot(~ Abuse + Boyfriend + Program, data = tbl, color = TRUE, main = "Abuse x Boyfriend x Program", type = 'deviance')
+```
+
+```{r}
+library(MASS) ## "loglm()" (... and many other useful functions) ##
+llm <- loglm(~ Abuse, 
+             digits = 4, 
+             data = tbl)
+# llm
+llm1 <- loglm(~ Abuse + 
+                  Boyfriend, 
+              digits = 4, 
+              data = tbl)
+# llm1
+llm2 <- loglm(~ Abuse + 
+                  Boyfriend + 
+                  Program, 
+              digits = 4, 
+              data = tbl)
+# llm2
+llm3 <- loglm(~ Abuse:Boyfriend + 
+                  Abuse:Program + 
+                  Boyfriend:Program, 
+              digits = 4, 
+              data = tbl)
+# llm3
+
+# anova(llm, llm1, llm2, llm3)
+# mosaic(llm3, gp=shading_Friendly)
+# llm.s <- step(llm4)
+```
+
+`r tufte::newthought("Three-Way Loglinear Analysis Summary.")` \todo 
+
+-----
+
+```{r llm, results='asis'}
+llm3
+```
+
+\newpage
+## $2.b.$ Logistic Regression with an Interaction Term^[\inprogress]
+
+$$ \ln\left(\frac{\pi}{1 - \pi}\right) = \alpha + \beta X $$
+
+$$ \pi = \frac{e^{\alpha + \beta X}}{1 + e^{\alpha + \beta X}} $$
+
+<!--Test a logistic regression model predicting abuse with an interaction between the boyfriend and program. Do not bother centering the variables for this analysis. Just report the test of the interaction and do not conduct any follow-up analysis.-->
+
+```{r echo=TRUE, results='asis'}
+lgm <- glm(abuse ~ boyfriend + program + boyfriend*program, data = dat, family = "binomial") 
+```
+
+`r tufte::newthought("Logistic regression with interaction summary.")` \todo
+
+```{r echo=FALSE, results='asis'}
+lgm
+```
+
+\newpage
+## `[2.c]`^[\todo]
+
+_`Look back at your findings from the analysis of the contingency table in HW 1 Problem 4. Briefly compare your results from HW 1 to the results from the loglinear analysis and the logistic regression model (no more than 2-3 sentences is needed). Refer to specific values when making your comparisons.`_
+
+\newpage
+## $2.d$% Multiple Logistic Regression^[\inprogress]
+
+
+<!--A second version of the Early Head Start data set has been created (child2.sav) which adds two new variables, the race/ethnicity of the mother (WHITE) and the number of encounters with the child welfare system (WELFARE). Use SPSS, R, or SAS to conduct a multiple logistic regression predicting ABUSE with PROGRAM, BOYFRIEND, WHITE, and WELFARE as predictors. Report and interpret your findings. Be sure to include the regression coefficients, the odds ratios, confidence limits, model fit information, and a pseudo-R2 measure. If you like, you may construct a table and report only significant coefficients in the text of the write-up.-->
+
+```{r resetup, echo=FALSE, results='hide'}
+rm(list = ls()) ## reset workspace for new dataset ##
+source("../SETUP.R") ## still need all of my setup tools though ##
+```
+
+`r tufte::newthought("Data Summary")`
+
+```{r q2dat2, results = 'asis'}
+dat2 <- R.rspss("data/child2.sav", vlabs = TRUE) ## factored variables ##
+    ## (see my "SETUP.R" file for the 'R.rspss()' function definition) ##
+dat2.n <- R.rspss("data/child2.sav", vlabs = FALSE) ## numeric variables ##
+dat2 <- na.omit(dat2)
+dat2.n <- na.omit(dat2.n)
+
+# R.msmm(dat2.n) ## numeric data summary ##
+sapply(dat2[, -4], table) ## summary of factored variables ##
+```
+
+
+-----
+
+`r tufte::newthought("Multiple logistic regression model summary statistics and fit indices")`
+
+```{r lgm, fig.margin=TRUE}
+lgm <- glm(abuse ~ program + boyfriend + white + welfare, 
+           data = dat2.n, 
+           family = binomial(link = "logit")) 
+lgm
+anova(lgm, test = "LRT")
+
+library(popbio)
+logi.hist.plot(dat2.n$welfare, dat2.n$abuse, boxp=FALSE, type="hist", col="gray")
+```
+
+
+```{r}
+## **Null Deviance** ##
+nulldev <- lgm$null.deviance
+nulldev.df <- lgm$df.null
+nulldev.p <- c(round(nulldev, 2), nulldev.df)
+
+## **Residual Deviance** ##
+dev <- lgm$deviance
+dev.df <- lgm$df.residual
+dev.p <- c(round(dev, 2), dev.df)
+
+## **AIC** ##
+aic <- lgm$aic
+aic.p <- c(round(aic, 2), " ")
+
+fits <- as.data.frame(rbind(nulldev.p, dev.p, aic.p))
+rownames(fits) <- c("**Null Deviance**", "**Residual Deviance**", "**AIC**")
+names(fits) <- c("Estimate", "Degrees of Freedom")
+
+CI.b <- confint(lgm, trace = FALSE)
+
+OR <- exp(coef(lgm)) 
+CI <- confint(lgm)
+
+CIb <- cbind(coef(lgm), CI.b)
+CIb.labs <- c("**$\\beta$**", dimnames(confint(lgm))[[2]])
+CIb <- rbind(CIb.labs, round(CIb, 4))
+dimnames(CIb)[[1]][1] <- " "
+dimnames(CIb)[[2]] <- c(" ", "$CI_{\\beta}$", " ")
+
+## odds ratios and 95% CI ##
+ORCI <- exp(cbind(coef(lgm), CI))
+ORCI.labs <- c("**$\\Phi$**", dimnames(confint(lgm))[[2]])
+ORCI <- rbind(ORCI.labs, round(ORCI, 4))
+dimnames(ORCI)[[1]][1] <- " "
+dimnames(ORCI)[[2]] <- c(" ", "$CI_{\\Phi}$", " ")
+
+
+library(lmtest) ## "lrtest()" ##
+lrchsq <- lrtest(lgm)[2, -3]
+lrchsq <- lrchsq[, c(2, 1, 3, 4)]
+names(lrchsq) <- c("Log Likelihood", "_df_", "$\\chi^{2}$", "_p_")
+
+library(modEvA)
+rsq <- RsqGLM(model = lgm) %>% sapply(round, 4)
+pander(rsq)
+rsq.perc <- (rsq[2]*100)
+kable(lrchsq, row.names = FALSE, caption = "Likelihood Ratio $\\chi^{2}$")
+```
+
+`r tufte::newthought("Confidence Intervals (CI) \\& Odds Ratios (OR)")`
+
+```{r lrmresults2, results='asis'}
+kable(CIb, align = rep('r', ncol(CIb)), 
+      caption = "Logistic Regression Coefficients ($\\beta$) \\& 
+      Coresponding Confidence Intervals (_CI_)")
+
+kable(ORCI, align = rep('r', ncol(ORCI)), 
+      caption = "Logistic Regression Odds Ratios ($\\Phi$) \\& 
+      Coresponding Confidence Intervals (_CI_) [note]") %>%
+    add_footnote("Confidence intervals are based on the logistic regression 
+                 model's profiled log-likelihood function, 
+                 rather than the standard errors", 
+                 threeparttable = TRUE)
+```
+
+```{r lrmresults3, results='asis'}
+kable(fits, caption = "Logistic Regression Model Fit Statistics")
+```
+
+
+\newpage
+## $2.e.$ Moderation Analysis^[\inprogress]
+
+
+<!--Use `SPSS` or `SAS` and the Hayes macro or the computer method describe in the handout using R to test whether participation in the Early Head Start program (Z) moderates the association between the number welfare encounters (X) and the probability of abuse. Mean center your variables before computing the interaction variable and testing the model. Include the mother race/ethnicity variable as a covariate in the model. Report and interpret the results. Even if the interaction is only marginally significant, report and interpret simple effects coefficients. A plot of the interaction is optional.-->
+
+```{r results='asis', fig.margin=TRUE}
+dat2.c <- within(dat2.n, {## could also do this with an "apply()" function ##
+    boyfriend <- boyfriend - mean(boyfriend)
+    program <- program - mean(program) 
+    welfare <- welfare - mean(welfare)
+    white <- white - mean(white)
+})
+
+dat2.c$int <- dat2.c$program * dat2.c$boyfriend
+
+library(mediation) ## "mediations()" & "plot.mediations()" ##
+
+set.seed(42) ## i'll explain later ##
+treatment <- c("welfare")
+mediators <- c("program")
+outcome <- c("abuse")
+covariates <- c("white")
+datasets <- list(dat2.c = dat2.c)
+m.model <- mediations(datasets, treatment, mediators, outcome, covariates,
+                      families = c("gaussian", "binomial"), 
+                      interaction = TRUE,
+                      conf.level = .95, sims = 50)
+
+mod.y <- m.model$abuse.welfare.program[["model.y"]]
+mod.m <- m.model$abuse.welfare.program[["model.m"]]
+
+mod.y
+mod.m
+
+plot(m.model, labels = c("Indirect", "Direct", "Total"))
+
+# 
+# mod.diref0 <- m.model$abuse.welfare.program[["z0"]]
+# mod.diref1 <- m.model$abuse.welfare.program[["z1"]]
+# mod.medef0 <- m.model$abuse.welfare.program[["d0"]]
+# mod.medef1 <- m.model$abuse.welfare.program[["d1"]]
+# x <- data.frame(dir = c(mod.diref0, mod.diref1), med = c(mod.medef0, mod.medef1))
+```
+
+
+```{r intEffects, echo=TRUE, results='asis'}
+## "interaction.plot()" from the {stats} package ##
+with(dat2, {
+    interaction.plot(
+    abuse,
+    program,
+    welfare,
+    col = c("darkgray", "#cd0000"),
+    lwd = 2,
+    main = "Interaction Effects",
+    ylab = expression(mu[welfare]),
+    xlab = "Abuse",
+    trace.label = "Program"
+    )
+})
+```

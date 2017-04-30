@@ -1,0 +1,334 @@
+---
+    title: "HW1 - R Notebook"
+author: "Rachel M. Smith"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+---
+
+    -----
+
+
+    ```{r setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE, error=FALSE, cache=FALSE}
+
+source("../SETUP.R")
+
+opts_chunk$set(results = 'asis', fig.keep = 'high', fig.show = 'asis')
+opts_template$set(Echo = list(echo = TRUE, results = 'asis', fig.keep = 'high', fig.show = 'asis'))
+opts_template$set(noEcho = list(echo = FALSE, results = 'asis', fig.keep = 'high', fig.show = 'asis'))
+opts_template$set(hideAll = list(echo = FALSE, results = 'hide', fig.show = 'none'))
+
+panderOptions('digits', 6)
+## overriding the "panderOptions('digits', 2)" `{pkg:pander}`in my
+## `"SETUP.R"` file, since the computations here are tending to
+## result in very small numeric values with more than 2 leading "0"s
+## after the decimal (e.g., "0.00002"), which are printed as "0"
+## when "panderOptions('digits', 2)" is set ##
+
+R.frmt <- function(x, big = ",", dgts = 0, ...) {format(x, big.mark = big, digits = dgts, ...)}
+## wrapper function for format() with the default values for
+## `"big.mark"` and `"digits"` set to my usual preferences of `","`
+## and `"0"`, respectively (at least for printing numbers that should
+## in fact be whole numbers (e.g., sample size)). ##
+
+```
+
+# Question-1
+
+`r tufte::newthought("Known Values:")` The report provides the following information regarding the racial characteristics of drivers involved in traffic stops conducted by the Portland Police Bureau during the data-collection timeframe:
+
+    ```{r Q1, opts.label='noEcho'}
+PAA <- 0.084
+PWH <- 0.916
+n <- 11716
+pi0 <- 0.5
+zCr <- 1.96
+```
+
+Proportion ($p$) of traffic stops involving _African American (AA) drivers_.
+:    $p_{AA} = `r PAA`$.
+
+Proportion ($p$) of traffic stops involving _White American (WH) drivers_.
+:    $p_{WH} = `r PWH`$.
+
+Sample size.
+:    $n = `r R.frmt(n)`$
+
+    `r newthought("Parameters for Hypothesis Testing.")` Given two focal categories for comparison with no predictors nor outcomes identified, the data are assumed to occur _randomly_ along a _Binomial Distribution_`r margin_note("$$ k \\thicksim B(n, p) $$")` `r margin_note("$$ \\binom{n}{k} \\pi^{n-k} = \\frac{n!}{k!(n-k)!}\\pi^{k}(1-\\pi)^{n-k} $$")`. The parameters for hypothesis testing according to this overarching assumption are listed below.
+
+Null Hypothesis ($H_{0}$).
+:    The sample proportion ($p$) is equivalent to the proportion assumed to exist within the population ($\pi_{0}$)
+
+Population Proportion.
+:    $\pi_{0} = 0.5$
+
+
+    ```{r Q1kab1, opts.label='noEcho'}
+data.frame(R.frmt(n), PAA, PWH, pi0, paste(zCr)) %>%
+    kable(col.names = c("N", "$P_{AA}$", "$P_{WH}$", "$\\pi$", "$z_{critical}$"))
+```
+
+
+## $z$-Score Test Computation
+
+```{r Q1ztest, opts.label='noEcho'}
+
+## z-Score Test Computation Breakdown ##
+########################################
+
+## | ------------------------------ | ##
+## |            p-\pi_{0}           | ##
+## | z = -------------------------- | ##
+## |      \sqrt{\pi(1-\pi_{0}) / n} | ##
+## | ------------------------------ | ##
+
+## | ----------------------- | ##
+## |          p - pi0        | ##
+## | z = ------------------- | ##
+## |    sqrt((pi0*(1-pi0)/n) | ##
+## | ----------------------- | ##
+
+## | -------- | ##
+## |      z1  | ##
+## | z = ---- | ##
+## |      z2  | ##
+## | -------- | ##
+
+## | --------------------------- | ##
+## |         0.196 - 0.5         | ##
+## | z = ----------------------- | ##
+## |   sqrt((0.5*(1-0.5)/11716)  | ##
+## | --------------------------- | ##
+
+########################################
+
+p <- PWH
+## focal proportion ##
+z1 <- p - pi0
+## numerator: p-\pi_{0} ##
+z2 <- sqrt((pi0*(1 - pi0))/n)
+## denominator: \sqrt{\pi(1-\pi_{0}) / n} ##
+z <- z1/z2
+## complete computation ##
+
+######################################################
+## z-Score Test Denominator Breakdown (for display) ##
+######################################################
+z2a <- 1 - pi0
+## "(1 - \pi_{0})" ##
+z2b <- pi0*z2a
+## "\pi(1 - \pi_{0})" ##
+z2c <- z2b/n
+## "\pi(1 - \pi_{0}) / n" ##
+z2d <- sqrt(z2c)
+## denominator (i.e., "SE_{\pi}"): "\sqrt{\pi(1 - \pi_{0}) / n}" ##
+
+########################################
+## CI_{z} Computation ##
+########################################
+SEp.z <- z2d
+zCr <- 1.96
+CIu.z <- p + (zCr*SEp.z)
+CIl.z <- p - (zCr*SEp.z)
+CIz <- paste0("CI_{z} = ", round(CIl.z, digits = 2), " < ", p, " < ", round(CIu.z, digits = 2))
+
+```
+
+```{r Q1wald, opts.label='noEcho'}
+## Wald's $z$-Test Computation
+
+## Wald-Test Computation Breakdown ##
+########################################
+
+## | ----------------------- | ##
+## |           p-\pi_{0}     | ##
+## | z = ------------------- | ##
+## |      \sqrt{p(1 - p)/n}  | ##
+## | ----------------------- | ##
+
+## | ------------------------- | ##
+## |            p - pi0        | ##
+## | z.w = ------------------  | ##
+## |       sqrt((p*(1 - p)/n)  | ##
+## | ------------------------- | ##
+
+## | ------------ | ##
+## |        z.w1  | ##
+## | z.w = ------ | ##
+## |        z.w2  | ##
+## | ------------ | ##
+
+## | ---------------------------------- | ##
+## |             0.196 - 0.5            | ##
+## | z.w = ---------------------------- | ##
+## |       sqrt((0.196*(1-0.196)/11716) | ##
+## | ---------------------------------- | ##
+
+########################################
+
+z.w1 <- z1
+## numerator: p-\pi_{0} ##
+z.w2 <- sqrt((p*(1 - p))/n)
+## denominator: \sqrt{p(1 - p)/n} ##
+
+z.w <- z.w1/z.w2
+## complete computation ##
+
+###################################################
+## Wald-Test Denominator Breakdown (for display) ##
+###################################################
+w2a <- 1 - p
+## "(1 - p)" ##
+w2b <- p*w2a
+## "p(1 - p)" ##
+w2c <- w2b/n
+## "p(1 - p)/n" ##
+w2d <- sqrt(w2c)
+## denominator (i.e., "SE_{p}"): "\sqrt{p(1 - p)/n}" ##
+
+########################################
+## CI_{w} Computation ##
+########################################
+SEp.w <- w2d
+CIu.w <- p + (zCr*SEp.w)
+CIl.w <- p - (zCr*SEp.w)
+CIw <- paste0("CI_{z_{Wald}} = ", p, " < \\textbf{", round(z.w, digits = 2), "} < ", round(CIu.w, digits = 2))
+```
+
+`r margin_note("$$ H_{0}: p - \\pi_{0} = 0 $$")`
+
+`r margin_note("$$ H_{1}: p - \\pi_{0} \\neq 0 $$")`
+
+A binomial ($z$-Score) Test was used to determine whether the sample proportions are significantly different from one another. To do so, the proportion of _White drivers_ ($p_{WH} = `r PWH`$) was first substracted from the _Null Hypothesis ($H_{0}$) proportion_ ($\pi_{0} = 0.5$). The _Null Hypothesis Proportion_ was then further used to compute the standard error of the $z$-Score Test's estimate ($SE_{\pi}$). Given $\pi_{0} = `r pi0`$, dividing the value of $p_{WH} - \pi_{0}$ by $SE_{\pi}$ ( $\sqrt{\pi_{0}(1-\pi_{0})/n}$ ) indicates that the difference between the sample's proportions is _**`r z`**_. These calculations are provided below.
+
+`r margin_note("$$ z = \\frac{p - \\pi_{0}}{SE_{\\pi}} $$")`
+
+`r margin_note("$$ SE_{\\pi} = \\sqrt{\\frac{\\pi_{0}(1-\\pi_{0})}{n}} $$")`
+
+$$ z = \frac{`r PWH` - `r pi0`}{\sqrt{\frac{`r pi0`(1-`r pi0`)}{`r n`}}} \Rightarrow \frac{`r z1`}{\sqrt{\frac{`r pi0`(`r z2a`)}{`r n`}}} \Rightarrow \frac{`r z1`}{\sqrt{\frac{`r z2b`}{`r n`}}} \Rightarrow \frac{`r z1`}{\sqrt{`r round(as.integer(z2c), 2)`}} \Rightarrow \frac{`r z1`}{`r z2`} \Longrightarrow $$
+
+    $$ z = \textbf{`r z`} $$
+
+    `r newthought("$z$-Score Test Confidence Interval ($CI_{z}$).")` The confidence interval for the above-computed _z_-score test statistic ($z = `r z`$) is calculated using the observed proportion ($p$) of traffic stops involving _White (WH) drivers_ ($p_{WH} = `r PWH`$) _plus and minus_ the product of the critical value for _z_ ($z_{critical}$) at the conventional $95\%$ confidence level and the standard error of the _z_-score test estimate ($SE_{\pi}$).<!--r margin_note("Note: In the calculations below, the lower $CI$ level is denoted as '$CI_{z}^{-}$', and the upper $CI$ level as $CI_{z}^{+}$]")-->
+
+    `r margin_note("$$ CI_{z} = p \\pm (z_{critical})(SE_{\\pi}) $$")`
+
+$$ LCL_{z} = p - (`r zCr`)(`r SEp.z`) \Rightarrow p - `r zCr*SEp.z` \Longrightarrow \textbf{`r p - (zCr*SEp.z)`} $$
+
+    $$ UCL_{z} = p + (`r zCr`)(`r SEp.z`) \Rightarrow p + `r zCr*SEp.z` \Longrightarrow \textbf{`r p + (zCr*SEp.z)`} $$
+
+    $$ CI_{z} = \textbf{`r round(CIl.z, digits = 2)`} < p < \textbf{`r round(CIu.z, digits = 2)`} $$
+
+    `r margin_note("$p = 0.916$")`
+
+`r newthought("$z$-Score Test Margin in Error ($ME_{z}$)")`. A margin of error for the $z$-Test Score was calculated using the one-half ($1/2$) the difference of the upper confidence level ($UCL$) from the lower confidence level ($LCL$), multiplied by $100$.`r margin_note("$$ ME_{z} = (\\frac{CI_{z}^{+} - CI_{z}^{-}}{2})(100) $$")`
+
+$$ ME_{z} = \frac{(`r CIl.z` - `r CIu.z`)}{2}(100) \Rightarrow \frac{(`r CIl.z - CIu.z`)}{2}(100) \Rightarrow (`r (CIl.z - CIu.z)/2`)(100) \Rightarrow $$
+
+    $$ ME_{z} = \textbf{`r (CIl.z - CIu.z)/2*100`} $$
+
+
+    ```{r Q1plots, opts.label='noEcho', eval=FALSE}
+CIz <- paste0("$CI_{z} = ", round(CIl.z, digits = 2), " < **", p, "** < ", round(CIu.z, digits = 2), "$")
+
+db <- dbinom(x = 0:n, size = n, prob = pi0)
+pdb <- cumsum(dbinom(x = 0:n, size = n, prob = pi0))
+dat <- data.frame(db, pdb)
+plot(dat[, 2], dat[, 1], type = 'l')
+cdb <- cumsum(dbinom(x = 0:n, size = n, prob = pi0)) ## same as pbinom(...) ##
+plot(cdb, type = 'l', xlab = expression(italic(n == 11716)), ylab = expression(italic(P(Y == K))), main = expression(paste('Cumulative Probability at  ', italic(pi == 0.5))), col = pal_my[5])
+
+
+plot(cdb, type = 'l', xaxt = 'n', xlab = expression(italic(n == 11716)), ylab = expression(italic(P(Y == K))), main = expression(paste('Cumulative Probability at  ', italic(pi == 0.5))), col = pal_my[5])
+```
+
+\newpage
+
+`r margin_note("$$ z = \\frac{p - \\pi_{0}}{SE_{\\pi}} $$")`
+
+`r margin_note("$$ H_{0}: p - \\pi_{0} = 0 $$")`
+
+`r margin_note("$$ H_{1}: p - \\pi_{0} \\neq 0 $$")`
+
+A binomal test was used to test whether there was a significant difference between traffic stops involve White drivers and those involving African American drivers. Of the `r R.frmt(n)` cases of traffic stops involving White or African American drivers, $`r PWH`\%$ involved White drivers, while $`r PAA` \%$ involved African American drivers. The difference score was computed as $z = `r z`$, with the $95\%$ score confidence intervals, $CIs = `r round(CIl.z, digits = 2)`, `r round(CIu.z, digits = 2)`$, not including the null value of equal proportions ($\pi_{0} = `r pi0`$), indicating that the a larger proportion of White drivers were involved in traffic stops than would be expected by chance alone. The margin of error for these data was $`r (CIl.z - CIu.z)/2*100`\%$.
+```{r Q1Amisc}
+Wh.d <- rbinom(n, 1, PWH)
+table(Wh.d) %>%
+    kable(caption = "Simulated Data of Expected Proportion (based on population proportion of White drivers in Portland, OR) of Traffic Stops involving White Drivers", col.names = c("Traffic Stop Involved White Driver (0 = 'No'; 1 = 'Yes')", "Frequency"))
+barplot(table(Wh), names.arg = labs, ylab = "Count", family = "sans", font.main = 1, col = pal_my[16], border = pal_my[18], main = "Observed Sample Proportions", sub = expression(H[1]:~~p - pi[0] != 0), cex.sub = 1.5, cex.main = 1.5)
+
+AA.d <- rbinom(n, 1, PAA)
+```
+
+
+```{r plot_mosaic}
+# USE THIS FOR Q3:
+
+dat2 <- rbinom(n, 1, 1 - EAA)
+dat2 <- sort(dat2)
+dat$exp <- factor(dat2, labels = c("African American", "White"), ordered = FALSE)
+labs <- c("African American Drivers", "White Drivers")
+
+barplot(table(dat2), names.arg = labs, ylab = "Count", family = "sans", font.main = 1, col = pal_my[2], border = pal_my[18], main = "Expected Frequencies", sub = expression(H[0]:~~p - pi[0] == 0), cex.sub = 1.5, cex.main = 1.5)
+
+tbl <- table(dat$exp, dat$driver)
+tbl
+
+
+library(vcd)
+
+dimnames(tbl) <- list(Expected = c("AA", "WH"), Observed = c("AA", "WH"))
+
+assocplot(tbl, col = pal_my.a[c(5, 16)])# is sufficient, main gives the title, and gp=shading_hcl and gp_args changes the cutoffs for #different shades, because in our case, the full table would be gray given the higher default cutoffs for colors
+mosaicplot(tbl, main = "Reuters Poll Data", color = pal_my.a[c(16, 5)], type = "deviance", family = "ETBembo")
+
+```
+
+# Q3 Without `NAs`
+
+```{r}
+#par(family = "ETBembo", font.main = 2, font.sub = 3, cex.lab = 0.75)
+
+sort(table(dat2$ped)) %>% ## see {dplyr} package ##
+    barplot(main = "Frequency Counts per Pedestrian Race\n(sorted from least-to-most)", col = grad(1:nlevels(dat2$ped), p = mag), family = "ETBembo", font.main = 3, cex.lab = 0.75)
+as.data.frame(table(dat2$ped)) %>%
+    kable(caption = "Factor Levels and Corresponding Frequency Counts for Pedestrians")
+
+sort(table(dat2$offense)) %>% ## see {dplyr} package ##
+    barplot(main = "Frequency Counts per Pedestrian Offense\n(sorted from least-to-most)", col = grad(1:nlevels(dat2$offense), p = grblues2), family = "ETBembo", font.main = 3, font.sub = 3, cex.lab = 0.75)
+as.data.frame(table(dat2$offense)) %>%
+    kable(caption = "Factor Levels and Corresponding Frequency Counts for Offenses")
+
+```
+
+`r tufte::newthought("Pedestrian Race-by-Offense Tabulation and Visualization")`
+
+```{r}
+tbl <- ftable(dat2$ped, dat2$offense)
+tbl
+
+# library(vcd)
+# labs.p <- c("AA", "AS", "HI", "NV", "WH")
+# labs.o <- c("NA", "Major", "Minor")
+# dimnames(tbl) <- list(Race = paste(levels(dat2$ped)), Offense = paste(labs.o))
+# mosaic(t(tbl))
+```
+
+`r tufte::newthought("Contingency Table and Group Comparisons via Pearson $\\chi^{2}$")`
+
+
+```{r results='asis'}
+tbl.df <- as.data.frame(tbl)
+names(tbl.df) <- c("Race", "Offense", "Freq")
+# mosaicplot(formula = Freq ~ Race + Offense, dat2a = tbl.df, main = "Pedestrian Race x Offense", type = "deviance", family = "ETBembo", las = 2, cex.axis = 0.5)
+
+
+xtbl <- xtabs(Freq ~ Offense + Race, data = tbl.df, sparse = TRUE, subset = NULL, na.action = NULL)
+xtbl.m <- as.matrix(xtbl)
+xsq <- chisq.test(xtbl.m)
+
+library(vcd)
+mosaic(Freq ~ Offense + Race, data = tbl.df, shade = TRUE)
+```
+
+
+\newpage
+# References`r R.cite_r(file = "~/GitHub/auxDocs/REFs.bib")`

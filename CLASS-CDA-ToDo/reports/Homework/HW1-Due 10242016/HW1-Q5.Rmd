@@ -1,0 +1,237 @@
+---
+title: "HW1 - R Notebook"
+author: "Rachel M. Smith"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+---
+
+-----
+
+\newpage
+# Question-$1$
+
+```{r setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE, error=FALSE, cache=FALSE}
+source("../SETUP.R")
+###################################################################
+### MAP (see 'StatDataAnalyses.Rmd' for full map creation code) ###
+map <- read.csv("data/usmap.csv")
+states = read.csv("data/states_new.csv",header = T,row.names = 1)
+#states = read.csv("data/states_new072016_1.csv",header = T,row.names = 1)
+states <- data.frame(state = rownames(states), states)
+####################################
+### STATE CENTROIDS (for adding state abbr. labels) ###
+snames <- aggregate(cbind(long, lat) ~ id, data = map, FUN = function(x)mean(range(x)))
+states <- merge(snames,states, by.x = "id", by.y = "state")
+##########################
+states[10,2] <- 1841536
+states[19,2] <- 706827
+states[2,2] <- -1344021
+states[2,3] <- -1974685
+states[37,2] <- 181757
+states[24,2] <- 400430
+states[23,2] <- 1264168
+states[23,3] <- -92122
+states[13,2] <- -1174084
+states[13,3] <- -0
+states[5,2] <- -1750000
+states[12,2] <- -350000
+states[12,3] <- -2010000
+states[21,3] <- -343925
+states[21,2] <- 1955994
+states[22,2] <- 2230000
+states[7,3] <- -6
+states[31,2] <- 2120364
+states[31,3] <- -255347
+states[30,3] <- 209979
+states[46,3] <- 309355
+states[8,3] <- -362274
+states[47,2] <- 1881512
+states[18,2] <- 1354662
+states[49,2] <- 1657769
+states[49,3] <- -520174
+states[41,2] <- 1770243
+states[41,3] <- -1015010
+states[20,3] <- 497611
+###################################################################
+### BASE MAP PLOT (using ggplot2) ###
+gg <- ggplot()
+gg <- gg + geom_map(data = map, map = map,
+                    aes(x = long, y = lat, map_id = id, group = group),
+                    fill = "transparent", color = pal_my[19], size = 0.15) + thm_cl_tft() ## no state labels in the base plot because i'll need to map the label colors in each map created later to a color scale appropriate for each variable ##
+# gg + geom_text(data = states, aes(long, lat, label = ST, colour = ST,fontface = "bold"), size = rel(2.75)) + scale_colour_manual(values = mpal(states), na.value = pal_my[2],guide = FALSE) ## map with labels (colour mapped to state name) ##
+# gg + geom_map(data = states, map = map, aes(map_id = id, fill = ST)) + geom_text(data = states, aes(long, lat, label = ST, fontface = "bold"), size = rel(2.75)) + scale_fill_manual(values = mpal(states, alpha = 0.35), na.value = pal_my[2],guide = FALSE) ## map with labels (fill mapped to state name) ##
+
+
+##############################################################
+### FACTORS
+
+
+states$Int_f <- factor(states$Interviewed,levels = c(2,1,0),ordered = T,labels = c("Interviewed", "Not Interviewed", "No Standards"))
+states$InterviewDate <- as.Date(states$InterviewDate, origin = "1899-12-30") ## SEE `?as.Date` FOR EXPLAINATION OF DATE ORIGINS ACCROSS DIFFERENT PLATFORMS (IN THIS CASE, THE ORIGINAL DATASET WAS CREATED USING EXCEL ON A WINDOWS PC, WHICH HAS AN ORIGIN DATE OF "1899-12-30"). ##
+
+states <- within(states, {
+    Q3bF <- factor(Q3b, levels = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11), labels = c("(No Standards)", "Never", "As Needed", "Triennially", "Biennially", "Annually", "Quarterly", "Bimonthly", "Monthly", "Daily", "Other"))
+    Q3cF <- factor(Q3c, levels = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11), labels = c("(No Standards)", "Never", "As Needed", "Triennially", "Biennially", "Annually", "Quarterly", "Bimonthly", "Monthly", "Daily", "Other"))
+    Q4aF <- factor(Q4a, levels = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11), labels = c("(No Standards)", "Never", "As Needed", "Triennially", "Biennially", "Annually", "Quarterly", "Bimonthly", "Monthly", "Daily", "Other"))
+    Q9aF <- factor(Q9a, levels = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11), labels = c("(No Standards)", "Never", "As Needed", "Triennially", "Biennially", "Annually", "Quarterly", "Bimonthly", "Monthly", "Daily", "Other"))
+    Q0F <- factor(Q0, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    Q4bF <- factor(Q4b, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    Q4cF <- factor(Q4c, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    Q4dF <- factor(Q4d, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    Q5F <- factor(Q5, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    Q6F <- factor(Q6, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    stF <- factor(Standards, levels = c(2, 1, 0), labels = c("Yes", "In Development", "No Standards"))
+    Q0aF <- factor(Q0a, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    Q7F <- factor(Q7, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    Q8F <- factor(Q8, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    Q9F <- factor(Q9, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    Q9cF <- factor(Q9c, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    Q9dF <- factor(Q9d, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+})
+
+states <- droplevels(states)
+attach(states) ## STATES IS NOW A PART OF THE `search()` PATH, SO NO LONGER HAVE TO SPECIFY "states$..." WHEN REFERRING TO SPECIFIC VARIABLES WITHIN THE DATASET ##
+
+## INTERVIWED STATUS ##
+tblI <- data.frame(table(Int_f))
+names(tblI) <- c("Interviewed", "n")
+
+####################################################################
+## STANDARDS Y/N ##
+tblS <- data.frame(table(stF))
+names(tblS) <- c("Current Standards Exist", "n")
+
+### STANDARDS COMMITTEE Y/N ###
+
+tblq0a <- data.frame(table(Q0aF))
+names(tblq0a) <- c("Standards Committee Exists", "n")
+
+### FEEDBACK MECHANISMS Y/N ###
+
+tblq7 <- data.frame(table(Q7F))
+names(tblq7) <- c("Feedback Mechanisms Exist", "n")
+
+### GENDER INCLUSIVE STANDARDS Y/N ###
+
+tblq8 <- data.frame(table(Q8F))
+names(tblq8) <- c("Gender Inclusive Standards", "n")
+
+### REVISIONS PROCESSES IN PLACE Y/N ###
+
+tblq9 <- data.frame(table(Q9F))
+names(tblq9) <- c("Revisions Processes Exist", "n")
+
+### EVALS FOR REVISIONS Y/N ###
+
+tblq9c <- data.frame(table(Q9cF))
+names(tblq9c) <- c("Standards Revisions are Informed by Program Evaluations", "n")
+
+### RESEARCH IN REVISIONS Y/N ###
+
+tblq9d <- data.frame(table(Q9dF))
+names(tblq9d) <- c("Research Information is Used in Standards Revisions", "n")
+
+stdstbls <- cbind(tblq0a, tblq7, tblq8, tblq9, tblq9c, tblq9d)
+names(stdstbls) <- c(" ", "Standards Committee Exists", " ", "Feedback Mechanisms Exist", " ", "Gender Inclusive Standards", " ", "Revisions Processes Exist", " ", "Standards Revisions are Informed by Program Evaluations", " ", "Research Information is Used in Standards Revisions")
+nums <- sapply(stdstbls, is.numeric)
+stdstbls <- stdstbls[, nums]
+row.names(stdstbls) <- c("Yes", "No", "(No Standards)")
+stdstbls <- t(stdstbls)
+####################################################################
+## MONITORING Y/N ##
+tblm <- data.frame(table(Q0F))
+names(tblm) <- c("Monitors BIPs' Compliance with Standards", "n")
+
+### SITE VISITS ###
+tblq4b <- data.frame(table(Q4bF))
+names(tblq4b) <- c("Site Visits Conducted", "n")
+
+### REPRECUSSIONS ###
+tblq4c <- data.frame(table(Q4bF))
+names(tblq4c) <- c("Reprecussions Exist", "n")
+
+### BIP ENDORSEMENT Y/N ###
+tblq4d <- data.frame(table(Q4dF))
+names(tblq4d) <- c("BIP Endorsement", "n")
+
+### BARRIERS Y/N ###
+tblq5 <- data.frame(table(Q5F))
+names(tblq5) <- c("Compliance Barriers have been Identified", "n")
+
+### COMPLIANCE DATA Y/N ###
+tblq6 <- data.frame(table(Q6F))
+names(tblq6) <- c("Compliance Data are Kept", "n")
+
+montbls <- cbind(tblm, tblq4b, tblq4c, tblq4d, tblq5, tblq6)
+names(montbls) <- c(" ", "Monitors BIPs' Compliance with Standards", " ", "Site Visits Conducted", " ", "Reprecussions Exist", " ", "BIP Endorsement", " ", "Compliance Barriers have been Identified", " ", "Compliance Data are Kept")
+nums <- sapply(montbls, is.numeric)
+montbls <- montbls[, nums]
+row.names(montbls) <- c("Yes", "No", "(No Standards)")
+montbls <- t(montbls)
+
+
+####################################################################
+####################################################################
+
+detach(states)
+
+```
+
+The data for the remaing sets of analyses are from a national telephone interview study of batterer intervention program (BIP) standards advisory and compliance monitoring committees. Respondents were asked a series of questions varying in structure from _open-ended_ to simple _yes-or-no_. These analyses will concern concern the discrete data collected in response to the following interview questions:
+
+> Does your organization have methods for assessing programs’ feedback about the standards?
+> Do the standards apply to programs designed for all genders?
+> Are there processes in place to revise the standards?
+> > Is there a process for informing revisions through program evaluations and needs assessments
+> > Is research information utilized in revising the standards?
+
+The primary interest for the below analyses relate to an overarching effort to implement and sustain effective and appropriate anti-violence intervention strategies among female-identified perpetrators of same-sex violence. The above listed questions provide dichotomous (`0 = No`; `1 = Yes`) indicators of responding states' current organizational and ideological capacities for such intervention strategies. 
+
+```{r echo=FALSE, results='hide'}
+n = 49
+ns = 38
+Q8y <- 27
+pt1 <- R.binom_test(p = Q8y, N = ns, pi0 = 0.5)
+```
+```{r opts.label='kab'}
+kable(pt1, caption = paste0("1-sample proportions test without continuity correction: \\textit{", Q8y, " out of ", n, "}"), col.names = c("$H_{1}$", "$\\pi_{0}$", "$df$", "$p$", "$\\chi_{2}$", "_p-value_", "CI"), format.args = list(digits = 2))
+```
+
+# Question-$5$
+
+A Pearson chi-square ($\chi^2$) test was conducted to determine whether there was a significant difference between trafficthe number of states with gender-inclusive BIP standards and those with BIP standards specific only to male-identified perpetrators. Given that no precedent currently exists for gener inclusivity in U.S. states' BIP standards, the binomial test was conducted using $0.5$ as the Null Hypothesis proportion. Of the $`r ns`$ interviewed states with BIP stamdards, `r Q8y` have indicated that their standards are gender-inclusive. The computed difference, $\chi^{2}(1) = `r pt$statistic`$, was larger than the critical value for the two-tailed $1 - df$ test ($3.84$). These findings suggest that a significant difference exists between the number of states with gender-inclusive BIP standards compared with the number of states without gender-inclusive standards.
+
+# Question-$6$
+
+```{r}
+tbl <- ftable(states$Q8F, states$Q9F)
+tbl.df <- as.data.frame(tbl)
+names(tbl.df) <- c("Gender", "Revisions", "Freq")
+# mosaicplot(formula = Freq ~ Race + Offense, data = tbl.df, main = "Pedestrian Race x Offense", type = "deviance", family = "ETBembo", las = 2, cex.axis = 0.5)
+
+xtbl <- xtabs(Freq ~ Gender + Revisions, data = tbl.df, sparse = TRUE, subset = NULL, na.action = NULL)
+xtbl.m <- as.matrix(xtbl)
+xsq <- chisq.test(xtbl.m)
+
+library(vcd)
+mosaic(Freq ~ Gender + Revisions, data = tbl.df)
+
+
+library(descr)
+
+ctab <- CrossTable(tbl.df$Race, tbl.df$Offense,
+                   digits = list(expected = 3, prop = 3, percent = 3, others = 3),
+                   expected = F,
+                   prop.r = F, prop.c = F, prop.t = F, prop.chisq = F, 
+                   chisq = T, fisher = F, mcnemar = F,
+                   dnn = c("Race", "Frequency of Stops"), cell.layout = F,
+                   row.labels = T,
+                   total.r = T, total.c = T,
+                   xlab = expression(italic("Frequency of Stops")),
+                   ylab = expression(italic("Race")))
+
+# ctab$chisq.corr[[3]] <- round(ctab$chisq.corr[[3]], 2)
+assocstats(tbl)
+```
+A Pearson chi-squared test was used to investigate whether states with gender-inclusive standards as compared with states with gender non-inclusive standards were more likely to have revisions processes in place versus not. The difference was significant, $\chi^2(1) = 55.345, p < 0.001$.
+
+

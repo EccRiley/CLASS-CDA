@@ -1,0 +1,107 @@
+---
+title: "Categorical Data Analysis: Homework 1"
+author: "Original content by [**Jason Newsom, Ph.D.**](http://web.pdx.edu/~newsomj/cdaclass/).  
+
+Sidenotes containing mathematical notations, R-Code \\& Rmarkdown formatting by [**Rachel Smith, M.S.**](http://web.pdx.edu/~rms7)"
+date: "Due 24 October 2016"
+---
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE, error=FALSE, cache=FALSE}
+source("../SETUP.R")
+```
+
+-----
+
+# Instructions
+
+`r newthought("For all questions:")` Your answers should be in your own words and most answers should be approximately one paragraph, _and ..._
+
+- Show your work or include a copy of the output, whichever is relevant.
+- Type your answers in report form, as if you were describing results in a published study.
+- Include the relevant descriptive and statistical values in your write-up (e.g., _proportions_, _chi-squared_).
+
+
+\newpage
+# Question-1
+
+Below is a summary of some data provided in a \rhref{http://www.portlandoregon.gov/police/article/481668}{2014 report} from the Portland police related to racial profiling in traffic stops. To simplify, _the frequencies below use only data from African American and White drivers or pedestrians_.
+
+- **(A)** The observed proportions (P$()$) for traffic stops are `r PAA` for African American drivers ($AA$)`r tufte::margin_note(paste0("$P(AA)=", PAA, "$ ($", PAAperc, "\\%$)"))` and `r PWH` for White drivers ($WH$)`r tufte::margin_note(paste0("$P(WH)=", PWH, "$ ($", PWHperc, "\\%$)"))`, and the sample size is `r N1prnt`.
+    - Compute the **binomial test** (**z-test for proportions**)`r margin_note("\textbf{Z-Test for Differences Between 2 Proportions:} $z=\\frac{p-\\pi_{0}}{\\sqrt{\\frac{p(1-p)}{n}}}$")`, the **confidence limits**, and the **margin of error** _by hand_.`r margin_note("\\textbf{Binomial Probablity Distribution:} $\\binom{n}{k} \\pi^{n-k} = \\frac{n!}{k!(n-k)!}\\pi^{k}(1-\\pi)^{n-k}$")`
+    - Specify which _type of test_ and _confidence limits_ you used.
+    - Use _`r pr.test`_ as the _test proportion_.
+    - Report and interpret your findings in terms of the research problem.
+
+```{r echo=FALSE}
+R.frmt <- function(x, big = ",", dgts = 0, ...) {format(x, big.mark = big, digits = dgts, ...)}
+N1 <- 11769
+N1prnt <- R.frmt(N1)
+PAA <- 0.084
+PWH <- 0.916
+PAAperc <- PAA*95
+PWHperc <- PWH*95
+NAA <- round(PAA*N1, 0)
+NAAprnt <- R.frmt(PAA*N1)
+NAA2 <- 985
+NWH2 <- 10782
+NWH2prnt <- R.frmt(NWH2)
+NWH <- round(PWH*N1, 0)
+NWHprnt <- R.frmt(PWH*N1)
+pr.test <- 0.5
+```
+
+
+- **(B)** For the same data, compute a **_Pearson_ $\chi^2$ test** _by hand_, also assuming an equal null frequency for the two groups.
+    - The corresponding frequencies are `r NAA2` African American drivers and `r NWH2prnt` White drivers.
+    - Report and interpret your findings in terms of the research problem.
+
+\newpage
+# Question-2
+
+Based results from the same report, I have created a data set and input statements (race.sav, race.sps, race.`R`, race.sas), available at the \rhref{http://web.pdx.edu/~newsomj/data.htm}{data page}. Use `SPSS`, `R`, or `SAS` to compute the binomial test to determine whether there was a significantly higher proportion of African American drivers stopped by the police than the benchmark proportion of drivers.
+
+- **(A)** Compute the **95\% confidence interval**.
+    - Be sure to specify the type of test and confidence limits you used.
+- **(B)** The variable of interest is called DRIVER. The report uses the proportion of injury accidents as one possible benchmark to determine the base rate (null hypothesis proportion) of African American vs. White drivers on the road. According to the report, the benchmark proportion to use for African Americans involved in injury accidents is `.080389769` (out of only African American and White drivers in injury accidents).
+    - Report and interpret your findings in terms of the research problem (you are welcome to cut and paste material from your earlier answer for this question).
+
+\newpage
+# Question-3
+
+A second data set (`race2.sav`), which concerns police stops of pedestrians, is available at the data page) and is derived from the same report. There are five race categories (African American, Asian, Hispanic, Native American, White) and two categories of reasons given for the stop (major offense, minor offense).^[\scriptsize{\textbf{"Major" offenses} include drug offenses, open alcohol container, and violent crimes.\\\textbf{"Minor" offenses} include jaywalking or other minor infractions.}]
+
+- **(A)** _Use `SPSS`, `R`, or `SAS`_ to compare the five racial groups with **_Pearson_ $\chi^2$** to see if there are group differences in the number of pedestrian stops. (You will not nee the offense variable for this problem.) What is problematic about this comparison?
+- **(B)** Because they are the same analysis, provide just one write-up for parts `B` and `C`.
+    - Conduct a **_2 × 2_ $\chi^2$ _analysis_** _by hand_ to check whether there is a significant difference among African American as compared to White pedestrians in whether they are stopped for a major vs. a minor offense.
+    - Please show your work.
+- **(C)** _Using `SPSS`, `R`, or `SAS`_, conduct a **_2 × 2_ $\chi^2$ _analysis_** to check whether there is a significant difference among African American as compared to White pedestrians in whether they were stopped for a major vs. a minor offense.
+    - Show how to obtain the phi statistic, the relative risk ratio, and the odds ratio by hand.
+    - Interpret all of your results (**_percentages_**, **_Pearson_ $\chi^2$**, **$\phi$**, **_odds ratio_**, and **_relative risk ratio_**) in terms of the research problem.
+
+\newpage
+# Question-4
+
+The data for this problem come from a randomized experiment investigating the effects of Early Head Start, a preschool program for ages 0 to 3, on child maltreatment (conducted by Professor Beth Green at Portland State). I have created a data set and input statements (`child.sav`, `child.sps`, `child.R`, `child.sas`), \rurl{http://web.pdx.edu/~newsomj/data.htm}. In earlier analyses I found that there was a marginally significant difference between whether there was any report of abuse (_`ABUSE`_) according to whether or not the mother had a boyfriend who was not the biological father (_`BOYFRIEND`_).
+
+- Investigate whether the program (_`PROGRAM`_) was able to reduce or eliminate this marginal difference by conducting the most appropriate significance test of a three-way contingency table for these data.
+- Present two **two-way tables** (_\rtt{ABUSE × BOYFRIEND}_), one for the _control group_ and one for the _program group_, that include both the **counts** and **percentages**.
+- Describe whichever counts and percentages needed to explain the results in the text of your write-up and give the appropriate statistical values that indicate whether the program made a significant difference in the likelihood that abuse would occur in households with a boyfriend.
+
+\newpage
+
+`r newthought("Use your own data set for \\texttt{Problems 5 and 6}.")` In addition to your results paragraph for each, please add a one-paragraph (**no more!**) description of your study design, sample, and pertinent measures. Choose research questions that are of interest to you—your results do not need to be significant. `r margin_note("Please let me know if you need help finding an appropriate data set, variables, or research question.")`
+
+# Question-5
+
+Choose a binary variable to examine the difference in proportions using a binomial test using whatever test proportion is most appropriate in your case.
+
+- Include the **95\% confidence limits**, and specify which type of test and confidence limits you used.
+- Report and interpret your findings in terms of the research problem.
+
+\newpage
+# Question-6
+
+Choose two categorical variables and test an interesting hypothesis about their relationship or group differences using a **Pearson $\chi^2$ for a `2 × 2` or `I × J` table**.
+
+- Include a table of the counts and percentages in addition to your write-up.
+- Obtain and interpret the **phi statistic**, the **relative risk ratio**, and the **odds ratio** in addition to the results of the **Pearson $\chi^2$** test.

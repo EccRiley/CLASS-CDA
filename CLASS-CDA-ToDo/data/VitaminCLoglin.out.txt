@@ -1,0 +1,256 @@
+ > 
+> ################################
+> ### Example: Vitamin C & Friench skiiers
+> ### Lesson 5: LOGLIN() & GLM() functions
+> ### Related: See VitaminC.R in Lesson 3
+> #################################
+> 
+> ### Here is one way to read the data vector of values with labels for the table
+> ski<-matrix(c(31, 17, 109, 122), ncol=2, dimnames=list(Treatment=c("Placebo", "VitaminC"), Cold=c("Cold", "NoCold")))
+> ski
+          Cold
+Treatment  Cold NoCold
+  Placebo    31    109
+  VitaminC   17    122
+> 
+> ### Here is how we did this in Lesson 3, for more details see VitaminC.R
+> ### Pearson's Chi-squared test  with Yates' continuity correction
+> result<-chisq.test(ski)
+> result
+
+	Pearson's Chi-squared test with Yates' continuity correction
+
+data:  ski 
+X-squared = 4.1407, df = 1, p-value = 0.04186
+
+> 
+> 
+> ####################################################################
+> ################ VIA LOGLIN() ###########################################
+> 
+> ### Fitting 2-way log-linear model of independence
+> ### using the table structure and loglin() function; this is similar to CATMOD in SAS
+> 
+> ##first check if the data are in the table format
+> is.table(ski)
+[1] FALSE
+> 
+> ## if not make them to be the table with 
+> ski<-as.table(ski)
+> 
+> 
+> ## fit the model
+> ## list(1,2) indicates that we are fitting the two margins independently 
+> ## fit=TRUE and param=TRUE, say that we want have the fitted values of the cells and the estimated model parameters returned
+> ## for other options see R help, e.g., type the ?loglin in the prompt
+> ski.ind<-loglin(ski, list(1, 2), fit=TRUE, param=TRUE)
+2 iterations: deviation 0 
+> ski.ind
+$lrt
+[1] 4.871697
+
+$pearson
+[1] 4.811413
+
+$df
+[1] 1
+
+$margin
+$margin[[1]]
+[1] "Treatment"
+
+$margin[[2]]
+[1] "Cold"
+
+
+$fit
+          Cold
+Treatment  Cold      NoCold   
+  Placebo   24.08602 115.91398
+  VitaminC  23.91398 115.08602
+
+$param
+$param$"(Intercept)"
+[1] 3.963656
+
+$param$Treatment
+     Placebo     VitaminC 
+ 0.003584245 -0.003584245 
+
+$param$Cold
+      Cold     NoCold 
+-0.7856083  0.7856083 
+
+
+> 
+> ## get the p-value; note that this output is the same as the chi-squared test WITHOUT Yates' continuity correction.
+> 1-pchisq(ski.ind$lrt, ski.ind$df)
+[1] 0.02730064
+> 
+> 
+> #### Fitting 2-way saturated log-linear model
+> ### using the table structure and loglin() function; this is similar to CATMOD in SAS
+> ski.sat<-loglin(ski, list(c(1, 2)), fit=TRUE, param=TRUE)
+2 iterations: deviation 0 
+> ### notice the zero value for LRT, and the PERFECT fit!!!
+> ski.sat
+$lrt
+[1] 0
+
+$pearson
+[1] 0
+
+$df
+[1] 0
+
+$margin
+$margin[[1]]
+[1] "Treatment" "Cold"     
+
+
+$fit
+          Cold
+Treatment  Cold NoCold
+  Placebo   31  109   
+  VitaminC  17  122   
+
+$param
+$param$"(Intercept)"
+[1] 3.940642
+
+$param$Treatment
+   Placebo   VitaminC 
+ 0.1220252 -0.1220252 
+
+$param$Cold
+      Cold     NoCold 
+-0.8070421  0.8070421 
+
+$param$Treatment.Cold
+          Cold
+Treatment        Cold     NoCold
+  Placebo   0.1783618 -0.1783618
+  VitaminC -0.1783618  0.1783618
+
+
+> 1-pchisq(ski.sat$lrt, ski.sat$df)
+[1] NaN
+Warning message: 
+NaNs produced in: pchisq(q, df, lower.tail, log.p) 
+> 
+> 
+> ####################################################################
+> ################ VIA GLM() ###########################################
+> ### Fitting 2-way log-linear model of independence 
+> ### using the database structure and glm() function; this is similar to GENMOD in SAS
+> 
+> ### first we must make the data to be in a data frame format
+> ski.data<-as.data.frame(ski)
+> ski.data
+  Treatment   Cold Freq
+1   Placebo   Cold   31
+2  VitaminC   Cold   17
+3   Placebo NoCold  109
+4  VitaminC NoCold  122
+> 
+> ### using the glm() to fit the loglinear model is similar to fitting a regression model but the trick is in specifying what the correct response, and the family of distributions (i.e., sampling scheme!) 
+> ### we need to specify the response that we are modeling which are the cell counts; ski.data$Freq
+> ## this line: ski.data$Treatment+ski.data$Cold, specifies that we have two main effects, and no interaction term
+> ### we need to specify that sampling distribution, that is for log-linear models when modeling the counts we assume the most general random mechanism of Poisson sampling: family=poinsson(). This assures that errors follow Poisson model AND that we are modeling "log" of the response that is of our counts.
+> 
+> ski.ind<-glm(ski.data$Freq~ski.data$Treatment+ski.data$Cold, family=poisson())
+> ski.ind
+
+Call:  glm(formula = ski.data$Freq ~ ski.data$Treatment + ski.data$Cold,      family = poisson()) 
+
+Coefficients:
+               (Intercept)  ski.data$TreatmentVitaminC         ski.data$ColdNoCold  
+                  3.181632                   -0.007168                    1.571217  
+
+Degrees of Freedom: 3 Total (i.e. Null);  1 Residual
+Null Deviance:	    135.5 
+Residual Deviance: 4.872 	AIC: 34 
+> summary(ski.ind)
+
+Call:
+glm(formula = ski.data$Freq ~ ski.data$Treatment + ski.data$Cold, 
+    family = poisson())
+
+Deviance Residuals: 
+      1        2        3        4  
+ 1.3484  -1.4918  -0.6487   0.6382  
+
+Coefficients:
+                            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)                 3.181632   0.156179  20.372   <2e-16 ***
+ski.data$TreatmentVitaminC -0.007168   0.119738  -0.060    0.952    
+ski.data$ColdNoCold         1.571217   0.158626   9.905   <2e-16 ***
+---
+Signif. codes:  0 `***' 0.001 `**' 0.01 `*' 0.05 `.' 0.1 ` ' 1 
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 135.4675  on 3  degrees of freedom
+Residual deviance:   4.8717  on 1  degrees of freedom
+AIC: 34.004
+
+Number of Fisher Scoring iterations: 4
+
+> anova(ski.ind)
+Analysis of Deviance Table
+
+Model: poisson, link: log
+
+Response: ski.data$Freq
+
+Terms added sequentially (first to last)
+
+
+                   Df Deviance Resid. Df Resid. Dev
+NULL                                   3    135.468
+ski.data$Treatment  1    0.004         2    135.464
+ski.data$Cold       1  130.592         1      4.872
+> fits<-fitted(ski.ind)
+> resids <- residuals(ski.ind,type="pearson")
+> h <- lm.influence(ski.ind)$hat
+> adjresids <- resids/sqrt(1-h)
+> round(cbind(ski.data$Freq,fits,adjresids),2)
+        fits adjresids
+1  31  24.09      2.19
+2  17  23.91     -2.19
+3 109 115.91     -2.19
+4 122 115.09      2.19
+> 
+> 
+> #### Fitting 2-way saturated log-linear model
+> #### using the database structure and glm() function; this is similar to GENMOD in SAS
+> ### Notice now that we have an interaction term in the model: ski.data$Treatment*ski.data$Cold
+> ski.sat<-glm(ski.data$Freq~ski.data$Treatment*ski.data$Cold, family=poisson())
+> ski.sat
+
+Call:  glm(formula = ski.data$Freq ~ ski.data$Treatment * ski.data$Cold,      family = poisson()) 
+
+Coefficients:
+                                   (Intercept)                      ski.data$TreatmentVitaminC  
+                                        3.4340                                         -0.6008  
+                           ski.data$ColdNoCold  ski.data$TreatmentVitaminC:ski.data$ColdNoCold  
+                                        1.2574                                          0.7134  
+
+Degrees of Freedom: 3 Total (i.e. Null);  0 Residual
+Null Deviance:	    135.5 
+Residual Deviance: 2.22e-16 	AIC: 31.13 
+> anova(ski.sat)
+Analysis of Deviance Table
+
+Model: poisson, link: log
+
+Response: ski.data$Freq
+
+Terms added sequentially (first to last)
+
+
+                                 Df Deviance Resid. Df Resid. Dev
+NULL                                                 3    135.468
+ski.data$Treatment                1    0.004         2    135.464
+ski.data$Cold                     1  130.592         1      4.872
+ski.data$Treatment:ski.data$Cold  1    4.872         0  2.220e-16

@@ -1,0 +1,696 @@
+---
+title: "Class Notes: Categorical Data Analysis (CDA)"
+author: "Riley Smith"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+url: "web.pdx.edu/~newsomj/cdaclass"
+---
+
+```{r setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache=FALSE}
+source("../SETUP.R")
+knitr::opts_chunk$set(
+    tidy = TRUE,
+    echo = TRUE,
+    cache = FALSE,
+    fig.keep = 'high',
+    fig.show = 'asis',
+    results = 'asis',
+    autodep = T,
+    Rplot = TRUE,
+    dev = 'pdf',
+    fig.path = 'graphics/rplot_',
+    fig.width = 7,
+    fig.height = 7,
+    out.width = "\\linewidth"
+    )
+```
+
+
+# Week 1. (26 September 2016)
+
+# What is a **Categorical Variable**?
+
+- **@stevens1946theory's Classifications**: _Levels of Measurement_
+    - Nominal
+    - Ordinal
+    - Interval
+    - Ratio
+
+## Distinguishing **Discrete** \& **Continuous** Variables
+
+
+<!--| Type of Dependent Variable | Level of Measurement | General Statistical Class | Example Statistical Procedures
+| :----- | :----- | :----- | :-----
+| Discrete | | |
+| Continuous | | |-->
+
+
+`r newthought("Impacts of Type of Dependent Variable.")` Influence on distributions and corresponding assumptions. From there, the distinction impacts all other statistical decisions in a given analysis.
+
+
+
+`r newthought("Impacts of decisions for how to treat discrete variables.")` Can (latent) psychological constructs be measured/evaluated on continuous scales? There is enough extant evidence indicating that if our ordered variable has $\geq 5$ categories, it can be treated as continuous with acceptable levels of statistical accuracy.
+
+
+`r newthought("To collapse or not to collapse.")` Only when distinctions between discrete values are not informative to the analysis. There are possibilities of increased risk of Types I and II errors in the analysis when otehrwise continuous variables are artificially dichotomized. However, there are circumstances where it makes sense, particularly in describing the data at discrete levels of an otherwise continuous variables. `r tufte::margin_note("\\textit{Basically: collapsing continuous variables into discrete/binary classes is damaging and risky due to the potential loss of statistical power and information.}")`
+
+
+# **Probability Theory**, **Sampling**, \& **Distributions**
+
+_Probability ($P(x)$)_ is particularly important with respect to _binomial sampling distribution_ issues in CDA.
+
+\textsc{Event.}
+:    An _event_ is the 'something' that is predicted to happen or not happen. Its a class of possible outcomes that are grouped together, and so is formally called an _event Class_.
+
+\textsc{trials.}
+:    _Trials_ are tests of an event's probability. An _outcome_ is the observation of an event in a given trial, as it relates to the probability being tested.
+
+\textsc{And Probability.}
+: `[???]`
+
+\textsc{Joint Probability.}
+:    Two probabilities multiplied together.
+
+
+\textsc{Sample Space.}
+:    All possible outcomes of an event happening.
+
+
+
+
+`r newthought("Notation.")` **`[TODO]`**.
+
+\textsc{Probability that an event does occur.}
+:    $P(A)$
+
+\textsc{Probability that an event does \textit{not} occur.}
+:    $P(\textasciitilde A)$
+
+
+\textsc{Factorial Notation.}
+:    $x!$
+\textsc{Event Class.}
+:    $K$
+
+\textsc{Union.}
+:    $\cup$
+
+
+\textsc{Intersection.}
+:    $\cap$
+
+
+`r newthought("The Binomial Coefficient.")` 3 Parameters: $K$ = the _event_ being predicted, $N$ = the number of _trials_, \& $p$ = the probability of $K$ occurring given $N$ trials. `r margin_note("\\textsc{Assumption:} the value of $p$ is fixed across all \\textit{trials}")`.
+
+
+`r newthought("Probability Mass Function")`
+
+```{r eval=F}
+
+binum <- function(n, k){
+     kf <- sapply(k, factorial)
+     nf <- factorial(n)
+     m <- function(x, n) {n - x}
+     nk <- sapply(k, m, n = n)
+     nkf <- sapply(nk, factorial)
+     kfnkf <- kf*nkf
+     p <- nf/kfnkf
+}
+n <- 5
+k <- c(0, 1, 2, 3, 4, 5)
+# p <- binum(n, k)
+binum(n, k)
+p.df1 <- data.frame(n = rep(5, length(k)), k = k, p = p)
+palette(pal_my); par(mypar)
+hist(p, freq = FALSE, col = 5, border = 18, xlab = ' ', cex.lab = 0.5,
+cex.axis = 0.5, main = ' ', family = "ETBembo", breaks = seq_along(p))
+lines(density(p), col = 17, lwd = 2)
+```
+
+\newpage
+
+# Week 2. (03 October 2016) - 3 Approaches to Binary Variable Analysis
+
+# Proportions \& Distributions
+
+Have to decide on the magnitude of the difference relative to the spread of the distribution. We use the information about the variability within the sample to guess about the variability in the distrbution.
+
+# Binomial Test
+
+Subtract a proportion in our sample $p$ from the _Null Hypothesis_ ($H_0$) that the proportion expected if there is no difference between "yes" and "no" ($\pi_{0}$).
+
+`r newthought("\\textbf{z}-Test for the Differences Between Two Proportions")`
+
+$$ z = \frac{p-\pi_{0}}{\sqrt{\frac{p(1-p)}{n}}}, $$
+
+\small{\textit{where the denominator is the standard error of the estimate ($SE$).`r tufte::margin_note("$$ SE_{p} = \\sqrt{\\frac{p(1-p)}{n}}$$")` Because the standard error is in standard deviation ($SD$) units we take the square root ($\sqrt{}$), and then we divide it by $n$.}}
+
+
+`r newthought("The z-test thus parrallels the single-sample t-test")`. `r tufte::margin_note("$T = \\frac{(\\hat{Y}-\\mu)}{\\sqrt{\\frac{s^{2}}{n}}}$")` Using the sampling proportion is not the best method to use with small samples.
+
+# Likelihood Ratio ($G^{2}$)
+
+When we square the **z-values** in the **normal distribution**, we get the $\chi^{2}$.
+
+$$ \binom{n}{k} \pi^{n-k} = \frac{n!}{k!(n-k)!}\pi^{k}(1-\pi)^{n-k} $$
+
+`r tufte::margin_note("$p = \\pi_{0}$ and $k = n\\pi_{0}$ for $L_{0}$, and $p$ and $np$ for $L_{1}$.")`
+
+-----
+
+## Example Computations
+
+1. [2016 Polling data](http://projects.fivethirtyeight.com/2016-election-forecast/?ex_cid=rrpromo)
+
+Here we are taking one of the favorability proportions (i.e. "sucess proportions") and comparing it to the _Null Hypothesis_ ($H_{0}$) represented by $\pi_{0}$ (i.e., 0.50).
+
+
+```{r}
+n <- 1231
+
+zp <- .55 ## 55% Clinton favorability ("p") ##
+zpi <- .50 ## Null Hypothesis difference between samples in the population "\pi_{0}" ##
+
+z1 <- zp - zpi ## numerator: p-\pi_{0} ##
+
+z2a <- 1-zpi ## "1-\pi_{0}" ##
+z2b <- zpi*z2a ## "\pi(1-\pi_{0})" ##
+z2c <- z2b/n ## "\pi(1-\pi_{0}) / n" ##
+z2 <- sqrt(z2c) ## denominator: "\sqrt{\pi(1-\pi_{0}) / n}" ##
+
+
+zscore <- z1/z2 ##
+##      p-\pi_{0}        ##
+## --------------------  ##
+## (\sqrt{\pi(1-\pi_{0}) / n})  ##
+
+zscore
+```
+
+2. Lower and Upper Confidence Limits
+
+Confidence limits are calculated by the favorability proportion ($p$) $\pm$ the $z_{critical}$ value multiplied by the standard error of the estimate ($SE_{\pi}$).
+
+`r tufte::margin_note("$CI = p \\pm (z_{critical})(SE_{\\pi})$")`
+
+
+```{r}
+zcr <- 1.96
+SEa <- 1-zp
+SEb <- zp*SEa
+SEc <- SEb/n
+SE <- sqrt(SEc)
+
+LCL <- .55 - (zcr)*(SE)
+UCL <- .55 + (zcr)*(SE)
+```
+
+
+# Goodness-of-Fit Tesets ($\chi^{2}$)
+
+`r tufte::margin_note("$\\chi^{2} = \\Sigma \\frac{(O_{i}-E{i})^{2}}{E_{i}}$")`
+
+Evaluate the observed $\chi^{2}$ value to the $\chi^{2}$ distribution ($f_{k}(x)$).
+
+```{r}
+Oc <- 677
+Ot <- 554
+```
+
+The $\chi^{2}$ test's flexibility allows for additional comparison analyses. The Likelihood Ratio $\chi^{2}$ is similar to the pearson $\chi^{2}$.
+
+# Maximum Likelihood Estimation (MLE)
+
+`r newthought("Binomial Probability Estimation")`
+
+$$ P(Y = k; n, \pi) = \binom{n}{k}\pi^{k}(1-\pi)^{n-k} $$
+
+For _MLE_, the first term on the right side of the _binomial coefficient_[^$\binom{n}{k}$] is ignored, as it does not inform the estimation of $\pi$, which is what _MLE_ is interested in finding. The rest of the right side of the _binomial estimation_ is the _"kernel"_ in _MLE_.
+
+```{r fig.fullwidth=TRUE, Rplot=TRUE}
+par(family = "ETBembo")
+eq.pbn <- expression(paste("P(", Y == k, "; n,", pi, ") = ", bgroup("(", atop(n, x), ")"), pi^k, " (", 1 - pi^{n - k}, ")"))
+## eq.pbn = Binomial Probability Equation (see above) ##
+
+x5 <- for (n in 0:5) choose(n, k = 0:n) ## n = 10 ##
+x10 <- seq(1:10) ## n = 10 ##
+x100 <- seq(1:100) ## n = 100 ##
+
+ppi <- 0.5
+
+nk <- c(5, 10, 100)
+
+
+## SOURCE: http://www.ics.uci.edu/~staceyah/111-202/discussion/Prob_Distns.html ##
+
+x1 <- matrix(c(0:5, dbinom(0:5, 5, 0.5)), ncol = 2,
+             dimnames = list(NULL, c("n", "P")))
+h.bn <- function(n, p, ...) {## plots a relative frequency histogram of the binomial distribution ##
+        k <- 0:n
+        p <- dbinom(k, n, p)
+        names(p) <- as.character(0:n)
+}
+
+h.bn(5, 0.5)
+
+```
+
+\todo `Expected from probability distribution, observed, obviously, from our data.`
+
+\todo `_Surface_ highest point `[...]`. Increases the likelihood that the sample matches the population.`
+
+```{r fig.margin=TRUE}
+clinton <- c(22, 40, 11, 33, 27, 30, 25, 25, 20, 19, 44, 27, 28, 30, 34, 24, 28, 29, 31, 19, 24, 29, 33, 32, 25)
+k <- clinton
+n <- 50
+p <- k/n
+
+p
+
+ll <- function(p) sum(dbinom(k, n, p, log = TRUE))
+p.sq <- seq(0.01, 0.99, 0.01)
+p.sql <- sapply(p.sq,ll)
+
+par(family = "ETBembo", pch = 20);
+plot(p.sq, p.sql, type = "l", xlab = "x", ylab = "y", main = "CDF - Hillary Clinton")
+hist(p, freq = TRUE, xlab = "x", ylab = "y", col = pal_my[16])
+```
+
+\newpage
+
+# \todo{Week 3. (10 October 2016)}
+
+$$ RR = \frac{\frac{n_{2+}}{n_{++}}}{\frac{n_{2+}}{n_{++}}} $$
+
+$$ OR = \frac{n_{11}n_{22}}{n_{21}n_{12}} $$
+
+\newpage
+# Week 4. (17 October 2016) - 3 Approaches to Binary Variable Analysis
+
+
+# Categorical  Data Vis - Mosaic plots^[_See **reuters.R**`]
+
+Extension of a (stacked) bar plots. Useful for conveynig categorical descriptive information, particularly with more complicated models.
+
+
+
+#  \todo{Three-Way Contingency Tables}
+
+While the statistical test does not require it, one way to simplify analysis of three-way contingency tables is to think about one dimension as a predictor. This is analogous `ANOVA`.
+
+\todo{See \textit{`z.nb.Rmd`}}
+
+
+`r newthought("Partial Tables")`
+
+**Conditional Proportions:** $p_{ij|k} = \frac{n_{ijk}}{n_{ ++k}}$
+
+**Common Odds Ratio ($\theta$):** Weighted by the levels of $Z$. The common odds ratio reflects the extent to which the levels of $X$ in terms of $Z$ are equal to the levels of $Y$ in terms of $Z$.
+
+$$ \theta_{XY|Z_1} = \frac{odds_{X=1|YZ_{1}}}{odds_{X=0|YZ_{1}}} \Rightarrow \frac{n_{211}/n_{221}}{n_{111}/n_{121}} \Rightarrow \frac{n_{211}n_{221}}{n_{211}n_{121}} \Rightarrow \frac{p_{\bar{X}=1|YZ_{1}}}{p_{\bar{X}=0|YZ_{1}}} $$
+
+In terms of analysis process - probably want to do the _Breslow-Day Test_ first, and then look at potential differences within the cell design (i.e., associations among $X$ and $Y$, not weighted b $Z$).
+
+If the data are sparse, or you have a particularly large number of strata for $Z$ (i.e., $K$ is large), exponential weighted average of the commone odds ratio (Woolf, 1955) is most efficient.
+
+
+# Logistic Regression
+
+`r margin_note("\\textit{Binary Outcome + Binary Predictors}")`
+
+# Equations for Binomial Hypothesis Testing using Loglinear and logistic regression models
+
+## Z-Score
+
+$$ Wald z = \sqrt{Wald \chi^{2}} $$
+
+## Chi-Square
+
+$$ Wald \chi^{2} = \left(\frac{\hat{\beta}}{s_{\hat{\beta}}}\right)^{2} $$
+
+## Regression Coefficient:
+
+$$ \beta\textasteriskcentered = \frac{s_{x}\beta}{\sqrt{\frac{s^{2}_{logit}}{R^{2}}}} $$
+
+## Confidence Interval:
+
+$$ \hat{\beta} \pm (z_{critical})s_{\hat{\beta}}; where z_{critical} = 1.96 when \alpha = 0.5 for a two-tailed test $$
+
+## Odds Ratio:
+
+<!--$$ \Phi = e^{\beta} = \frac{\frac{}{}}{\frac{}{}} $$-->
+
+
+## Log-likelihood Function:
+
+$$ \log(\beta) = \Sigma\{y_{i}\log(\pi_{i}) + (n_{i} - y_{i})\log(1-\pi_{i})} ##
+
+- where \pi_{i} is dependent upon the covariates x_{i} and a vector of p parameters \beta through the \logit transformation.
+
+
+# \textbf{Matched-Pairs} \& \textbf{Within-Subjects} Analysis
+
+Most of the analyses covered thus far fall under what is often referred to as _matched-pairs_ analyses, which examine _non-independent_ (i.e., _dependent_) levels within categories (e.g., dyadic data for romantic couples)`r margin_note("in other words, \\textbf{\\textit{within-subjects analyes}}")`
+
+
+`r newthought("McNemar's $\\chi^{2}$")`
+
+$$ McNemar's \chi^{2} = \frac{n_{21} - }
+
+Can be algebraically given as the difference between the _discordant cells_.`r margin_note("\\textbf{\\textit{Discordant Cells.}} Contingency table cells that reflect non-agreement ($\"no\" = \"yes\"$ or $\"yes\" - \"no\"$)")`
+
+-----
+
+`r newthought("McNemar's $\\chi^{2}$ Example")`
+
+`r margin_note("\\todo{\\textit{Data: \\texttt{'data/dep.sav'}}}")`
+
+```{r mcnemar}
+ddat <- matrix(c(146, 145, 301,
+                 47, 303, 350,
+                 193, 458, 651), nrow = 3, byrow = TRUE)
+## Counts taken from \todo{frequency table analysis} ##
+
+counts <- array(c(146, 155, 47, 303), dim = c(2, 2), dimnames = list(wldep = c("not", "depressed"), w2dep = c("not", "depressed")))
+
+mcnemar.test(counts, correct = FALSE)
+```
+
+## Going Beyond the $2 x 2$ Contingency Table
+
+Once we go beyond $2 x 2$ _contingency table analyses_, there's, obviously, a greater diversity in the types of research questions \& hypotheses we can address/test. Most commonly, we're interested _marginal symmetry_`r margin_note("\\textbf{\\textit{Marginal Symmetry Hypothesis}}")`
+
+
+## Example: Three dimensions`r margin_note("\\todo{\\textit{Data: \\texttt{'data/cnnpoll.sav'}}}")` \todo
+
+
+\newpage
+
+# Week 5. (24 October 2016)
+
+# Natural Logarithms - Rules
+
+`r tufte::newthought("Qutient Rule.")` The log of two products is equal to the log of each of those added together.
+
+$$ log(xy) = log(x) + log(y) $$
+
+`r tufte::newthought("Power Rule.")` The log of some base raised to some power is equal to the power value multiplied at the front of the log of the base value.
+
+$$log(x^{y}) = y log(x) $$
+
+
+# Odds, Log-Odds \& Odds Ratios - Analysis Example
+
+`r tufte::margin_note("Data = reuters.sav")`
+
+## Weighting
+
+The purpose of weighting is adjusting sample marginals to better reflect the population population.
+
+
+## Modeling and Hypothesis Testing
+
+```{r setup, warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, results='hide'}
+source("../SETUP.R")
+```
+
+What we're doing in terms of _Odds_ is related to the marginal proportions.
+
+```{r}
+x.base <- array(c("n11", "n12", "n1+",
+                  "n21", "n22", "n2+",
+                  "n+1", "n+2", "n++"), dim = c(3, 3))
+x <- array(c(491, 629, 1120, 63, 48, 111, 554, 677, 1231), dim = c(3, 3))
+dimnames(x) <- list(Category = c("Party Affiliate", "Independent", "Mc"), Candidate = c("Trump", "Clinton", "Mr"))
+x
+xm <- array(c(x[3], x[6], x[7], x[8], x[9]), dim = c(2, 2))
+xs <- sum(xm)/2
+```
+
+<!--$$ \Theta = \frac{n_{12}} $$-->
+
+```{r}
+
+OR.a <- (x[4]/x[5])
+OR.b <- (x[1]/x[2])
+OR <- OR.a/OR.b
+```
+
+
+The expected value is denoted by $\mu_{ij}$, which is calculated by
+
+$$ n_{`++`}\pi_{1`+`}\pi_{`+`j} $$
+
+Where $\pi_{1+}$ \& $\pi_{+1}$ are the contingency table .
+
+## Independence Model
+
+Can give us the expected values for each cell.
+
+Adding an association term representing the departure of the observed frequencies  to the independence model ($\lambda^{xy}$) creates the saturated model.`r tufte::margin_note("$\\lambda^{xy}$ represents any combination of cells in a contingency table.")` When $\lambda^{xy} = 0$, the independence model hodls true.
+
+`r margin_note("Independence Model:\\\\$$ log(\\mu_{ij} = \\lambda + \\lambda_{i}^{x} + \\lambda_{j}^{y}) $$")`
+
+`r margin_note("Saturated Model:\\\\$$ log(\\mu_{ij} = \\lambda + \\lambda_{i}^{x} + \\lambda_{j}^{y} + \\lambda_{ij}^{xy}) $$")`
+
+```{r}
+library(foreign)
+
+dat <- read.spss("data/reuters.sav", to.data.frame = TRUE)
+
+R.na <- function(x, v = 0){
+    ## x = object to be manipulated,
+    ## v = value to assign to NAs ##
+    x <- ifelse(is.na(x), v, x)
+    return(x)
+}
+
+dat$party <- sapply(dat$party, R.na, v = 99)
+dat$response <- recode_factor(dat$response, "other/no opinion" = NA_character_)
+## see "recode_factor()" in the {dplyr} package ##
+
+dat <- na.omit(dat)
+
+R.msmm(dat[, 2:5])
+
+tbl <- table(dat$ind, dat$response)
+tbl
+
+tbl.df <- as.data.frame(tbl)
+names(tbl.df) <- c("ind", "response", "Freq")
+
+library(MASS)
+llm1 <- loglm(Freq ~ ind + response, data = tbl.df)
+
+dat <- read.spss("data/cnnpoll.sav", to.data.frame = TRUE)
+
+```
+
+
+> Males and females are statistically identical in terms of party association and candidate choice.
+
+Residual is the degree to which the observed values depart from expected.
+
+# Analysis of Ordinal Contingency Tables
+
+`r tufte::margin_note("The basic research question invovled in examining the relationship between two or more ordinal variables is: _'As the levels of $x$ increase, do the levels of $y$ also increase?'_")`
+
+\newpage
+#  Logistic Regression
+
+## Dummy Variables and Interactions
+
+You need as many interaction terms as you have dummy variables.
+
+With dummy variables, we're breaking up a single variable into essentially two variables.
+
+## Mediation Analysis with Logistic Regression
+
+`r tufte::newthought("Odds")`
+
+Odds are technically _ratios of **probabilities**_:
+
+$$ Odds = \frac{p}{(1 - p)} $$
+
+\textsc{Log Odds.}
+:    The **_natural log_** of the odds, also known as a **_logit_**.
+
+$$ \log(Odds) = \logit = \log(\frac{p}{(1 - p)})
+
+`r tufte::newthought("Odds Ratio")`
+
+Odds ratios are actually _ratios of ratios_:
+
+$$ OR = \frac{odds_{1}}{odds_{2}} = \frac{\frac{p_{1}}{(1 - p_{1})}}{\frac{p_{2}}{(1 - p_{2})}} $$
+
+For a given logistic regression model, the odds ratio can be computed from the logistic regression **_coefficient_** ($\beta$):
+
+$$ OR = exp(\beta) $$
+
+`r tufte::newthought("Probability")`
+
+Similarly, probability is computed from a model's logistic regression coefficients
+
+$$ Pr = \frac{exp(\beta_{X})}{(1 + exp(\beta_{X}))}, \textit{Where $\beta_{X}$ is the linear predictor.} $$
+
+\textsc{Indirect Coefficient} ($\beta_{M}$).
+:    Change in $Y$ per unit change in $X$ mediated by changes in $m$.
+
+Indirect Coefficient ($\beta_{M}$) calculation (2 ways):
+
+`r margin_note("Sobel method is to multiply two regression coefficients")`
+$$ \Beta = a*b $$
+
+$$ \Beta = c - c\prime $$
+
+## Bootstraping Mediation and Moderation Analyses
+
+`r margin_note("Hayes' PROCESS")`
+
+In the end, it turns out that the bias-corrected bootstrapping, in _OLS_ (with continuous outcomes), does not do better than "naive", uncorrected, bootstrapping methods - according to recent simulation studies on the topic.
+
+## Using Odds Ratios or Proportion Mediation for the Magnitude of the Indirect Effect
+
+Steer clear of reporting the _proportion mediated indirect effect_ when using OR for logistic regression.
+
+\newpage
+# Diagnostics for Logistic Regression
+
+Diagnostics typically focus on the outliers in your data, if they are present, which is tied to looking at the distribution.
+
+
+## Assumptions
+
+`r tufte::newthought("Independence of Errors/observations")`. Talking about the _conditional distribution after what's left over in the model_ (hence, "errors").
+
+`r tufte::newthought("Correctly Specified Model")`. We can't ever realy have a perfect model - meaning we can't always account for every covariate and our models are always going wrong to a certain degree, especially in applied research. Nonetheless, the model should be considered
+
+`r tufte::newhthought("Correct functional form")`.
+
+`r tufte::newthought("Absence of Multicolinearity")`. _Multicolinearity_ means that we have correlation among predictors in a model, which is generally fine after various corrections, however, when there is dependency among three or more predictors, the _standard errors_ tend to become inflated. `r margin_note("Multicolinearity is likely to occur when \\textit{coding errors} are present, rather than actually consequential co-dependencies among predictors.")`
+
+`r tufte::newthought("Fixed Predictors")`. The response variable in a model is a random variable, while the value of the predictor (e.g., $X$) is fixed such that the value means the same thing in one model as it does in another model. The exception to a fixed predictor may be a situtaion in which there are _fixed "profiles"_ `[...]`, wherein the predictor variable could be treated as a random effect and tested using things like _analysis of variance (ANOVA)_. `r margin_note("Profiles are not very common, but are sometimes used in Agricultural research.")`
+
+`r tufte::newthought("Heteroscedacsticity")`.
+
+`r tufte::newthought("Normality of Errors")`. This is based on the assumption that the errors are normally distributed in the population.
+
+# Absolute level Change vs. Lagged Regression
+
+> What's the average change across the whole sample?
+
+Can think about how an individual changes across time-points.
+
+> Is there a difference between scores at time-2, controlling for the difference at time-1?
+
+Can generalize _ANCOVA_ idea to regression analysis (Lagged Regression Analysis).
+
+- Control for T1 variable by including it in the regression model as a predictor (like any other control/covariate).
+
+- In _ANCOVA_, trying to acccount for/remove differences at T1 to isolate the effect of the predictor over time.
+
+The two approaches don't always lead to the same conclusions, despite both being concerned with the same question.
+    Llord's Paradox
+
+_ANCOVA_ is not trying to account for level differences across time-points.
+    for the most part, the correlation stays about the same so long as the rank order is consistent, but when we start messing with the positioning, the variable loses stability.
+    Can be thought of as _relative change_ lagged regression.
+    Benefit is that it does take into account individual differences at time-1.
+
+Absolute level change is vulnerable to _regression toward the mean_
+    Takes advantage of a random likelihood of similarity among the variables at time-1 when that similarity may not exist and the change over time may in fact be due to chance, whereas the ANCOVA approach examines differences at time-2 according to the underlying correlation structure of the model variables.
+
+Regression coefficient = log(discordant cells)
+    log of discordant cells not equal to log of each person
+
+`r tufte::newthought("Conditional Logistic Model")`
+$$ \logit\[P(Y_{it} = 1)\] = \alpha_{i} + \beta X_{t} $$
+
+`r tufte::newthought("Conditional Regression Coefficient")`
+$$ \beta = \ln\left(\frac{n_{21}}{n_{12}}\right) $$
+
+`r tufte::newthought("Logistic Transformation")`
+$$ P(Y_{it} = 1) = \frac{e^{a_{i}}}{1 + e^{a_{i}}} $$
+
+
+`r tufte::newthought("Generalized Estimating Equations (GEE) Approach")`
+$$ \logit\[P(Y_{it} = 1)\] = \alpha + \beta X_{t} $$
+
+
+# Generalized Linear Models
+
+`r tufte::newthought("Logistic Link Function")`
+$$ \ln\left(\frac{\mu}{1 - \mu}) $$
+
+$$ + $$
+
+`r tufte::newthought("Regression Line Equation")`
+$$ \alpha + \beta X $$
+
+$$ = $$
+
+`r tufte::newthought("The Generalized Linear Model")`
+$$ \ln\left(\frac{\mu}{1 - \mu}) \alpha + \beta X $$
+
+
+## Probit Regression Model
+
+$$ Y^{\textasterickcentered} = \alpha + \beta X $$
+
+$$ OR $$
+
+$$ \eta^{\textasterickcentered} = \alpha + \beta X $$
+
+$$ \Phi^{-1}(\pi) = \frac{}{\sqrt{2\pi\textasterickcentered}}
+
+# Ordinal Regression
+
+$$ \logit\[P(Y\leq j | X)\] = \alpha_{j} + \beta X $$
+
+`r tufte::newthought("Threshold")`
+$$ \alpha_{j - 1} < Y^{\textasterickcentered} < \alpha_{j} $$
+
+`r tufte::newthought("Predicted Probability in Each Category")`
+$$ P(Y \leq j) = \frac{e^{\alpha_{j} + \beta X}}{1 + e^{\alpha_{j} + \beta X}} - \frac{e^{\alpha_{j-1} + \beta X}}{1 + e^{\alpha_{j-1} + \beta X}} $$
+
+\newpage
+
+# Week 10 - Psychometric Issues
+
+# Measurement Development
+
+## Item Response Models
+
+Investigate the properties of a test with multiple items. Can be used for any sorts of measures, typically discussed in terms of binary options (e.g., yes/no, correct/incorrect). Can also be generalized to ordinal items or multi-categorical (nominal) responses.
+
+Compared to CTT, IRT is more focused, obviously, around individual items, and is more formulated around binary response options.
+
+Compared to factor analysis (CTT), the IRT model is interested in how well each item performs in terms of how much it discriminates among respondents (e.g., if all test takers get an item correct, or all incorrect, it is not very informative in terms of discriminating between test takers).
+
+`r tufte::newthought("The IRT Model")`
+
+$$ z = a(\theta - b), $$
+
+\centering{\textit{where $a$ represents the item's discrimination, $\theta$ represents the target latent construct being tested, and $b$ represents the difficulty}}.
+
+`r tufte::newthought("In terms of the Generalized Linear Model")`
+
+$$ Intercept: \alpha = -ab $$
+
+$$ Slop: b = \frac{\alpha}{-a} $$
+
+`r tufte::margin_note("\\textsc{Note:} The negative sign is arbitruary.")`
+
+`r tufte::newthought("IRT Model Estimation")`
+
+Can be estimated in terms of logistic or probit models.
+
+`r tute::newthought("Item Characteristic Curve")`
+
+-----
+
+# Latent Class Analysis
+
+In latent _variable_ model, we're thinking about the latent construct as a continuous variable. In comparison, with latent _class_ analysis, we're looking at the latent construct in terms of discrete categories.`r tufte::margin_note("\\textit{'\\textbf{The latent class measurement model} (without the regression portion) seeks to find some set of mutually exclusive and exhaustive categories that group cases based on a set of observed variables.'} -- Newsom (2016). 'Latent Class Analysis' Handout.")` The categories are not _known classes_, rather the measurement model serves as a mechanism for determining the probability of individuals belonging to discrete classes, which are then defined according to the theory underlying the target latent construct/factor
+
+\newpage
+# References`r R.cite_r("~/GitHub/auxDocs/REFs.bib", footnote = TRUE)`

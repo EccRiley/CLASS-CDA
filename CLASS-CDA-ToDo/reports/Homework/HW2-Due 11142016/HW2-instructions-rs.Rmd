@@ -1,0 +1,50 @@
+# Question-1
+
+_Use the data set from the \rhref{http://www.portlandoregon.gov/police/article/481668}{2014 report from the Portland police related to racial profiling in traffic stops for the questions below}._ `r margin_note("\\textbf{\\color{patriarch}{\\texttt{race2.sav}}}")`
+
+## `[1.a]`
+
+`("Conduct a \textit{\textbf{loglinear analysis} of the $2 × 2$ contingency table}")` to determine whether there is a difference between _African American and White pedestrians_ in whether they were stopped for _a major vs. a minor offense_.^[$`RACE` x `OFFENSE`$]
+- Report and interpret the appropriate percentages and statistical tests in your results.
+
+## `[1.b]`
+
+`("Test a \textbf{logistic regression model}")` using _race to predict traffic stops (major vs. minor offense)_.
+- Report and interpret your findings. Be sure to include the _regression coefficient, the odds ratio, confidence limits, model fit information, and a $pseudo-R^{2}$ measure_.
+
+## `[1.c]`
+
+`("Look back at your findings from the analysis of the contingency table in")` \\textbf{\\color{dkpatriarch}{\\texttt{HW-1 Problem-3c}}}.
+- Briefly **compare your results** from \\textitf{\\color{dkpatriarch}{\\texttt{HW-1 Problem-3c}}} to the results from the loglinear analysis and the logistic regression model^[_no more than 2-3 sentences is needed_]. Refer to specific values when making your comparisons.
+
+-----
+
+# Question-2
+
+_Use the Early Head Start data set for the following problems._ `r margin_note("\\textbf{\\color{patriarch}{\\texttt{child.sav}}}")`
+
+## `[2.a]`
+
+`r tufte::newthought("Conduct a loglinear analysis of to examine the three-way contingency table")` ($`ABUSE` × `BOYFRIEND` × `PROGRAM`$) to investigate whether the program (`PROGRAM`) the relationship between abuse (`ABUSE`) and the boyfriend variable (`BOYFRIEND`) differed by program group. Describe whichever counts and percentages are needed to explain the results in the text of your write-up, and give the appropriate statistical values that indicate whether the program made a significant difference in the likelihood that abuse would occur in households with a boyfriend.
+
+## `[2.b]`
+
+Test a logistic regression model predicting abuse with an interaction between the boyfriend and program. Do not bother centering the variables for this analysis. Just report the test of the interaction and do not conduct any follow-up analysis.
+
+## `[2.c]`
+
+Look back at your findings from the analysis of the contingency table in HW 1 Problem 4. Briefly compare your results from HW 1 to the results from the loglinear analysis and the logistic regression model (no more than 2-3 sentences is needed). Refer to specific values when making your comparisons.
+
+## `[2.d]`
+
+A second version of the Early Head Start data set has been created (child2.sav) which adds two new variables, the race/ethnicity of the mother (WHITE) and the number of encounters with the child welfare system (WELFARE). Use SPSS, R, or SAS to conduct a multiple logistic regression predicting ABUSE with PROGRAM, BOYFRIEND, WHITE, and WELFARE as predictors. Report and interpret your findings. Be sure to include the regression coefficients, the odds ratios, confidence limits, model fit information, and a pseudo-R2 measure. If you like, you may construct a table and report only significant coefficients in the text of the write-up.
+
+## `[2.e]`
+
+Use `SPSS` or `SAS` and the Hayes macro or the computer method describe in the handout using R to test whether participation in the Early Head Start program (Z) moderates the association between the number welfare encounters (X) and the probability of abuse. Mean center your variables before computing the interaction variable and testing the model. Include the mother race/ethnicity variable as a covariate in the model. Report and interpret the results. Even if the interaction is only marginally significant, report and interpret simple effects coefficients. A plot of the interaction is optional.
+
+-----
+
+# Question-3
+
+`r tufte::newthought("Using your own data set")`, test a multiple logistic regression model with at least two predictors in SPSS, R, or SAS. Report and interpret your findings. Be sure to include the regression coefficients, the odds ratios, confidence limits, model fit information, and a pseudo-R2 measure.

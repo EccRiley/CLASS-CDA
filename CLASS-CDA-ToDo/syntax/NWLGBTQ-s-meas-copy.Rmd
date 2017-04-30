@@ -1,0 +1,1407 @@
+---
+title: "NWLGBTQ Research Project.
+
+Measures Evaluation
+
+with Inter-Rater
+
+Reliability  Analysis"
+author: Riley M. Smith
+date: '`r format(Sys.Date(), "%d %B %Y")`'
+---
+
+```{r setup, include=FALSE, cache = FALSE, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+source("../SETUP.R")
+mypal1 <- c(mypal, "#75176b", "#3e3d64")
+knitr::knit_hooks$set(Rplot = function(before, options, envir) { ## SETTING UP A CHUNK HOOK FOR SETTING PLOT PARAMS CORRESPONDING TO '`ggthemes::theme_tufte()`' WHEN USING BASE GRAPHICS ##
+    if (before) {
+        palette(mypal)
+        par(bg = "transparent", font.main = 3, family = "ETBembo", cex = 0.75)
+    }})
+mypar <- c(bg = "transparent", font.main = 3, family = "ETBembo", cex = 0.75)
+opts_chunk$set(cache = FALSE, dev = 'png', dpi = 300, Rplot = TRUE,
+               fig.path = 'graphics/rplot_m_', fig.asp = 1) #out.width = '\\textwidth'
+```
+
+# Evaluated Measures
+
+```{r tblkabs, echo=FALSE, message=FALSE, warning=FALSE, include=FALSE, eval=TRUE, results='hide'}
+setwd("../NWLGBTQ") ## There are a few things I need from my other project folder ##
+source("s-zThesisTbls.R")
+setwd("../CDA") ## Always a good idea to change the WD back to the source doc's directory ##
+```
+
+```{r tblkabs1, results='asis', echo=FALSE}
+kab.meas %>%
+    pandoc.table(row.names = FALSE,
+                 col.names = c("Target Construct", "Measure [note]", "_N~items~_"),
+                 caption = "\nGender-Relevant and
+                            Violence Assessment Measures {#tbl:measures}",
+                 format.args = list(zero.print = ".")) %>% kable() %>%
+    add_footnote("Marked measures were removed from the formal evaluation analysis.",
+                 notation = "alphabet", threeparttable = TRUE)
+```
+
+```{r measVals, results='asis', echo=FALSE}
+kable(kab.meas_valTEX, caption = "\nExisting Validity and Reliability
+    Evidence for Evaluated Measures {#tbl:measVals}", align = rep('c', 12))
+```
+
+# Inductively-Derived Codebook
+
+```{r CODEBOOK, echo=TRUE}
+
+cdbk <- data.frame(items = c("code_1", "code_2", "code_3", "code_4", "code_5",
+"code_6", "code_7", "code_8", "code_9", "code_10", "code_11", "code_12",
+"code_13", "code_14", "code_15", "code_16", "code_17", "code_18", "code_19",
+"code_20", "code_21", "code_22", "code_23", "code_24", "code_25", "code_26",
+"code_27", "code_28", "code_29", "code_30", "code_31", "code_32", "code_33",
+"code_34", "code_35", "code_36", "code_37", "code_38", "code_39", "code_40",
+"code_41", "code_42", "code_43", "code_44", "code_45", "code_46", "code_47",
+"code_48", "code_49", "code_50", "code_51", "code_52", "code_53", "code_54",
+"code_55", "code_56", "code_57", "code_58", "code_59", "code_60", "code_61",
+"code_62", "code_63", "code_64", "code_65", "code_66", "code_67", "code_68",
+"code_69", "code_70", "code_71", "code_72", "code_73", "code_74", "code_75",
+"code_76", "code_77", "code_78", "code_79", "code_80", "code_81", "code_82",
+"code_83", "code_84", "code_85", "code_86", "code_87", "code_88", "code_89",
+"code_90", "code_91", "code_92", "code_93", "code_94", "code_95", "code_96",
+"code_97", "code_98", "code_99", "code_100", "code_101", "code_102",
+"code_103"),
+                    CODES = c("ACCEPTANCE",
+"ADULTHOOD", "AFFECT", "AGE", "ANDROGYNY", "APPEARANCE", "APPEARANCE_CLOTHING",
+"AUTHENTICITY", "BINARY", "BUTCH", "CHANGE", "CHILDHOOD", "CHOICE",
+"CISGENDER", "COMFORT", "COMING_OUT", "COMMUNITY", "COMPLIANCE", "CONFIDENCE",
+"CONFUSION", "CONSISTENCY", "CONTEXT_DEPENDENT", "CULTURE", "DAY_TO_DAY",
+"DOMINANT_CULTURE", "EDUCATING_OTHERS", "EQUITABLE_ROLES", "EXPRESSION",
+"EXTERNAL_INFLUENCE", "FAMILY", "FEMALE", "FEMININITY", "FEMINISM", "FLUIDITY",
+"GENDER", "GENDER_EXPRESSION", "GENDER_IDENTITY", "GENDER_ROLE_ADHERENCE",
+"GENDER_ROLE_ENFORCEMENT", "GENDER_ROLE_STRESS", "GENDER_ROLES",
+"GENDERED_CLOTHING", "GENDERED_LANGUAGE", "HETERONORMATIVITY", "HISTORY",
+"HYPERSEXUALIZED", "IDENTITY", "IDENTITY_FIT", "IDENTITY_POLICING",
+"IDENTITY_WORK", "INCLUSION", "INDEPENDENCE", "INTELLECT", "INTERSECTIONALITY",
+"INTERSECTIONALITYx", "IPV", "LABELS", "LGBTQ_COMMUNITY", "LGBTQ_HISTORY",
+"LOOKING_THE_PART", "MASCULINITY", "MEDIA", "MEDIA_ONLINE_FORUMS",
+"MEDIA_INFLUENCE", "MENTAL_HEALTH", "MINORITY_STRESS", "MISGENDERING",
+"NATURE_OVER_NURTURE", "OTHERS_CONFUSION", "OTHERS_EXPECTATIONS",
+"OTHERS_REACTIONS", "PARENTING", "PERFORMANCE", "PERSONALITY", "PLACE",
+"PRESENTATION", "PRESSURE", "PRIORITY_IDENTITY", "PRIVILEGE", "RACE",
+"RACE_IDENTITY", "RELIGION", "ROLES", "ROMANTIC_LIFE", "SAFETY",
+"SCHOOL_EXPERIENCES", "SELF_PERCEPTION", "SELF_PRESENTATION",
+"SEXUAL_ORIENTATION", "SEXUALITY", "SOCIAL_CHANGE", "SOCIAL_LIFE",
+"SOCIAL_MEDIA", "SOCIAL_SUPPORT", "SPACE", "STEREOTYPING", "SURVIVAL", "TITLE",
+"TWO_SPIRIT", "WITHIN_GROUP_OPPRESSION", "WITHIN_GROUP_STEREOTYPING", "WOMAN",
+"WORK"),
+                    CID = c(1, 2, 3, 6, 7, 8, 11, 13, 14, 15, 16,
+18, 22, 25, 26, 29, 33, 34, 35, 37, 39, 40, 44, 45, 46, 47, 48, 49, 50, 51, 55,
+56, 58, 59, 60, 62, 66, 69, 71, 72, 73, 76, 77, 78, 79, 81, 82, 86, 88, 89, 92,
+93, 94, 95, 99, 103, 104, 106, 108, 109, 111, 113, 117, 118, 119, 122, 125,
+127, 128, 129, 133, 135, 136, 139, 141, 145, 146, 148, 149, 150, 152, 153, 156,
+157, 160, 161, 162, 163, 164, 168, 169, 171, 174, 175, 177, 179, 181, 182, 183,
+184, 185, 186, 187))
+
+rec <- c("1='ACCEPTANCE'; 2='ADULTHOOD'; 3='AFFECT'; 6='AGE';
+    7='ANDROGYNY'; 8='APPEARANCE'; 11='APPEARANCE_CLOTHING';
+	13='AUTHENTICITY'; 14='BINARY'; 15='BUTCH'; 16='CHANGE';
+	18='CHILDHOOD'; 22='CHOICE'; 25='CISGENDER'; 26='COMFORT';
+	29='COMING_OUT'; 33='COMMUNITY'; 34='COMPLIANCE'; 35='CONFIDENCE';
+	37='CONFUSION'; 39='CONSISTENCY'; 40='CONTEXT_DEPENDENT';
+	44='CULTURE'; 45='DAY_TO_DAY'; 46='DOMINANT_CULTURE';
+	47='EDUCATING_OTHERS'; 48='EQUITABLE_ROLES'; 49='EXPRESSION';
+	50='EXTERNAL_INFLUENCE'; 51='FAMILY'; 55='FEMALE'; 56='FEMININITY';
+	58='FEMINISM'; 59='FLUIDITY'; 60='GENDER'; 62='GENDER_EXPRESSION';
+	66='GENDER_IDENTITY'; 69='GENDER_ROLE_ADHERENCE';
+	71='GENDER_ROLE_ENFORCEMENT'; 72='GENDER_ROLE_STRESS';
+	73='GENDER_ROLES'; 76='GENDERED_CLOTHING'; 77='GENDERED_LANGUAGE';
+	78='HETERONORMATIVITY'; 79='HISTORY'; 81='HYPERSEXUALIZED';
+	82='IDENTITY'; 86='IDENTITY_FIT'; 88='IDENTITY_POLICING';
+	89='IDENTITY_WORK'; 92='INCLUSION'; 93='INDEPENDENCE';
+	94='INTELLECT'; 95='INTERSECTIONALITY'; 99='INTERSECTIONALITY_X';
+	103='IPV'; 104='LABELS'; 106='LGBTQ_COMMUNITY'; 108='LGBTQ_HISTORY';
+	109='LOOKING_THE_PART'; 111='MASCULINITY'; 113='MEDIA';
+	117='MEDIA_ONLINE_FORUMS'; 118='MEDIA_INFLUENCE'; 119='MENTAL_HEALTH';
+	122='MINORITY_STRESS'; 125='MISGENDERING'; 127='NATURE_OVER_NURTURE';
+	128='OTHERS_CONFUSION'; 129='OTHERS_EXPECTATIONS';
+	133='OTHERS_REACTIONS'; 135='PARENTING'; 136='PERFORMANCE';
+	139='PERSONALITY'; 141='PLACE'; 145='PRESENTATION'; 146='PRESSURE';
+	148='PRIORITY_IDENTITY'; 149='PRIVILEGE'; 150='RACE'; 152='RACE_IDENTITY';
+	153='RELIGION'; 156='ROLES'; 157='ROMANTIC_LIFE'; 160='SAFETY';
+	161='SCHOOL_EXPERIENCES'; 162='SELF_PERCEPTION'; 163='SELF_PRESENTATION';
+	164='SEXUAL_ORIENTATION'; 168='SEXUALITY'; 169='SOCIAL_CHANGE';
+	171='SOCIAL_LIFE'; 174='SOCIAL_MEDIA'; 175='SOCIAL_SUPPORT'; 177='SPACE';
+	179='STEREOTYPING'; 181='SURVIVAL'; 182='TITLE'; 183='TWO_SPIRIT';
+	184='WITHIN_GROUP_OPPRESSION'; 185='WITHIN_GROUP_STEREOTYPING';
+	186='WOMAN'; 187='WORK'; 0='[z]'")
+
+rec2 <- c("'ACCEPTANCE'=1; 'ADULTHOOD'=2; 'AFFECT'=3; 'AGE'=6;
+'ANDROGYNY'=7; 'APPEARANCE'=8; 'APPEARANCE_CLOTHING'=11;
+'AUTHENTICITY'=13; 'BINARY'=14; 'BUTCH'=15; 'CHANGE'=16; 'CHILDHOOD'=18;
+'CHOICE'=22; 'CISGENDER'=25; 'COMFORT'=26; 'COMING_OUT'=29; 'COMMUNITY'=33;
+'COMPLIANCE'=34; 'CONFIDENCE'=35; 'CONFUSION'=37; 'CONSISTENCY'=39;
+'CONTEXT_DEPENDENT'=40; 'CULTURE'=44; 'DAY_TO_DAY'=45;
+'DOMINANT_CULTURE'=46; 'EDUCATING_OTHERS'=47; 'EQUITABLE_ROLES'=48;
+'EXPRESSION'=49; 'EXTERNAL_INFLUENCE'=50; 'FAMILY'=51; 'FEMALE'=55;
+'FEMININITY'=56; 'FEMINISM'=58; 'FLUIDITY'=59; 'GENDER'=60;
+'GENDER_EXPRESSION'=62; 'GENDER_IDENTITY'=66; 'GENDER_ROLE_ADHERENCE'=69;
+'GENDER_ROLE_ENFORCEMENT'=71; 'GENDER_ROLE_STRESS'=72; 'GENDER_ROLES'=73;
+'GENDERED_CLOTHING'=76; 'GENDERED_LANGUAGE'=77; 'HETERONORMATIVITY'=78;
+'HISTORY'=79; 'HYPERSEXUALIZED'=81; 'IDENTITY'=82; 'IDENTITY_FIT'=86;
+'IDENTITY_POLICING'=88; 'IDENTITY_WORK'=89; 'INCLUSION'=92; 'INDEPENDENCE'=93;
+'INTELLECT'=94; 'INTERSECTIONALITY'=95; 'INTERSECTIONALITY_X'=99;
+'IPV'=103; 'LABELS'=104; 'LGBTQ_COMMUNITY'=106; 'LGBTQ_HISTORY'=108;
+'LOOKING_THE_PART'=109; 'MASCULINITY'=111; 'MEDIA'=113;
+'MEDIA_ONLINE_FORUMS'=117; 'MEDIA_INFLUENCE'=118;
+'MENTAL_HEALTH'=119; 'MINORITY_STRESS'=122; 'MISGENDERING'=125;
+'NATURE_OVER_NURTURE'=127; 'OTHERS_CONFUSION'=128;
+'OTHERS_EXPECTATIONS'=129; 'OTHERS_REACTIONS'=133; 'PARENTING'=135;
+'PERFORMANCE'=136; 'PERSONALITY'=139; 'PLACE'=141; 'PRESENTATION'=145;
+'PRESSURE'=146; 'PRIORITY_IDENTITY'=148; 'PRIVILEGE'=149; 'RACE'=150;
+'RACE_IDENTITY'=152; 'RELIGION'=153; 'ROLES'=156; 'ROMANTIC_LIFE'=157;
+'SAFETY'=160; 'SCHOOL_EXPERIENCES'=161; 'SELF_PERCEPTION'=162;
+'SELF_PRESENTATION'=163; 'SEXUAL_ORIENTATION'=164; 'SEXUALITY'=168;
+'SOCIAL_CHANGE'=169; 'SOCIAL_LIFE'=171; 'SOCIAL_MEDIA'=174; 'SOCIAL_SUPPORT'=175;
+'SPACE'=177; 'STEREOTYPING'=179; 'SURVIVAL'=181; 'TITLE'=182; 'TWO_SPIRIT'=183;
+'WITHIN_GROUP_OPPRESSION'=184; 'WITHIN_GROUP_STEREOTYPING'=185;
+'WOMAN'=186; 'WORK'=187; '[z]'=0")
+
+rec_syn <- c("11=8; 157=171; 182=187; 145=163; 136=109; 135=51;
+    108=106; 117=113; 118=113; 185=184")
+```
+
+
+```{r cdbkReformat, echo = FALSE}
+cdbk2 <- data.frame(cat = c("MS", "MS", "MSxIDxG", "ID", "G", "MSxIDxG",
+"MSxG", "ID", "MSxG", "G", "IDxG", "MSxIDxG", "MSxIDxG", "G", "MSxIDxG",
+"MSxIDxG", "ID", "MS", "MSxID", "IDxG", "G", "MSxIDxG", "G", "MS", "G", "MS",
+"G", "G", "ID", "MSxIDxG", "G", "MSxG", "ID", "G", "MSxID", "MSxIDxG",
+"MSxIDxG", "IDxG", "G", "MS", "MS", "G", "MS", "IDxG", "MS", "MSxIDxG", "IDxG",
+"MS", "MS", "G", "ID", "MSxIDxG", "MS", "IDxG", "MSxG", "ID", "MSxID", "MSxG",
+"ID", "MSxIDxG", "G", "MSxID", "MSxG", "G", "ID", "MSxIDxG", "MS", "ID",
+"MSxIDxG", "IDxG", "MSxIDxG", "G", "MSxID", "ID", "MS", "MSxID", "ID", "MSxID",
+"G", "MSxG", "MS", "MS", "ID", "ID", "MSxIDxG", "ID", "MSxG", "MSxID", "ID",
+"MS", "MS", "MSxID", "MS", "ID", "G", "MS", "MS", "G", "MSxIDxG"),
+CODES = c(newthought('Acceptance'), newthought('Adulthood'), newthought('Affect'), newthought('Age'), newthought('Androgyny'), newthought('Appearance'), newthought('Appearance-clothing'), newthought('Authenticity'), newthought('Binary'), newthought('Butch'), newthought('Change'), newthought('Childhood'), newthought('Choice'), newthought('Cis-gender'), newthought('Comfort'), newthought('Coming out'), newthought('Community'), newthought('Compliance'), newthought('Confidence'), newthought('Confusion'), newthought('Consistency'), newthought('Context Dependent'), newthought('Culture'), newthought('Day-to-day'), newthought('Dominant Culture'), newthought('Educating Others'), newthought('Equitable Roles'), newthought('Expression'), newthought('External Influence'), newthought('Family'), newthought('Female'), newthought('Femininity'), newthought('Feminism'), newthought('Fluidity'), newthought('Gender Expression'), newthought('Gender Identity'), newthought('Gender Role Adherence'), newthought('Gender Role Enforcement'), newthought('Gender Role Stress'), newthought('Gender Roles'), newthought('Gendered Clothing'), newthought('Gendered Language'), newthought('Heteronormativity'), newthought('History'), newthought('Hypersexualized'), newthought('Identity Fit'), newthought('Identity Policing'), newthought('Identity Work'), newthought('Inclusion'), newthought('Independence'), newthought('Intellect'), newthought('Intersectionality-X'), newthought('IPV'), newthought('Labels'), newthought('LGBTQ Community'), newthought('LGBTQ History'), newthought('Looking the Part'), newthought('Masculinity'), newthought('Media Influence'), newthought('Media'), newthought('Media-online Forums'), newthought('Mental Health'), newthought('Misgendering'), newthought('Nature over Nurture'), newthought('Others Confusion'), newthought('Others Expectations'), newthought('Others Reactions'), newthought('Parenting'), newthought('Performance'), newthought('Personality'), newthought('Place'), newthought('Presentation'), newthought('Pressure'), newthought('Priority Identity'), newthought('Privilege'), newthought('Race Identity'), newthought('Race'), newthought('Religion'), newthought('Roles'), newthought('Romantic Life'), newthought('Safety'), newthought('School Experiences'), newthought('Self-perception'), newthought('Self-presentation'), newthought('Sexual Orientation'), newthought('Sexuality'), newthought('Social Change'), newthought('Social Life'), newthought('Social Media'), newthought('Social Support'), newthought('Space'), newthought('Stereotyping'), newthought('Survival'), newthought('Title'), newthought('Two-spirit'), newthought('Within Group Oppression'), newthought('Within Group Stereotyping'), newthought('Woman'), newthought('Work')),
+                   CID = c("1", "2", "3", "6", "7", "8", "11", "13", "14",
+"15", "16", "18", "22", "25", "26", "29", "33", "34", "35", "37", "39", "40",
+"44", "45", "46", "47", "48", "49", "50", "51", "55", "56", "58", "59", "62",
+"66", "69", "71", "72", "73", "76", "77", "78", "79", "81", "86", "88", "89",
+"92", "93", "94", "99", "103", "104", "106", "108", "109", "111", "118", "113",
+"117", "119", "125", "127", "128", "129", "133", "135", "136", "139", "141",
+"145", "146", "148", "149", "152", "150", "153", "156", "157", "160", "161",
+"162", "163", "164", "168", "169", "171", "174", "175", "177", "179", "181",
+"182", "183", "184", "185", "186", "187"))
+```
+
+# Measures Coding (Two Coders)
+
+```{r }
+margin_note("_Thanks to stackoverflow.com user [**A handcart and Mohair**](http://stackoverflow.com/users/1270695/a-handcart-and-mohair) for [**this solution**](http://stackoverflow.com/questions/14872081/adding-a-prefix-to-column-names) to prefixing colnames in matrix objects._")
+```
+
+```{r mc}
+library(stats) ## reshape() ##
+mc <- read.csv("../NWLGBTQ/data/measEval2.csv", header = T)
+
+library(car) ## `'recode()'`
+mc2 <- within(mc, {
+    Rcode1 <- recode(Coder_R_1, rec)
+    Rcode2 <- recode(Coder_R_2, rec)
+    Acode1 <- recode(Coder_A_1, rec)
+    Acode2 <- recode(Coder_A_2, rec)
+})
+# mc2 <- mc2[, c("id", "Item", "Coder_R_1", "Rcode1", "Coder_R_2", "Rcode2", "Coder_A_1", "Acode1", "Coder_A_2", "Acode2")]
+# write.csv(mc, "measEval2_withCodenames.csv")
+# mc2 <- mc[, c("Rcode1", "Rcode2", "Acode1", "Acode2")]
+# write.csv(mc2, "measEval2_codenamesOnly.csv")
+library(tidyr)
+mcR <- mc[, 1:4]
+mcRL <- reshape(mcR, idvar = 'id', varying = list(3:4), direction = "long")
+mcA <- mc[, c(1:2, 5:6)]
+mcAL <- reshape(mcA, idvar = 'id', varying = list(3:4), direction = "long")
+mclong <- cbind(mcRL, mcAL[, 4])
+names(mclong) <- c("id", "item", "time", "CR", "CA")
+mclong <- separate(mclong, item, c("meas", "i"), sep = '_',
+                   remove = FALSE, fill = "right")
+mclong <- within(mclong, {
+    CA.f <- factor(CA, ordered = F, levels = unique(cdbk$CID))
+    CR.f <- factor(CR, ordered = F, levels = unique(cdbk$CID))
+})
+
+R.dich <- function(x, min = 0, values = c(0, 1)) {## Function for dichotomizing
+                                                    ## numeric data ##
+    if (is.numeric(x)) {
+        x[x > min] <- values[2]
+        x[x <=  min] <- values[1]
+    }
+    else
+        stop('x must be numeric')
+    return(x)
+}
+
+R.names <- function(x, dim = 2, str, pl = "A", sep = "_"){ ##Function for
+    ## appending (pl="A") or prepending (pl="P") character string to matrix
+    ## dimnames (defaults to colnames by "dim=2" for rownames, set "dim=1")##
+    if (dim == 2)
+        if (pl == "A")
+            colnames(x) <- paste(str, colnames(x), sep = sep)
+        else if (pl == "P")
+            colnames(x) <- paste(colnames(x), str, sep = sep)
+        else if (dim == 1)
+            if (pl == "A")
+                colnames(x) <- paste(str, colnames(x), sep = sep)
+            else if (pl == "P")
+                rownames(x) <- paste(rownames(x), str, sep = sep)
+            else
+                stop('pl must be either "A" or "P"')
+            else
+                stop('dim must be either "1" or "2"')
+            return(x)
+}
+
+mcft.R <- mclong[,c(3, 8)]
+mcft.R <- as.matrix(ftable(mcft.R, row.vars = 1))
+mcft.R1 <- apply(mcft.R, 2, R.dich)
+mcft.R1 <- mcft.R1[c(1, 4, 3, 7, 10, 2, 6, 5, 8, 9), ]
+mcft.R <- mcft.R[c(1, 4, 3, 7, 10, 2, 6, 5, 8, 9), ]
+mcft.A <- mclong[,c(3, 9)]
+mcft.A <- as.matrix(ftable(mcft.A, row.vars = 1))
+mcft.A1 <- apply(mcft.A, 2, R.dich)
+mcft.A1 <- mcft.A1[c(1, 4, 3, 7, 10, 2, 6, 5, 8, 9), ]
+mcft.A <- mcft.A[c(1, 4, 3, 7, 10, 2, 6, 5, 8, 9), ]
+
+library(Hmisc)
+cAR <- cor(t(mcft.R), t(mcft.A))
+c1 <- cor(t(mcft.R1), t(mcft.A1))
+rownames(c1) <- toupper(rownames(c1))
+colnames(c1) <- toupper(colnames(c1))
+```
+
+# Coding Matrices
+
+## Raw Frequencies of Codes Applied to Each Measure by Each Coder
+
+The below matrices provide the raw frequencies with which each coder applied a given code (rows) to each measure (columns).
+
+```{r mcftkabs11, results='asis'}
+Rkab <- t(mcft.R)
+rownames(Rkab) <- recode(rownames(Rkab), rec)
+kable(Rkab, caption = "Coder-R's Raw Frequencies Coding Matrix",
+    format.args = list(zero.print = "."))
+```
+
+```{r mcftkabs12, results='asis'}
+Akab <- t(mcft.A)
+rownames(Akab) <- recode(rownames(Akab), rec)
+kable(Akab, caption = "Coder-A's Raw Frequencies Coding Matrix {#Akab}",
+    format.args = list(zero.print = "."))
+```
+
+## Dichotomous Frequencies of Codes Applied to Each Measure by Each Coder
+
+The below matrices represent each coder's coding of each measure (columns) according to whether a code (rows) was assigned to that measure (`1=yes; 0=no`).
+
+```{r mcftkabs22, results='asis'}
+R1kab <- t(mcft.R1)
+rownames(R1kab) <- recode(rownames(R1kab), rec)
+kable(R1kab, caption = "Coder-R's Dichotomous Coding Matrix {#R1kab}",
+    format.args = list(zero.print = "."))
+```
+
+```{r mcftkabs21, results='asis'}
+A1kab <- t(mcft.A1)
+rownames(A1kab) <- recode(rownames(A1kab), rec)
+kable(A1kab, caption = "Coder-A's Dichotomous Coding Matrix {#A1kab}",
+    format.args = list(zero.print = "."))
+```
+
+```{r cARkab, results = 'asis', fig.cap = "Distribution of Correlations for Coder-R's and Coder-A's Raw Coding Frequencies", fig.margin = TRUE}
+palette(mypal); par(mypar)
+hist(cAR, freq = FALSE, col = 5, border = 18, xlab = ' ', cex.lab = 0.5,
+cex.axis = 0.5, main = ' ', family = "ETBembo")
+lines(density(cAR), col = 17, lwd = 2)
+
+kable(cAR, caption = "Correlation Matrix for Coder-R and
+    Coder-A Raw Coding Frequencies")
+```
+
+```{r c1kab, results = 'asis', fig.cap = "Distributions of Correlations for Coder-R and Coder-A's Dichotomous Coding", fig.margin = TRUE}
+palette(mypal); par(mypar)
+hist(c1, freq = FALSE, col = 5, border = 18, xlab = ' ', cex.lab = 0.5,
+cex.axis = 0.5, main = ' ', family = "ETBembo")
+lines(density(c1), col = 17, lwd = 2)
+
+kable(c1, caption = "Correlation Matrix for Coder-R and
+    Coder-A Dichotomous Coding Tables")
+```
+
+```{r c1Lattice, Rplot = TRUE, fig.fullwidth  = TRUE, fig.cap = "Visual Representation of Correlation Matrix for Coder-R and Coder-A Dichotomous Coding Tables"}
+library(lattice); par(mypar)
+levelplot(c1, col.regions = grad(1:100, p = whblmg),
+          fontfamily = "ETBembo", xlab = "", ylab = "", cuts = length(c1),
+          at = seq(range(c1)[1], range(c1)[2],
+                   length.out = length(c1)),
+          pretty = T,
+          scales = list(tck = 0.5, fontfamily = "ETBembo", cex = 0.4),
+          colorkey = list(tick.number = 3, tck = 0.25,width = 0.75,
+                          axis.text = list(cex = 0.4, fontfamily = "ETBembo")))
+```
+
+## Kappa Calculations Per Measure
+
+```{r kappa}
+k.bsri <- rbind(mcft.R1[1, ], mcft.A1[1, ])
+rownames(k.bsri) <- c("R", "A")
+k.gemsmw <- rbind(mcft.R1[2, ], mcft.A1[2, ])
+rownames(k.gemsmw) <- c("R", "A")
+k.fis <- rbind(mcft.R1[3, ], mcft.A1[3, ])
+rownames(k.fis) <- c("R", "A")
+k.mrnir <- rbind(mcft.R1[4, ], mcft.A1[4, ])
+rownames(k.mrnir) <- c("R", "A")
+k.sdo <- rbind(mcft.R1[5, ], mcft.A1[5, ])
+rownames(k.sdo) <- c("R", "A")
+k.fgrs <- rbind(mcft.R1[6, ], mcft.A1[6, ])
+rownames(k.fgrs) <- c("R", "A")
+k.mgrs <- rbind(mcft.R1[7, ], mcft.A1[7, ])
+rownames(k.mgrs) <- c("R", "A")
+k.lihs <- rbind(mcft.R1[8, ], mcft.A1[8, ])
+rownames(k.lihs) <- c("R", "A")
+k.oi <- rbind(mcft.R1[9, ], mcft.A1[9, ])
+rownames(k.oi) <- c("R", "A")
+k.scq <- rbind(mcft.R1[10, ], mcft.A1[10, ])
+rownames(k.scq) <- c("R", "A")
+```
+
+-----
+
+_**`R.kappaPB():`** Function for calculating prevalence and bias in a contingency table (for $Kappa (\\Kappa)$/interrater reliability analysis). **x**: matrix object, or other object that can be coerced to a $2x2$ matrix object, containing the contingency table's non-marginal cell values in clockwise order (see details), or a $2x2$ matrix-like (e.g., dataframe, table, etc) object representing the contingency table's non-marginal cells. **n**: total number of ratings in the contingency table. **stat**: character value of length 1 specifying the supplementary statistic(s) to calculate [@sim2005kappa]._ `r margin_note("_**p** = Prevalence, **b** = Bias, **pb** = [DEFAULT] Prevalence and Bias._")`
+
+```{r }
+library(irr)
+R.kappaPB <- function(x, n, stat = "pb"){
+    if (length(x) != 4) {
+        stop('length(x) must equal 4')
+    }
+    if (class(x) != "matrix") {
+        if (class(x) == "data.frame") {
+            x <- matrix(x, 2)
+        }
+        else if (class(x) == "table") {
+            x <- matrix(x, 2)
+        }
+        else if (class(x) == "list") {
+            x <- matrix(x, 2)
+        }
+        else {
+            stop('x must be either a list of length 4 OR a
+			2x2 matrix, table, or dataframe')
+        }
+    }
+    a <- x[1, 1]
+    b <- x[1, 2]
+    c <- x[2, 1]
+    d <- x[2, 2]
+    if (stat == "p") {
+        Prevalence <- (abs(a - d))/n
+        return(Prevalence)
+    }
+    if (stat == "b") {
+        Bias <- (abs(b - c))/n
+        return(Bias)
+    }
+    if (stat == "pb") {
+        p <- (abs(a - d))/n
+        b <- (abs(b - c))/n
+        pb <- list(Prevalence = p, Bias = b)
+        return(pb)
+    }
+}
+```
+
+-----
+
+`r margin_note("_See _?desc::crosstab()_ for more information on the code above and below._")`
+
+```{r }
+library(descr)
+n = 103
+kap1 <- kappa2(t(k.bsri))$value
+ct1 <- crosstab(t(k.bsri)[, 1], t(k.bsri)[, 2], plot = FALSE)$tab
+pb1 <- data.frame(pb1 <- R.kappaPB(ct1, n))
+kap2 <- kappa2(t(k.gemsmw))$value
+ct2 <- crosstab(t(k.gemsmw)[, 1], t(k.gemsmw)[, 2], plot = FALSE)$tab
+pb2 <- data.frame(pb2 <- R.kappaPB(ct2, n))
+kap3 <- kappa2(t(k.fis))$value
+ct3 <- crosstab(t(k.fis)[, 1], t(k.fis)[, 2], plot = FALSE)$tab
+pb3 <- data.frame(pb3 <- R.kappaPB(ct1, n))
+kap4 <- kappa2(t(k.mrnir))$value
+ct4 <- crosstab(t(k.mrnir)[, 1], t(k.mrnir)[, 2], plot = FALSE)$tab
+pb4 <- data.frame(pb4 <- R.kappaPB(ct4, n))
+kap5 <- kappa2(t(k.sdo))$value
+ct5 <- crosstab(t(k.sdo)[, 1], t(k.sdo)[, 2], plot = FALSE)$tab
+pb5 <- data.frame(pb5 <- R.kappaPB(ct5, n))
+kap6 <- kappa2(t(k.fgrs))$value
+ct6 <- crosstab(t(k.fgrs)[, 1], t(k.fgrs)[, 2], plot = FALSE)$tab
+pb6 <- data.frame(pb6 <- R.kappaPB(ct6, n))
+kap7 <- kappa2(t(k.mgrs))$value
+ct7 <- crosstab(t(k.mgrs)[, 1], t(k.mgrs)[, 2], plot = FALSE)$tab
+pb7 <- data.frame(pb7 <- R.kappaPB(ct7, n))
+kap8 <- kappa2(t(k.lihs))$value
+ct8 <- crosstab(t(k.lihs)[, 1], t(k.lihs)[, 2], plot = FALSE)$tab
+pb8 <- data.frame(pb8 <- R.kappaPB(ct8, n))
+kap9 <- kappa2(t(k.oi))$value
+ct9 <- crosstab(t(k.oi)[, 1], t(k.oi)[, 2], plot = FALSE)$tab
+pb9 <- data.frame(pb9 <- R.kappaPB(ct9, n))
+kap10 <- kappa2(t(k.scq))$value
+ct10 <- crosstab(t(k.scq)[, 1], t(k.scq)[, 2], plot = FALSE)$tab
+pb10 <- data.frame(pb10 <- R.kappaPB(ct10, n))
+pb <- data.frame(rbind(pb1, pb2, pb3, pb4, pb5, pb6, pb7, pb8, pb9,
+                       pb10), row.names = c("BSRI", "GEMSMW", "FIS", "MRNIR", "SDO",
+                                            "FGRS", "MGRS", "LIHS", "OI", "SCQ"))
+```
+
+```{r bcodes, results='asis'}
+t.bsri <- data.frame(t(k.bsri))
+t.gemsmw <- data.frame(t(k.gemsmw))
+t.fis <- data.frame(t(k.fis))
+t.mrnir <- data.frame(t(k.mrnir))
+t.sdo <- data.frame(t(k.sdo))
+t.fgrs <- data.frame(t(k.fgrs))
+t.mgrs <- data.frame(t(k.mgrs))
+t.lihs <- data.frame(t(k.lihs))
+t.oi <- data.frame(t(k.oi))
+t.scq <- data.frame(t(k.scq))
+
+R.r2var <- function(x){
+    x$CID <- rownames(x)
+    return(x)
+}
+
+R.idvar <- function(x){
+    x$id <- seq(length(x[,1]))
+    return(x)
+}
+
+t.bsri$Diff <- t.bsri[,1] - t.bsri[,2]
+t.gemsmw$Diff <- t.gemsmw[,1] - t.gemsmw[,2]
+t.fis$Diff <- t.fis[,1] - t.fis[,2]
+t.mrnir$Diff <- t.mrnir[,1] - t.mrnir[,2]
+t.sdo$Diff <- t.sdo[,1] - t.sdo[,2]
+t.fgrs$Diff <- t.fgrs[,1] - t.fgrs[,2]
+t.mgrs$Diff <- t.mgrs[,1] - t.mgrs[,2]
+t.lihs$Diff <- t.lihs[,1] - t.lihs[,2]
+t.oi$Diff <- t.oi[,1] - t.oi[,2]
+t.scq$Diff <- t.scq[,1] - t.scq[,2]
+
+t.bsri <- R.r2var(t.bsri)
+t.gemsmw <- R.r2var(t.gemsmw)
+t.fis <- R.r2var(t.fis)
+t.mrnir <- R.r2var(t.mrnir)
+t.sdo <- R.r2var(t.sdo)
+t.fgrs <- R.r2var(t.fgrs)
+t.mgrs <- R.r2var(t.mgrs)
+t.lihs <- R.r2var(t.lihs)
+t.oi <- R.r2var(t.oi)
+t.scq <- R.r2var(t.scq)
+
+R.revcol <- function(x){
+    y <- names(x)
+    x <- x[, rev(y)]
+    return(x)
+}
+
+t.bsri <- R.revcol(t.bsri)
+t.gemsmw <- R.revcol(t.gemsmw)
+t.fis <- R.revcol(t.fis)
+t.mrnir <- R.revcol(t.mrnir)
+t.sdo <- R.revcol(t.sdo)
+t.fgrs <- R.revcol(t.fgrs)
+t.mgrs <- R.revcol(t.mgrs)
+t.lihs <- R.revcol(t.lihs)
+t.oi <- R.revcol(t.oi)
+t.scq <- R.revcol(t.scq)
+
+t.bsri$meas <- rep("BSRI", 103)
+t.gemsmw$meas <- rep("GEMSMW", 103)
+t.fis$meas <- rep("FIS", 103)
+t.mrnir$meas <- rep("MRNIR", 103)
+t.sdo$meas <- rep("SDO", 103)
+t.fgrs$meas <- rep("FGRS", 103)
+t.mgrs$meas <- rep("MGRS", 103)
+t.lihs$meas <- rep("LIHS", 103)
+t.oi$meas <- rep("OI", 103)
+t.scq$meas <- rep("SCQ", 103)
+
+t.all <- rbind(t.bsri, t.gemsmw, t.fis, t.mrnir, t.sdo, t.fgrs, t.mgrs,
+               t.lihs, t.oi, t.scq)
+t.all <- t.all[, c("CID","meas", "A", "R", "Diff")]
+t.all_agree <- t.all[t.all$Diff == 0, ]
+t.all_ag.s <- t.all_agree[, c(1, 2, 3)]
+t.all_ag.s.w <- reshape(t.all_ag.s, idvar = "CID", timevar = "meas",
+                        direction = "wide")
+names(t.all_ag.s.w) <- c("CID", "BSRI", "GEMSMW", "FIS", "MRNIR",
+                         "SDO", "FGRS", "MGRS", "LIHS", "OI", "SCQ")
+
+k.all <- t.all[, c(1,3,4)]
+kap.all <- kappa2(k.all[,2:3])$value
+
+# bcodes <- t.all[t.all$Diff!=0, ]
+# bcodes.s <- bcodes[, c(1, 2, 5)]
+# bcodes.s.w <- reshape(bcodes.s, idvar="CID", timevar="meas", direction="wide")
+# names(bcodes.s.w) <- c("CID", "BSRI", "GEMSMW", "FIS", "MRNIR", "SDO", "FGRS", "MGRS", "LIHS", "OI", "SCQ")
+
+library(descr)
+
+kappas <- data.frame(Measure = c("_All Measures_", "1. BSRI",
+                                 "2. GEMSMW", "3. FIS", "4. MRNIR",
+                                 "5. SDO", "6. FGRS", "7. MGRS",
+                                 "8. LIHS", "9. OI", "10. SCQ"),
+                     Category = c("_All Categories_", "Gender Expression",
+                                  " ", "Gender Role Adherence", " ", " ",
+                                  "Gender Role Stress", " ",
+                                  "Minority Stress", " ", " "),
+                     Kappa = round(c(kap.all, kap1, kap2, kap3, kap4,
+                                     kap5, kap6,kap7, kap8, kap9, kap10),
+                                   digits = 2))
+
+kapSub <- kappas[2:11, ]
+kapMu <- mean(kapSub$Kappa)
+kapSD <- sd(kapSub$Kappa)
+kapMin <- min(kapSub$Kappa)
+kapMax <- max(kapSub$Kappa)
+kapSum <- data.frame(Mean = kapMu, SD = kapSD,
+                     Range = paste0(kapMin, " - ", kapMax))
+
+t.bsri0 <- t.bsri[!t.bsri$Diff == 0, ]
+t.gemsmw0 <- t.gemsmw[!t.gemsmw$Diff == 0, ]
+t.fis0 <- t.fis[!t.fis$Diff == 0, ]
+t.mrnir0 <- t.mrnir[!t.mrnir$Diff == 0, ]
+t.sdo0 <- t.sdo[!t.sdo$Diff == 0, ]
+t.fgrs0 <- t.fgrs[!t.fgrs$Diff == 0, ]
+t.mgrs0 <- t.mgrs[!t.mgrs$Diff == 0, ]
+t.lihs0 <- t.lihs[!t.lihs$Diff == 0, ]
+t.oi0 <- t.oi[!t.oi$Diff == 0, ]
+t.scq0 <- t.scq[!t.scq$Diff == 0, ]
+
+t.bsri0$meas <- rep("BSRI", nrow(t.bsri0))
+t.gemsmw0$meas <- rep("GEMSMW", nrow(t.gemsmw0))
+t.fis0$meas <- rep("FIS", nrow(t.fis0))
+t.mrnir0$meas <- rep("MRNIR", nrow(t.mrnir0))
+t.sdo0$meas <- rep("SDO", nrow(t.sdo0))
+t.fgrs0$meas <- rep("FGRS", nrow(t.fgrs0))
+t.mgrs0$meas <- rep("MGRS", nrow(t.mgrs0))
+t.lihs0$meas <- rep("LIHS", nrow(t.lihs0))
+t.oi0$meas <- rep("OI", nrow(t.oi0))
+t.scq0$meas <- rep("SCQ", nrow(t.scq0))
+
+t.all0 <- rbind(t.bsri0, t.gemsmw0, t.fis0, t.mrnir0, t.sdo0, t.fgrs0,
+                t.mgrs0, t.lihs0, t.oi0, t.scq0)
+
+bcodes <- c(3, 8, 39, 58, 62, 78, 109, 129, 133, 135, 145, 149, 156,
+            163, 171, 175, 181, 56, 60, 73, 76, 86, 92, 164, 171, 175, 3, 14,
+            46, 55, 56, 60, 71, 109, 127, 133, 182, 186, 14, 49, 71, 78, 94,
+            109, 111, 113, 119, 129, 136, 156, 157, 171, 175, 182, 33, 46,
+            92, 16, 49, 69, 72, 93, 129, 146, 163, 181, 3, 37, 48, 49, 56, 60,
+            69, 72, 78, 93, 111, 145, 156, 171, 175, 181, 8, 16, 18, 22, 33,
+            34, 35, 49, 69, 78, 86, 95, 99, 109, 127, 129, 145, 162, 168,
+            169, 175, 185, 3, 16, 51, 62, 72, 78, 86, 89, 106, 122, 127, 171,
+            179, 181, 46, 49, 62, 71, 82, 86, 145, 1, 46, 78, 82, 145, 185)
+tbcodes <- data.frame(table(bcodes))
+# tbcodes[tbcodes$Freq>1,]
+library(car)
+tbcodes$codename <- recode(tbcodes[,1], rec)
+names(tbcodes)[c(1, 2)] <- c("CID", "Disagreement Frequency")
+```
+
+## Inter-Rater Reliability ($Kappa$) Summary Information Across Measures
+
+```{r kapsumKab, results = 'asis'}
+kapSum %>% kable(caption = "$Kappa$ Summary Information")
+```
+
+```{r kappakab, results='asis'}
+
+kable(kappas[, c(2, 1, 3)], row.names = FALSE,
+      caption = "Kappa Statistics Per Measure")
+kable(pb, row.names = TRUE, caption = "Inter-Rater Reliability
+    ($Kappa$) Prevalence and Bias Statistics per Measure")
+```
+
+```{r tbcodesKab, results = 'asis'}
+kable(tbcodes[, c(1, 3, 2)], row.names = FALSE,
+      caption = "Codes with Disagreements Across All Measures")
+```
+
+# General Summary Statistics
+
+```{r measft1}
+meas.ft1 <- t.all_ag.s.w
+meas.ft1$code <- recode(meas.ft1$CID, rec)
+rownames(meas.ft1) <- meas.ft1$code
+meas.ft1 <- meas.ft1[, 2:11]
+meas.ft1 <- as.matrix(meas.ft1)
+meas <- dimnames(meas.ft1)[[2]]
+
+
+nitems <- c(60, 15, 44, 39, 16, 39, 40, 52, 27, 20)
+```
+
+`r margin_note("_**nitems**: Number of items in each measure (in the order the appear in all the data frames created here)._")`
+
+```{r }
+colsum <- apply(meas.ft1, 2, sum, na.rm = TRUE)
+```
+
+`r margin_note("_**colsum:** I used the **meas.ft1** data I just created (2 lines ago) to tally the sum of codes aplied to a measure._")`
+
+```{r }
+ncb <- 103
+ndiv2 <- colsum-nitems/nitems
+ndiv1 <- colsum*nitems/ncb
+nwgt <- nitems/ncb
+ndiv <- colsum*(nwgt)
+nwgt_EQ <- expression(italic(mu[scriptscriptstyle(weighted)]) == over(italic(N[scriptscriptstyle(italic(Items))]), italic(N[scriptscriptstyle(Codebook)]))*italic(N[scriptstyle(CodesApplied)]))
+nwgt_EQ2 <- expression(italic(N)[scriptscriptstyle(Codebook)] == 103)
+```
+
+`r margin_note("_**ndiv:** $\\Sum$ of codes applied to a given measure weighted by the number of items within that measure._")`
+
+```{r }
+cperc <- function(x, cb=103, naaction = TRUE) {
+    n <- sum(x, na.rm = naaction) # where `x` is a vector
+    n <- paste0(comma((n/cb)*100), "%")
+    return(n)
+}
+
+cbperc <- apply(meas.ft1, 2, cperc)
+msum <- data.frame(measure = meas, nitems = nitems, sum = colsum,
+                   ndiv = ndiv, cbperc = cbperc
+)
+
+msumkab <- msum[, c("measure", "nitems", "sum", "cbperc")]
+row.names(msum) <- seq(1:10)
+msum <- msum[,c("measure", "nitems", "sum", "ndiv")]
+```
+
+```{r msumkab, results = 'asis'}
+names(msumkab) <- c("Measure", "$N_{items}$",
+                    "$\\Sigma_{codes}$", "$\\%_{codebook}$")
+kable(msumkab, caption = "\nSummary Information of Codes Applied
+    to Evaluated Measures {#tbl:measfreq}", row.names = FALSE, format.args = list(zero.print = ".")
+)
+
+kable(msum, caption = "\nSummary Information of Codes Applied
+    to Evaluated Measures {#tbl:measfreq}", row.names = FALSE, format.args = list(zero.print = "."), col.names = c("Measure", "$N_{items}$",
+                    "$\\Sigma_{codes}$", nwgt_EQ)
+)
+```
+
+```{r rsumdf}
+rowsum <- apply(meas.ft1, 1, sum, na.rm = TRUE)
+```
+
+`r margin_note("_**rowsum:** $\\Sum$ of measures to which a given code was applied._")`
+
+```{r }
+rsumdf <- data.frame(rowsum)
+names(rsumdf) <- ("Nmeasures")
+rsumdf2 <- apply(rsumdf, 2, R.dich)
+sum(rsumdf2)/length(cdbk[,1])
+nocode <- rsumdf2[rsumdf == 0, ]
+nocodekab <- data.frame(CID = recode(names(nocode), rec2),
+                        CodeName = names(nocode))
+nocodekab <- nocodekab[order(nocodekab$CID), ]
+```
+
+```{r REnocodekab}
+cdbkNC <- merge(nocodekab, cdbk2, by = "CID", all.y = FALSE)
+
+NCcat <- group_by(cdbkNC, cat); NCcat <- arrange(NCcat, cat)
+NCcat <- NCcat[, 3:4]
+```
+
+```{r nocodeKab}
+kable(nocodekab, caption = "\nCodes not Covered by Any of the
+Evaluated Measures {#tbl:notcoded}", row.names = FALSE)
+```
+
+```{r catcovs}
+grexdf <- meas.ft1[,1:2]
+rsumgrex <- data.frame(apply(grexdf, 1, sum, na.rm = TRUE))
+rsumgrex <- apply(rsumgrex, 2, R.dich)
+names(rsumgrex) <- "GREX"
+grexsum <- apply(rsumgrex, 2, sum)
+grexsum #15
+grexperc <- cperc(grexsum)
+
+gradf <- meas.ft1[,3:5]
+rsumgra <- data.frame(apply(gradf, 1, sum, na.rm = TRUE))
+rsumgra <- apply(rsumgra, 2, R.dich)
+names(rsumgra) <- "GRA"
+grasum <- apply(rsumgra, 2, sum)
+grasum #20
+graperc <- cperc(grasum)
+
+grsdf <- meas.ft1[,6:7]
+rsumgrs <- data.frame(apply(grsdf, 1, sum, na.rm = TRUE))
+rsumgrs <- apply(rsumgrs, 2, R.dich)
+names(rsumgrs) <- "GRS"
+grssum <- apply(rsumgrs, 2, sum)
+grssum #15
+grsperc <- cperc(grssum)
+
+msdf <- meas.ft1[,8:10]
+rsumms <- data.frame(apply(msdf, 1, sum, na.rm = TRUE))
+rsumms <- apply(rsumms, 2, R.dich)
+names(rsumms) <- "MS"
+mssum <- apply(rsumms, 2, sum)
+mssum #25
+msperc <- cperc(mssum)
+
+catcovkab <- data.frame(Measures = c("Bem Sex Role Inventory",
+                                     "Gender Expression Measure among Sexual Minority Women",
+                                     "Femininity Ideology Scale",
+                                     "Male Role Norms Inventory-Revised",
+                                     "Social Dominance Orientation Scale",
+                                     "Feminine Gender Role Stress Scale",
+                                     "Masculine Gender Role Stress Scale",
+                                     "Lesbian Internalized Homophobia Scale",
+                                     "Outness Inventory", "Stigma Consciousness Questionnaire"),
+                        Cat = c("Gender Expression", "", "Gender Role Adherence", "", "",
+                                "Gender Role Stress", "", "Minority Stress", "", ""),
+                        Ncodes = c(grexsum, 0, grasum, 0, 0, grssum, 0, mssum, 0, 0),
+                        perc = c(grexperc, "", graperc, "", "", grsperc, "", msperc, "", "")
+)
+
+catcovkab2 <- data.frame(Cat = c(newthought("Gender Expression"), "", "", newthought("Gender Role Adherence"), "", "", "",
+                                newthought("Gender Role Stress"), "", "", newthought("Minority Stress"), "", "", ""),
+                        Measures = c("", "BSRI",
+                                     "GEMSMW",
+                                     "", "FIS",
+                                     "MRNIR",
+                                     "SDO",
+                                     "", "FGRS",
+                                     "MGRS",
+                                     "", "LIHS",
+                                     "OI", "SCQ"),
+                        Nitems = c(sum(nitems[1:2]), nitems[1], nitems[2], sum(nitems[3:5]), nitems[3], nitems[4], nitems[5], sum(nitems[6:7]), nitems[6], nitems[7], sum(nitems[8:10]), nitems[8], nitems[9], nitems[10]),
+                        Ncodes = c(grexsum, msumkab[1,3], msumkab[2,3], grasum, msumkab[3,3], msumkab[4,3], msumkab[5,3], grssum, msumkab[6,3], msumkab[7,3], mssum, msumkab[8,3], msumkab[9,3], msumkab[10,3]),
+                        perc = c(grexperc, msumkab[1,4], msumkab[2,4], graperc, msumkab[3,4], msumkab[4,4], msumkab[5,4], grsperc, msumkab[6,4], msumkab[7,4], msperc, msumkab[8,4], msumkab[9,4], msumkab[10,4])
+)
+
+catcovkab1 <- data.frame(Cat = c("Gender Expression", "Gender Role Adherence", "Gender Role Stress", "Minority Stress"),
+                         Ncodes = c(grexsum, grasum, grssum, mssum),
+                         perc = c(grexperc, graperc, grsperc, msperc)
+)
+
+```
+
+```{r catcovkab, results = 'asis'}
+# kable(catcovkab, caption = "Codebook Coverage Per Measure Category
+#     {#tbl:catcov}", col.names = c("Measure", "Measure Categry",
+#                                   "$N_{codes}$", "$\\%_{codebook}$"), row.names = FALSE,
+#       format.args = list(zero.print = " ")
+# )
+kable(catcovkab1, caption = "Codebook Coverage Per Measure Category
+    {#tbl:catcov}", col.names = c("Measure Category",
+                                  "$N_{codes}$", "$\\%_{codebook}$"), row.names = FALSE,
+      format.args = list(zero.print = " ")
+)
+
+kable(catcovkab2, caption = "\nCodebook Coverage per Measurement Category and per Measure {#tbl:measfreq}", format.args = list(zero.print = " "), align = c("l", "l", "c", "c", "c"), row.names = FALSE, col.names = c("Measurement Category", "Measure", "$N_{Items}$", "$\\Sigma_{Codes}$", "$\\%_{codebook}$"))
+```
+
+# Measures-Codebook Overlap Venn Diagrams
+
+## Data-Shaping for Venn Diagrams
+
+Below, I create a few lists using the `t.all` data-frame created earlier. The resulting venn diagrams depict the observed, agreed upon, overlap among the inductively-derived codebook and the evaluated measures.
+
+```{r vennData}
+v.all <- t.all[!t.all$A == 0, ]
+v.all <- v.all[!v.all$R == 0, ]
+v.allA <- t.all[!t.all$A == 0, c(1, 3)]
+v.allR <- t.all[!t.all$R == 0, c(1, 4)]
+
+vBSRI2 <- v.all[v.all$meas == "BSRI", 1]
+vGEMSMW2 <- v.all[v.all$meas == "GEMSMW", 1]
+vFIS2 <- v.all[v.all$meas == "FIS", 1]
+vMRNIR2 <- v.all[v.all$meas == "MRNIR", 1]
+vSDO2 <- v.all[v.all$meas == "SDO", 1]
+vFGRS2 <- v.all[v.all$meas == "FGRS", 1]
+vMGRS2 <- v.all[v.all$meas == "MGRS", 1]
+vLIHS2 <- v.all[v.all$meas == "LIHS", 1]
+vOI2 <- v.all[v.all$meas == "OI", 1]
+vSCQ2 <- v.all[v.all$meas == "SCQ", 1]
+
+vCDBK <- cdbk[,"CID"]
+v <- list(
+    BSRI = length(vBSRI2),
+    GEMSMW = length(vGEMSMW2),
+    FIS = length(vFIS2),
+    MRNIR = length(vMRNIR2),
+    SDO = length(vSDO2),
+    FGRS = length(vFGRS2),
+    MGRS = length(vMGRS2),
+    LIHS = length(vLIHS2),
+    OI = length(vOI2),
+    SCQ = length(vSCQ2),
+    SMW = length(vCDBK))
+
+MS <- consolidate(vLIHS2, vSCQ2, protect = TRUE)
+MS <- consolidate(MS, vOI2, protect = TRUE)
+GRS <- consolidate(vMGRS2, vFGRS2, protect = TRUE)
+GRA <- consolidate(vMRNIR2, vSDO2, protect = TRUE)
+GRA <- consolidate(GRA, vFIS2, protect = TRUE)
+GREX <- consolidate(vGEMSMW2, vBSRI2, protect = TRUE)
+zALL <- consolidate(MS, GRS, protect = TRUE)
+zALL <- consolidate(zALL, GRA, protect = TRUE)
+zALL <- consolidate(zALL, GREX, protect = TRUE)
+vCAT <- list(
+    MS = length(unique(MS)),
+    GRS = length(unique(GRS)),
+    GRA = length(unique(GRA)),
+    GREX = length(unique(GREX)),
+    CDBK = length(unique(vCDBK)),
+    ALL = length(unique(zALL)))
+```
+
+-----
+
+## Functions to Generate Venn Diagrams
+
+```{r vennFunctions}
+library(VennDiagram)
+library(venneuler)
+
+R.EvennA <- function(x, ffamily = "ETBembo", vcol = mypal1[c(21,22)],
+                     labs = rev(names(x)), al = 0.5, lcex = 1,
+                     ltextx = evenn$centers[, 1], ltexty = evenn$centers[, 2],
+                     ptextx = 0.4, ptexty = 0.45, pmain = NULL, pmcex = 0.95, pmfont = 3, keep = FALSE, ...){
+    palette(mypal)
+    par(family = ffamily, mar = (c(0.5, 0.5, 2, 0.5) + 0.1))
+    A <- x[[2]]
+    AB <- x[[1]]
+    evenn <- venneuler(c(A = A, "A&B" = AB))
+    evenn$labels <- c("", "")
+    ABperc <- round((AB/A)*100, 0)
+    ABperc <- paste0(ABperc, "%")
+    plot(evenn, col = vcol, alpha = al, main = pmain, cex.main = pmcex, font.main = pmfont)
+    box(lwd = 0.5, col = 20)
+    text(x = ltextx, y = ltexty, labels = labs, col = mypal[1], cex = lcex)
+    text(ptextx, ptexty, labels = ABperc, col = mypal[1], cex = lcex, font = 3)
+    if (keep == TRUE) {
+    return(evenn)
+    }
+}
+```
+
+gridlayouts
+
+```{r }
+m1 <- matrix(1)
+# layout(m1)
+m2 <- matrix(c(1, 2), nrow = 1, ncol = 2, byrow = TRUE)
+## Arrange 2 venns on a single row ##
+# layout(m2)
+m22 <- matrix(c(1, 1,
+                2, 3), nrow = 2, ncol = 2, byrow = TRUE)
+                ## Arrange 2 measures'-venns on a single row
+                ## beneath their corresponding category venn
+                ## (which takes up the 2 columns in the top row) ##
+# layout(m3)
+m3 <- matrix(c(1, 2, 3), nrow = 1, ncol = 3, byrow = TRUE)
+## Arrange 3 venns on a single row ##
+# layout(m3)
+m32 <- matrix(c(1, 1, 1,
+                2, 3, 4), nrow = 2, ncol = 3, byrow = TRUE)
+                ## Arrange 3 measures'-venns on a single row
+                ## beneath their corresponding category venn
+                ## (which takes up 1 column in the top row) ##
+# layout(m32)
+m4 <- matrix(c(1, 2, 3, 4), nrow = 2, ncol = 2, byrow = TRUE)
+## Arrange 4 venns along 2 rows and 2 columns (1 column per venn) ##
+# layout(m4)
+m15 <- matrix(c( 2, 6,  7,  0,  3,
+                15, 1,  1,  1,  8,
+                14, 1,  1,  1,  9,
+                13, 1,  1,  1, 10,
+                 5, 0, 12, 11,  4), nrow = 5, ncol = 5, byrow = TRUE)
+                 ## Arrange 15 vennns with the main venn comprising
+                 ## the center 3 rows and 3 columns, surounded by
+                 ## sub-venns placed along the outer rows & columns
+                 ## with the category venns in each of the corners cells ##
+m152 <- matrix(c( 2, 2, 6,  7,  0, 3,  3,
+                  2, 2, 6,  7,  0, 3,  3,
+                 15, 15, 1,  1,  1, 8,  8,
+                 14, 14, 1,  1,  1, 9,  9,
+                 13, 13, 1,  1,  1, 10, 10,
+                  5, 5, 0,  12,  11, 4,  4,
+                  5, 5, 0, 12, 11, 4,  4), nrow = 7, ncol = 7, byrow = TRUE)
+                  ## Arrange 15 vennns with the main venn comprising
+                  ## the center 3 rows and 3 columns, surounded by
+                  ## sub-venns placed along the outer rows & columns
+                  ## with the category venns in each of the corners cells ##
+```
+
+```{r echo=FALSE}
+opts_chunk$set(echo = FALSE, fig.fullwidth = TRUE, fig.path = "graphics/rplot_vm_")
+```
+
+## Gender Expression Venn Diagrams
+
+```{r vGREX}
+layout(m22)
+
+R.EvennA(vCAT[c(4, 5)], labs = c("SMW", expression(paste(italic("GREX")))), pmain = "Gender Expression (GREX) Measures", ltextx = c(0.7, 0.41), lcex = 0.95)
+
+R.EvennA(v[c(1, 11)], labs = c("SMW", expression(paste(italic("BSRI")))), pmain = "Bem Sex Role Inventory (BSRI)", ptextx = 0.39, ptexty = 0.47, pmcex = 0.85, lcex = 0.85)
+
+R.EvennA(v[c(2, 11)], labs = c("SMW", expression(paste(italic("GEMSMW")))), pmain = "Gender Expression Measure among\nSexual Minority Women (GEMSMW)", ptextx = 0.35, ptexty = 0.47, pmcex = 0.85, lcex = 0.85)
+```
+
+## Gender Role Adherence Venn Diagrams
+
+```{r vGRA}
+layout(m32)
+
+R.EvennA(vCAT[c(3, 5)], labs = c("SMW", expression(paste(italic("GRA")))), ltextx = c(0.7, 0.41), pmain = "Gender Role Adherence (GRA) Measures", lcex = 0.95)
+
+R.EvennA(v[c(3,11)], ptextx = 0.38, ptexty = 0.47, labs = c("SMW", expression(paste(italic("FIS")))), pmain = "Femininity Ideology Scale (FIS)", pmcex = 0.85, lcex = 0.85)
+
+R.EvennA(v[c(4,11)], ptextx = 0.36, ptexty = 0.47, labs = c("SMW", expression(paste(italic("MRNIR")))), pmain = "Male Role Norms Inventory - Revised (MRNIR)", pmcex = 0.85, lcex = 0.85)
+
+R.EvennA(v[c(5,11)], ptextx = 0.35, ptexty = 0.47, labs = c("SMW", expression(paste(italic("SDO")))), pmain = "Social Dominance Orientation-7 Scale (SDO)", pmcex = 0.85, lcex = 0.85)
+```
+
+## Gender Role Stress Venn Diagrams
+
+```{r vgrs}
+layout(m22)
+
+R.EvennA(vCAT[c(2, 5)], labs = c("SMW", expression(paste(italic("GRS")))), ltextx = c(0.7, 0.39), pmain = "Gender Role Stress (GRS) Measures", lcex = 0.95)
+
+R.EvennA(v[c(6,11)], ptextx = 0.38, ptexty = 0.43, labs = c("SMW", expression(paste(italic("FGRS")))), pmain = "Feminine Gender Role Stress Scale (FGRS)", pmcex = 0.85, lcex = 0.85)
+
+R.EvennA(v[c(7,11)], ptextx = 0.38, labs = c("SMW", expression(paste(italic("MGRS")))),  pmain = "Mascuilne Gender Role Stress Scale (MGRS)", pmcex = 0.85, lcex = 0.85)
+```
+
+## Minority Stress Measures
+
+```{r vms}
+layout(m32)
+
+R.EvennA(vCAT[c(1, 5)], labs = c("SMW", expression(paste(italic("MS")))), ltextx = c(0.7, 0.41),  pmain = "Minority Stress (MS) Measures", lcex = 0.95)
+
+R.EvennA(v[c(8,11)], ptextx = 0.41, ptexty = 0.42, labs = c("SMW", expression(paste(italic("LIHS")))), ltextx = c(0.7, 0.4), pmain = "Lesbian Internalized Homophobia Scale (LIHS)", pmcex = 0.85, lcex = 0.85)
+
+R.EvennA(v[c(9,11)], ptextx = 0.38, ptexty = 0.46, labs = c("SMW", expression(paste(italic("OI")))), pmain = "Outness Inventory (OI)", pmcex = 0.85, lcex = 0.85)
+
+R.EvennA(v[c(10,11)], ptextx = 0.37, ptexty = 0.44, labs = c("SMW", expression(paste(italic("SCQ")))), pmain = "Stigma Consciousness Questionnaire (SCQ)", pmcex = 0.85, lcex = 0.85)
+```
+
+## All Measures
+
+```{r catvenns, fig.keep = 'last', fig.show = 'last', fig.margin = TRUE}
+m <- matrix(c(1, 2, 3, 4), nrow = 2, ncol = 2, byrow = TRUE); layout(m)
+
+R.EvennA(vCAT[c(4, 5)], labs = c("SMW", expression(paste(italic("GREX")))), ltextx = c(0.7, 0.39), pmain = "Gender Expression (GREX) Measures", pmcex = 0.85, lcex = 0.85)
+
+R.EvennA(vCAT[c(3, 5)], labs = c("SMW", expression(paste(italic("GRA")))), ltextx = c(0.7, 0.41), pmain = "Gender Role Adherence (GRA) Measures", pmcex = 0.85, lcex = 0.85)
+
+R.EvennA(vCAT[c(2, 5)], labs = c("SMW", expression(paste(italic("GRS")))), ltextx = c(0.7, 0.39), pmain = "Gender Role Stress (GRS) Measures", pmcex = 0.85, lcex = 0.85)
+
+R.EvennA(vCAT[c(1, 5)], labs = c("SMW", expression(paste(italic("MS")))), ltextx = c(0.7, 0.41),  pmain = "Minority Stress (MS) Measures", pmcex = 0.85, lcex = 0.85)
+```
+
+```{r vall}
+layout(m1)
+
+R.EvennA(vCAT[c(6, 5)], labs = c("SMW", expression(paste(italic("ALL"), "Measures"))), ltextx = c(0.72, 0.42), pmain = "All Measures")
+```
+
+
+```{r echo = FALSE, results = 'hide', fig.keep = 'none', fig.show = 'none'}
+
+par(mar = c(5, 4, 4, 2) + 0.1); layout(m1)
+```
+
+```{r }
+opts_chunk$set(echo = TRUE, fig.path = 'graphics/rplot_m_')
+```
+
+```{r msumkab2, results = 'asis'}
+msumkab2 <- cbind(catcovkab[, 2], msumkab[, 1:3])
+
+names(msumkab2) <- c("_Category_", "Measure", "$N_{Items}$", "$\\Sigma_{Codes}$")
+
+kable(msumkab2, caption = "\nCodebook Coverage per Measure {#tbl:measfreq}", format.args = list(zero.print = " "), align = c("l", "l", "c", "c"), row.names = FALSE)
+```
+
+```{r msumkab3, results = 'asis'}
+msumkab3 <- cbind(msumkab[, 1], catcovkab[, 2:4])
+
+names(msumkab3) <- c("Measure", "_Category_", "$\\Sigma_{Codes}$", "$\\%_{Codebook}$")
+
+kable(msumkab3, caption = "\nCodebook Coverage per Construct Category {#tbl:measfreq2}", format.args = list(zero.print = " "), align = c("l", "l", "c", "c"), row.names = FALSE)
+```
+
+# Miscellaneious Exploratory Analyses
+
+```{r ctab}
+library(descr)
+
+ctab <- CrossTable(k.all[, 2], k.all[, 3],
+                   digits = list(expected = 0, prop = 0, percent = 0, others = 0),
+                   expected = T,
+                   prop.r = F, prop.c = F, prop.t = F,
+                   prop.chisq = F, chisq = T, fisher = T, mcnemar = T,
+                   dnn = c("_Coder-A_", "Coder-R"), cell.layout = T,
+                   row.labels = T,
+                   total.r = T, total.c = T,
+                   xlab = expression(italic("Coder-A")),
+                   ylab = expression(italic("Coder-R")))
+ctab
+
+par(family = "ETBembo")
+plot(ctab, col = adjustcolor(mypal1[c(22, 17)], alpha.f = 0.75))
+ctab$chisq.corr[[3]] <- round(ctab$chisq.corr[[3]], 2)
+ctab$chisq.corr
+```
+
+## Hierarchical Cluster Analysis: Examining Code Clusterings based on Codebook Application to Measures
+
+```{r mclust, fig.fullwidth = TRUE}
+meas.ft1 <- apply(meas.ft1, 2, R.na)
+means <- apply(meas.ft1,2,mean)
+sds <- apply(meas.ft1,2,sd)
+mdist <- dist(meas.ft1)
+mclust <- hclust(mdist)
+palette(mypal)
+plot(mclust, labels = recode(rownames(meas.ft1), rec2), sub = ' ',
+     xlab = ' ', main = ' ', frame.plot = F, col = 5, cex = 0.4, cex.main = 0.4,
+     lwd = 0.5, cex.lab = 0.4, cex.axis = 0.4, family = "ETBembo")
+for (i in c(0, 1, 2)) {abline(a = i, b = 0, lty = 3, lwd = 0.5, col = 19)}
+```
+
+```{r 8grpsKab, results = 'asis'}
+Grps <- cutree(mclust,8)
+as.data.frame(table(Grps)) %>%
+    rename(Group = Grps, Nmembers = Freq) %>% ## 'rename()' {dplyr} args: [output]=[input]
+    kable(caption = "Hierarchical Cluster Analysis: 8-Group Solution
+	Membership Counts {#tbl:allClust}")
+```
+
+```{r 8grpsHist}
+hist(Grps, freq = FALSE, col = 5, border = 18,
+     main = "8-Group Solution Membership Distribution With
+	Corresponding Density Curve", xlab = ' ', cex.main = 0.4,
+     cex.lab = 0.6, cex.axis = 0.5)
+lines(density(Grps), col = 17, lwd = 2)
+```
+
+```{r 4grpsKab, results = 'asis'}
+Grps <- cutree(mclust,4)
+as.data.frame(table(Grps)) %>%
+    rename(Group = Grps, Nmembers = Freq) %>% ## 'rename()' {dplyr} args: [output]=[input]
+    kable(caption = "Hierarchical Cluster Analysis: 8-Group Solution
+	Membership Counts {#tbl:allClust}")
+```
+
+4grpsHist, fig.fullwidth = TRUE
+
+```{r }
+hist(Grps, freq = FALSE, col = 5, border = 18,
+     main = "4-Group Solution Membership Distribution With
+	Corresponding Density Curve", xlab = ' ', cex.main = 0.4,
+     cex.lab = 0.5, cex.axis = 0.5)
+lines(density(Grps), col = 17, lwd = 2)
+allCnts <- sapply(2:8, function(ncl) table(cutree(mclust, ncl)))
+names(allCnts) <- 2:8
+names(allCnts) <- paste("Group", names(allCnts), sep = "-")
+```
+
+```{r mclustKabs, results = 'asis'}
+for (i in 1:7) print(kable(data.frame(allCnts[[i]]),
+                           caption = paste0(i+1, "-Group Solution Membership Counts"),
+                           col.names = c("Group", "Count")))
+
+members <- sapply(unique(Grps),function(g)
+    paste(recode(rownames(meas.ft1), rec2)[Grps == g]))
+ncent <- 4 ## based on dendrogram in mclust ##
+fit.all <- kmeans(meas.ft1, ncent)
+
+aggregate(meas.ft1,by=list(fit.all$cluster),FUN=mean) %>% ## get cluster means ##
+    kable(caption = "Cluster Means")
+```
+
+```{r cormats, echo = FALSE, eval = FALSE, include = FALSE}
+R <- t(mcft.R)
+R1 <- t(mcft.R1)
+A <- t(mcft.A)
+A1 <- t(mcft.A1)
+R <- R.names(R, dim = 2, pl = "P", str = "R")
+R1 <- R.names(R1, dim = 2, pl = "P", str = "R")
+A <- R.names(A, dim = 2, pl = "P", str = "A")
+A1 <- R.names(A1, dim = 2, pl = "P", str = "A")
+```
+
+```{r xt, echo = FALSE, eval = FALSE, include = FALSE}
+par(mypar)
+palette(mypal)
+ss <- function(x) sum(x^2)
+library(vcd)
+xt <- xtabs(~ A + R, data = k.all, subset = NULL, na.action = NULL)
+palette(mypal)
+par(mypar)
+mosaicplot(xt, color = adjustcolor(mypal1[c(22, 17)], alpha.f = 0.75),
+           shade = TRUE, xlab = expression(italic("Coder-A")),
+           ylab = expression(italic("Coder-R")), type = "pearson")
+assoc(xt, shade = TRUE)
+xt.ind <- coindep_test(xt, n = 1000, indepfun = ss, aggfun = sum)
+```
+
+# Correspondence Analysis
+
+`r margin_note("_Tutorial and code available from [STHDA](http://www.sthda.com/english/wiki/correspondence-analysis-in-r-the-ultimate-guide-for-the-analysis-the-visualization-and-the-interpretation-r-software-and-data-mining#required-packages)_")`
+
+```{r echo=FALSE}
+opts_chunk$set(fig.fullwidth = TRUE)
+```
+
+```{r ca}
+m1 <- data.frame(MEASURE = rep("BSRI", length(vBSRI2)),
+CODES = vBSRI2, nitems = rep(60, length(vBSRI2)))
+m2 <- data.frame(MEASURE = rep("GEMSMW", length(vGEMSMW2)),
+CODES = vGEMSMW2, nitems = rep(15, length(vGEMSMW2)))
+m3 <- data.frame(MEASURE = rep("FIS", length(vFIS2)),
+CODES = vFIS2, nitems = rep(44, length(vFIS2)))
+m4 <- data.frame(MEASURE = rep("MRNIR", length(vMRNIR2)),
+CODES = vMRNIR2, nitems = rep(39, length(vMRNIR2)))
+m5 <- data.frame(MEASURE = rep("SDO", length(vSDO2)),
+CODES = vSDO2, nitems = rep(16, length(vSDO2)))
+m6 <- data.frame(MEASURE = rep("FGRS", length(vFGRS2)),
+CODES = vFGRS2, nitems = rep(39, length(vFGRS2)))
+m7 <- data.frame(MEASURE = rep("MGRS", length(vMGRS2)),
+CODES = vMGRS2, nitems = rep(40, length(vMGRS2)))
+m8 <- data.frame(MEASURE = rep("LIHS", length(vLIHS2)),
+CODES = vLIHS2, nitems = rep(52, length(vLIHS2)))
+m9 <- data.frame(MEASURE = rep("OI", length(vOI2)),
+CODES = vOI2, nitems = rep(27, length(vOI2)))
+m10 <- data.frame(MEASURE = rep("SCQ", length(vSCQ2)),
+CODES = vSCQ2, nitems = rep(20, length(vSCQ2)))
+measures <- rbind(m1, m2, m3, m4, m5, m6, m7, m8, m9, m10)
+
+grp <- group_by(measures,MEASURE)
+cntw <- dplyr::count(grp, CODES, wt = nitems, sort = T) ## this is where `grp$n` will be coming from ##
+cnt <- dplyr::count(grp, CODES, sort = F)
+names(cnt) <- c("MEASURE", "CODES", "n_uw")
+grp <- left_join(grp, cntw, by = "CODES")
+grp <- left_join(grp, cnt, by = "CODES")
+
+grp$ndiv <- round(grp$n/grp$nitems, digits = 1) ##
+```
+
+`n` is a column created in the `count()` call to crate `cntw` (and `cnt`), so `cntw$n` = count of codes applied to each item in each measure, weighted by the number of items in a measure, while `cnt$n_uw` is an unweighted count of codes applied to each item in each measure, which means `grp$ndiv` is the weighted count of codes applied to each item divided by te number of items in a measure.
+
+```{r }
+grp$ndiv_uw <- round(grp$n_uw/grp$nitems, digits = 1)
+grp$cn <- factor(as.numeric(grp$CODES))
+
+grp2 <- tbl_df(measures)
+
+grp2 <- group_by(grp2, MEASURE)
+cnt2 <- tally(group_by(grp2, MEASURE, CODES))
+
+library(FactoMineR)
+library(factoextra)
+
+mt <- meas.ft1
+R.OneTwo <- function(x) {
+	ifelse(x > 0, 2, x)
+	}
+R.zeroOne <- function(x) {
+	ifelse(x == 0, 1, x)
+	}
+mt <- apply(mt, 2, R.OneTwo)
+mt <- apply(mt, 2, R.zeroOne)
+
+library(vcd)
+## `mar_table()` function, along with many other functions because the {vcd}
+## package is next to goddessness ##
+
+mar.t <- mar_table(mt)
+dimnames(mar.t)[2]
+## print column names - `dimnames(x)[1]` prints row names of "x" when "x" is a
+## matrix or table object  (could also just use `rownames(x)`/`colnames(x)`).
+## Works on dataframes too, but there's other ways to work with indexing
+## dataframes, whereas `dimnames()`, `colnames()`, and `rownames()` are the
+## only ways to work with matrices and tables (that i know of at least). ##
+
+library(graphics)
+## `mosaicplot()` function, among others. Also, you probably already have the
+## {graphics} package loaded from loading any number of other packages, as many
+## packages load it as a dependency, i only loaded it here to note the package
+## needed for the next command ##
+
+mt2 <- grp[, c(1, 4, 8)]
+# fmt2 <- as.table(as.matrix(ftable(mt2, row.vars = c(2, 3))))
+# mosaicplot(t(fmt2), cex.axis = 0.40, type = "deviance", shade = T, las = 1)
+# assoc(head(mt), shade = T, las = 3)
+
+res.ca <- CA(mt)
+summary(res.ca, nb.dec = 2, ncp = 2)
+eig <- get_eigenvalue(res.ca)
+trace <- sum(eig$eigenvalue)
+cor.coef <- sqrt(trace)
+cor.coef ## should be >= 0.2 to be considered "important" correlation coefficient ##
+
+# Chi-square statistics
+chi2 <- trace*sum(meas.ft1)
+chi2
+# Degree of freedom
+df <- (nrow(meas.ft1) - 1) * (ncol(meas.ft1) - 1)
+df
+# P-value
+pval <- pchisq(chi2, df = df, lower.tail = FALSE)
+pval
+
+eigenvalues <- get_eigenvalue(res.ca)
+head(round(eigenvalues, 2))
+fviz_screeplot(res.ca) + thm_tft(base_family = "ETBembo")
+```
+
+`r newthought('These data contains 103 rows and 10 columns.')` If the data were random, the expected value of the eigenvalue for each axis would be `r expression(over(1, nrow(data)) - 1)`
+
+
+> _"Any axis with a contribution larger than the maximum of these two percentages should be considered as important and included in the solution for the interpretation of the data_ [see, @bendixen1995compositional, 577]."_
+
+
+```{r pca}
+fviz_screeplot(res.ca) + geom_hline(yintercept = 11, linetype = 2, color = "red") + thm_tft(base_family = "ETBembo")
+
+par(family = "ETBembo")
+plot(res.ca, cex = 0.7, col.row = mypal[14], col.col = mypal[4], autoLab = "yes")
+plot(res.ca, cex = 0.7, col.row = mypal[14], col.col = mypal[4], autoLab = "yes", selectRow = "cos2 25", ylim = c(-1.5, 3), title = "cos2: Top 25 Rows per Dimension")
+plot(res.ca, cex = 0.7, col.row = mypal[14], col.col = mypal[4], autoLab = "yes", selectRow = "cos2 0.8", ylim = c(-1.5, 3), title = expression(paste("CA Factor Map ", cos2 >= 0.8)))
+plot(res.ca, cex = 0.7, col.row = mypal[14], col.col = mypal[4], autoLab = "yes", selectRow = "coord 25", ylim = c(-1.5, 3))
+plot(res.ca, cex = 0.7, col.row = mypal[14], col.col = mypal[4], autoLab = "yes", selectRow = "contrib 15", ylim = c(-1.5, 3))
+
+fviz_ca_row(res.ca, cex = 0.5, col.row = mypal[14], col.col = mypal[4]) + thm_tft(base_family = "ETBembo")
+
+# library(corrplot)
+row <- get_ca_row(res.ca)
+# corrplot(row$contrib, is.corr = FALSE)
+
+fviz_contrib(res.ca, choice = "row", axes = 1)
+fviz_contrib(res.ca, choice = "row", axes = 2)
+fviz_contrib(res.ca, choice = "row", axes = 3)
+fviz_contrib(res.ca, choice = "row", axes = 4)
+fviz_contrib(res.ca, choice = "row", axes = 5)
+fviz_contrib(res.ca, choice = "row", axes = 1:5)
+fviz_ca_row(res.ca, col.row = "contrib", selectRow = "cos2 0.8")
+
+fviz_ca_row(res.ca, col.row = "contrib") + scale_color_gradient2(low = mypal[1], mid = mypal[2], high = mypal[5], midpoint = 0.05) + thm_tft(base_family = "ETBembo", base_size = 10)
+
+fviz_ca_row(res.ca, alpha.row = "contrib") + thm_tft(base_family = "ETBembo", base_size = 10)
+
+fviz_contrib(res.ca, choice = "col", axes = 4)
+fviz_contrib(res.ca, choice = "col", axes = 3)
+fviz_contrib(res.ca, choice = "col", axes = 2)
+fviz_contrib(res.ca, choice = "col", axes = 1)
+
+```
+
+
+# More Exploratory Plotting with `{ggplot2}`
+
+
+```{r meas_gg, echo = TRUE}
+gmeas <- ggplot(grp, aes(x = cn, y = ndiv, fill = MEASURE, group = MEASURE)) +
+scale_fill_manual(values = grad(table(grp$MEASURE), alpha = 0.4)) +
+geom_area(position = position_dodge(width = 1)) +
+thm_tft(base_family = "ETBembo")
+gmeas2 <- ggplot(grp, aes(x = MEASURE, y = ndiv, fill = CODES, group = CODES)) +
+scale_fill_manual(values = grad(table(grp$CODES), alpha = 0.4)) +
+geom_area(position = "identity") + thm_tft(base_family = "ETBembo") +
+theme(legend.title = element_text(face = "bold", size = rel(0.65)),
+legend.text = element_text(colour = mypal[19], size = rel(0.45)),
+legend.key.size = unit(0.15, "cm"),
+legend.direction = "horizontal",
+legend.position = "bottom")
+gmeas3 <- ggplot(grp, aes(x = MEASURE, y = CODES, colour = ndiv, size = ndiv)) + thm_tft(base_family = "ETBembo") + geom_point(alpha = 0.5) + scale_colour_gradientn(colours = rev(cols3(max(grp$ndiv)))) # scale_colour_gradientn(colors = mpal(table(grp$CODES)), guide = FALSE)
+```
+
+```{r gmeas, echo = FALSE}
+ndiv_eq <- expression(mu[scriptscriptstyle(weighted)] == over(N[scriptscriptstyle(codes)]*N[scriptscriptstyle(items)], N[scriptscriptstyle(items)]))
+gmeas + labs(x = "Code ID", y = ndiv_eq)
+```
+
+```{r gmeas2, echo = FALSE}
+gmeas2 + labs(y = ndiv_eq)
+```
+
+```{r gmeas3, echo = FALSE}
+gmeas3
+```
+
+```{r gmsum_gg, echo = TRUE, results = 'asis'}
+gmsum <- ggplot(grp, aes(x = ndiv, colour = MEASURE)) +
+thm_tft(base_family = "ETBembo") +
+geom_freqpoly(binwidth = 10, position = "identity") +
+scale_colour_manual(values = grad(table(grp$MEASURE)))
+gmsum
+# + geom_freqpoly(binwidth = 10, position = position_dodge(width = 0.25))
+wgt_eq <- as.character(expression(italic("Count Weight") == over("N"[italic("Codes Applied")], "N"[italic("Measure Items")])))
+gmsum2 <- ggplot(msum, aes(x = sum)) +
+geom_histogram(binwidth = 1, aes(weight = ndiv, fill = measure)) +
+scale_fill_manual(values = grad(table(msum$measure))) +
+annotate("text", label = wgt_eq, parse = TRUE, x = -Inf, y = Inf,
+hjust = -0.25, vjust = 1.5) + thm_tft(base_family = "ETBembo")
+gmsum2 + ggtitle("Distribution of Number of Codes Applied to Each Measure")
+```
+
+# `To-Do`
+
+_**Examine mapping of measurement evaluation coding analysis to codebook categories**_
+
+```{r }
+cdbk_cc <- data.frame(cat = as.factor(c("MS", "MS", "MSxIDxG", "ID", "G", "MSxIDxG",
+"MSxG", "ID", "MSxG", "G", "IDxG", "MSxIDxG", "MSxIDxG", "G", "MSxIDxG",
+"MSxIDxG", "ID", "MS", "MSxID", "IDxG", "G", "MSxIDxG", "G", "MS", "G", "MS",
+"G", "G", "ID", "MSxIDxG", "G", "MSxG", "ID", "G", "MSxID", "MSxIDxG",
+"MSxIDxG", "IDxG", "G", "MS", "MS", "G", "MS", "IDxG", "MS", "MSxIDxG", "IDxG",
+"MS", "MS", "G", "ID", "MSxIDxG", "MS", "IDxG", "MSxG", "ID", "MSxID", "MSxG",
+"ID", "MSxIDxG", "G", "MSxID", "MSxG", "G", "ID", "MSxIDxG", "MS", "ID",
+"MSxIDxG", "IDxG", "MSxIDxG", "G", "MSxID", "ID", "MS", "MSxID", "ID", "MSxID",
+"G", "MSxG", "MS", "MS", "ID", "ID", "MSxIDxG", "ID", "MSxG", "MSxID", "ID",
+"MS", "MS", "MSxID", "MS", "ID", "G", "MS", "MS", "G", "MSxIDxG")), CID = as.factor(c("1",
+"2", "3", "6", "7", "8", "11", "13", "14", "15", "16", "18", "22", "25", "26",
+"29", "33", "34", "35", "37", "39", "40", "44", "45", "46", "47", "48", "49",
+"50", "51", "55", "56", "58", "59", "62", "66", "69", "71", "72", "73", "76",
+"77", "78", "79", "81", "86", "88", "89", "92", "93", "94", "99", "103", "104",
+"106", "108", "109", "111", "118", "113", "117", "119", "125", "127", "128",
+"129", "133", "135", "136", "139", "141", "145", "146", "148", "149", "152",
+"150", "153", "156", "157", "160", "161", "162", "163", "164", "168", "169",
+"171", "174", "175", "177", "179", "181", "182", "183", "184", "185", "186",
+"187")))
+```
+
+_**Examine relations among measures primarily using 1^st^-person perspective, versus those primarily using 3^rd^-person perspective**_
+
+```{r}
+mc2 <- data.frame(id = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 299, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 331, 332, 333, 334, 335, 336, 337, 338, 339, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363), item = c("bsri_ALL", "bsri_1", "bsri_2", "bsri_3", "bsri_4", "bsri_5", "bsri_6", "bsri_7", "bsri_8", "bsri_9", "bsri_10", "bsri_11", "bsri_12", "bsri_13", "bsri_14", "bsri_15", "bsri_16", "bsri_17", "bsri_18", "bsri_19", "bsri_20", "bsri_21", "bsri_22", "bsri_23", "bsri_24", "bsri_25", "bsri_26", "bsri_27", "bsri_28", "bsri_29", "bsri_30", "bsri_31", "bsri_32", "bsri_33", "bsri_34", "bsri_35", "bsri_36", "bsri_37", "bsri_38", "bsri_39", "bsri_40", "bsri_41", "bsri_42", "bsri_43", "bsri_44", "bsri_45", "bsri_46", "bsri_47", "bsri_48", "bsri_49", "bsri_50", "bsri_51", "bsri_52", "bsri_53", "bsri_54", "bsri_55", "bsri_56", "bsri_57", "bsri_58", "bsri_59", "bsri_60", "gemsmw_ALL", "gemsmw_1", "gemsmw_2", "gemsmw_3", "gemsmw_4", "gemsmw_5", "gemsmw_6", "gemsmw_7", "gemsmw_8", "gemsmw_9", "gemsmw_10", "gemsmw_11", "gemsmw_12", "gemsmw_13", "gemsmw_14", "gemsmw_15", "fis_ALL", "fis_1", "fis_2", "fis_3", "fis_4", "fis_5", "fis_6", "fis_7", "fis_8", "fis_9", "fis_10", "fis_11", "fis_12", "fis_13", "fis_14", "fis_15", "fis_16", "fis_17", "fis_18", "fis_19", "fis_20", "fis_21", "fis_22", "fis_23", "fis_24", "fis_25", "fis_26", "fis_27", "fis_28", "fis_29", "fis_30", "fis_31", "fis_32", "fis_33", "fis_34", "fis_35", "fis_36", "fis_37", "fis_38", "fis_39", "fis_40", "fis_41", "fis_42", "fis_43", "fis_44", "fis_45", "mrnir_ALL", "mrnir_1", "mrnir_2", "mrnir_3", "mrnir_4", "mrnir_5", "mrnir_6", "mrnir_7", "mrnir_8", "mrnir_9", "mrnir_10", "mrnir_11", "mrnir_12", "mrnir_13", "mrnir_14", "mrnir_15", "mrnir_16", "mrnir_17", "mrnir_18", "mrnir_19", "mrnir_20", "mrnir_21", "mrnir_22", "mrnir_23", "mrnir_24", "mrnir_25", "mrnir_26", "mrnir_27", "mrnir_28", "mrnir_29", "mrnir_30", "mrnir_31", "mrnir_32", "mrnir_33", "mrnir_34", "mrnir_35", "mrnir_36", "mrnir_37", "mrnir_38", "mrnir_39", "sdo_ALL", "sdo_1", "sdo_2", "sdo_3", "sdo_4", "sdo_5", "sdo_6", "sdo_7", "sdo_8", "sdo_9", "sdo_10", "sdo_11", "sdo_12", "sdo_13", "sdo_14", "sdo_15", "sdo_16", "fgrs_ALL", "fgrs_1", "fgrs_2", "fgrs_3", "fgrs_4", "fgrs_5", "fgrs_6", "fgrs_7", "fgrs_8", "fgrs_9", "fgrs_10", "fgrs_11", "fgrs_12", "fgrs_13", "fgrs_14", "fgrs_15", "fgrs_16", "fgrs_17", "fgrs_18", "fgrs_19", "fgrs_20", "fgrs_21", "fgrs_22", "fgrs_23", "fgrs_24", "fgrs_25", "fgrs_26", "fgrs_27", "fgrs_28", "fgrs_29", "fgrs_30", "fgrs_31", "fgrs_32", "fgrs_33", "fgrs_34", "fgrs_35", "fgrs_36", "fgrs_37", "fgrs_38", "fgrs_39", "mgrs_ALL", "mgrs_1", "mgrs_2", "mgrs_3", "mgrs_4", "mgrs_5", "mgrs_6", "mgrs_7", "mgrs_8", "mgrs_9", "mgrs_10", "mgrs_11", "mgrs_12", "mgrs_13", "mgrs_14", "mgrs_15", "mgrs_16", "mgrs_17", "mgrs_18", "mgrs_19", "mgrs_20", "mgrs_21", "mgrs_22", "mgrs_23", "mgrs_24", "mgrs_25", "mgrs_26", "mgrs_27", "mgrs_28", "mgrs_29", "mgrs_30", "mgrs_31", "mgrs_32", "mgrs_33", "mgrs_34", "mgrs_35", "mgrs_36", "mgrs_37", "mgrs_38", "mgrs_39", "mgrs_40", "lihs_ALL", "lihs_1", "lihs_2", "lihs_3", "lihs_4", "lihs_5", "lihs_6", "lihs_7", "lihs_8", "lihs_9", "lihs_10", "lihs_11", "lihs_12", "lihs_13", "lihs_14", "lihs_15", "lihs_16", "lihs_17", "lihs_18", "lihs_19", "lihs_20", "lihs_21", "lihs_22", "lihs_23", "lihs_24", "lihs_25", "lihs_26", "lihs_27", "lihs_28", "lihs_29", "lihs_30", "lihs_31", "lihs_32", "lihs_33", "lihs_34", "lihs_35", "lihs_36", "lihs_37", "lihs_38", "lihs_39", "lihs_40", "lihs_41", "lihs_42", "lihs_43", "lihs_44", "lihs_45", "lihs_46", "lihs_47", "lihs_48", "lihs_49", "lihs_50", "lihs_51", "lihs_52", "oi_ALL", "oi_1", "oi_2", "oi_3", "oi_4", "oi_5", "oi_6", "oi_7", "oi_8", "oi_9", "oi_10", "oi_11", "oi_12", "oi_13", "oi_14", "oi_15", "oi_16", "oi_17", "oi_18", "oi_19", "oi_20", "oi_21", "oi_22", "oi_23", "oi_24", "oi_25", "oi_26", "oi_27", "scq_ALL", "scq_1", "scq_2", "scq_3", "scq_4", "scq_5", "scq_6", "scq_7", "scq_8", "scq_9", "scq_10", "scq_11", "scq_12", "scq_13", "scq_14", "scq_15", "scq_16", "scq_17", "scq_18", "scq_19", "scq_20"), r1 = c(39, 93, 34, 175, 13, 3, 3, 93, 35, 175, 8, 3, 8, 49, 8, 3, 163, 175, 16, 3, 56, 39, 94, 49, 139, 94, 175, 13, 35, 139, 49, 139, 49, 13, 93, 175, 35, 149, 34, 139, 111, 49, 49, 35, 49, 49, 49, 94, 94, 109, 94, 34, 49, 49, 139, 139, 139, 94, 94, 49, 139, 8, 8, 157, 171, 171, 8, 157, 11, 11, 11, 8, 11, 8, 49, 49, 49, 73, 55, 175, 157, 157, 135, 93, 182, 157, 157, 157, 157, 49, 0, 0, 168, 187, 51, 109, 8, 129, 3, 153, 8, 51, 168, 168, 49, 49, 8, 49, 135, 135, 129, 129, 11, 129, 156, 156, 129, 129, 129, 187, 8, 135, 18, 73, 164, 182, 182, 8, 73, 164, 73, 18, 94, 94, 73, 168, 187, 157, 18, 168, 182, 51, 157, 164, 14, 49, 49, 94, 164, 49, 136, 49, 109, 168, 51, 109, 135, 8, 156, 49, 156, 164, 49, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 0, 146, 168, 168, 168, 168, 157, 51, 157, 8, 49, 133, 8, 8, 8, 8, 8, 6, 11, 160, 160, 181, 160, 93, 0, 93, 93, 93, 187, 135, 187, 0, 157, 135, 157, 135, 135, 135, 135, 171, 0, 0, 49, 187, 93, 187, 168, 187, 168, 60, 93, 164, 49, 157, 187, 187, 0, 49, 157, 58, 168, 133, 135, 145, 133, 168, 145, 49, 187, 49, 168, 133, 49, 49, 94, 187, 145, 60, 8, 135, 187, 106, 92, 171, 92, 171, 171, 106, 106, 26, 106, 108, 106, 106, 106, 29, 26, 187, 29, 29, 29, 29, 49, 29, 29, 171, 26, 133, 157, 157, 157, 88, 164, 88, 82, 26, 88, 88, 86, 127, 164, 164, 169, 135, 135, 22, 106, 129, 129, 49, 106, 106, 106, 99, 29, 157, 157, 168, 181, 29, 164, 1, 133, 26, 26, 164, 86, 86, 122, 86, 86, 29, 26, 89, 86, 86, 89, 89, 89, 37, 164, 164, 0, 179, 179, 145, 60, 55, 55, 55, 46, 46, 46, 179, 179, 145, 164, 164, 164, 164, 46, 46, 46), r2 = c(0, 0, 129, 139, 39, 0, 0, 22, 0, 0, 82, 171, 145, 35, 139, 0, 0, 0, 0, 163, 62, 0, 0, 0, 0, 35, 0, 0, 0, 0, 0, 0, 0, 49, 181, 0, 0, 0, 49, 0, 62, 0, 3, 0, 0, 0, 163, 0, 0, 94, 0, 129, 93, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 164, 175, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 186, 182, 0, 51, 51, 22, 0, 0, 168, 51, 187, 168, 0, 0, 0, 51, 0, 127, 157, 11, 49, 0, 93, 0, 156, 0, 0, 0, 0, 0, 0, 0, 51, 94, 171, 109, 49, 129, 135, 49, 51, 94, 129, 135, 133, 14, 0, 73, 73, 94, 0, 0, 171, 0, 0, 0, 0, 0, 0, 0, 171, 0, 0, 0, 0, 171, 157, 94, 109, 119, 136, 187, 0, 0, 109, 136, 0, 0, 136, 0, 109, 0, 109, 0, 0, 175, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 168, 0, 0, 157, 0, 168, 175, 49, 168, 133, 8, 0, 0, 157, 0, 129, 157, 0, 93, 0, 94, 0, 16, 0, 0, 0, 0, 6, 187, 163, 0, 0, 0, 0, 0, 187, 157, 157, 0, 0, 0, 0, 60, 0, 181, 157, 60, 157, 156, 187, 133, 0, 93, 94, 94, 0, 0, 60, 0, 0, 56, 49, 60, 37, 157, 171, 60, 51, 133, 0, 60, 60, 171, 187, 0, 0, 171, 157, 0, 0, 164, 0, 0, 0, 0, 26, 92, 171, 171, 0, 0, 113, 113, 0, 145, 29, 29, 51, 171, 0, 133, 26, 0, 171, 49, 51, 15, 29, 29, 29, 164, 86, 164, 1, 86, 164, 82, 122, 164, 153, 1, 164, 164, 164, 164, 95, 1, 133, 99, 99, 99, 1, 15, 164, 0, 0, 157, 0, 164, 0, 164, 164, 133, 164, 133, 164, 164, 164, 1, 1, 51, 82, 1, 89, 89, 37, 37, 37, 89, 0, 0, 0, 186, 133, 133, 133, 133, 0, 133, 60, 60, 60, 164, 133, 133, 133, 133, 0, 133, 164, 164, 164), a1 = c(0, 93, 34, 56, 0, 49, 49, 93, 49, 56, 82, 56, 49, 111, 49, 49, 49, 49, 58, 49, 56, 111, 94, 49, 49, 111, 56, 13, 111, 49, 49, 22, 56, 13, 93, 56, 49, 111, 56, 139, 82, 49, 49, 49, 56, 49, 49, 94, 0, 111, 49, 16, 13, 49, 0, 111, 56, 49, 49, 49, 156, 60, 8, 86, 86, 49, 11, 86, 11, 11, 11, 73, 11, 8, 73, 73, 49, 71, 60, 56, 46, 46, 51, 22, 187, 157, 93, 93, 157, 49, 49, 56, 168, 187, 51, 49, 11, 49, 56, 153, 8, 51, 168, 168, 49, 49, 8, 56, 157, 51, 94, 171, 11, 49, 49, 51, 49, 51, 129, 129, 8, 129, 18, 71, 51, 187, 78, 8, 113, 164, 113, 18, 71, 71, 113, 168, 168, 71, 18, 168, 187, 51, 111, 164, 18, 111, 111, 129, 164, 111, 111, 111, 111, 168, 51, 111, 135, 111, 111, 111, 111, 164, 111, 33, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 69, 157, 69, 157, 157, 157, 157, 51, 157, 168, 133, 8, 8, 8, 8, 8, 8, 6, 11, 160, 160, 160, 160, 160, 160, 94, 94, 94, 6, 135, 187, 133, 157, 51, 51, 135, 135, 51, 51, 171, 69, 8, 51, 111, 157, 187, 157, 111, 157, 111, 187, 78, 3, 157, 187, 94, 69, 69, 111, 58, 157, 111, 135, 111, 94, 157, 8, 175, 51, 133, 157, 133, 111, 48, 94, 187, 72, 111, 8, 135, 187, 82, 106, 106, 92, 171, 26, 106, 171, 106, 33, 106, 113, 113, 113, 8, 29, 82, 51, 26, 29, 122, 171, 1, 133, 34, 26, 15, 69, 69, 69, 122, 35, 122, 1, 26, 16, 162, 122, 168, 153, 1, 1, 51, 51, 1, 26, 88, 88, 88, 88, 88, 1, 15, 164, 157, 157, 157, 29, 29, 157, 1, 133, 72, 72, 3, 72, 62, 78, 62, 72, 29, 26, 29, 127, 29, 37, 37, 37, 37, 164, 164, 82, 179, 55, 133, 60, 60, 55, 55, 60, 82, 71, 164, 133, 164, 1, 185, 164, 133, 164, 164, 78), a2 = c(0, 111, 0, 0, 0, 139, 139, 111, 139, 139, 111, 139, 139, 139, 139, 139, 139, 139, 139, 139, 82, 139, 139, 139, 139, 139, 111, 139, 0, 94, 139, 35, 139, 139, 111, 133, 139, 139, 139, 0, 111, 139, 139, 139, 139, 139, 111, 0, 0, 156, 139, 0, 93, 56, 0, 139, 135, 139, 139, 56, 78, 0, 86, 157, 92, 56, 86, 157, 86, 86, 76, 86, 86, 86, 86, 86, 73, 73, 187, 175, 157, 157, 129, 93, 0, 168, 157, 51, 168, 56, 46, 0, 0, 0, 156, 157, 0, 129, 0, 93, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 129, 129, 0, 129, 129, 135, 129, 129, 156, 156, 135, 135, 49, 73, 164, 0, 0, 0, 0, 0, 0, 0, 73, 73, 0, 0, 187, 73, 0, 0, 0, 135, 0, 168, 0, 0, 0, 0, 187, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 92, 92, 92, 92, 92, 92, 92, 92, 92, 92, 92, 92, 92, 92, 92, 92, 72, 0, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 187, 187, 0, 0, 187, 135, 94, 0, 187, 135, 135, 175, 72, 0, 157, 187, 0, 0, 0, 187, 168, 0, 0, 164, 0, 187, 0, 187, 72, 72, 157, 0, 168, 0, 0, 0, 0, 168, 0, 0, 187, 0, 168, 0, 0, 0, 187, 0, 0, 175, 0, 0, 0, 164, 1, 0, 106, 175, 171, 0, 175, 171, 106, 108, 0, 0, 0, 109, 26, 187, 0, 157, 0, 0, 0, 0, 171, 78, 51, 133, 157, 157, 157, 168, 0, 168, 92, 0, 122, 0, 0, 0, 0, 0, 18, 135, 135, 0, 106, 185, 185, 185, 185, 185, 0, 185, 0, 164, 164, 168, 72, 164, 164, 0, 0, 133, 62, 133, 16, 0, 179, 106, 78, 171, 82, 78, 0, 72, 72, 78, 78, 72, 0, 0, 86, 186, 179, 186, 62, 133, 0, 133, 49, 86, 0, 179, 164, 133, 164, 164, 0, 164, 179, 0, 164), pov = c(0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 3, 3, 3, 3, 3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 3, 1, 1, 1, 1, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 1, 3, 1, 3, 1, 1, 1, 1, 0, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 0, 1, 1, 1, 3, 1, 1, 1, 3, 1, 3, 1, 1, 1, 3, 1, 1, 1, 3, 1, 3))
+
+mc2 <- within(mc2, {
+	a2f <- factor(a2, ordered = FALSE)
+	a1f <- factor(a1)
+	r2f <- factor(r2)
+	r1f <- factor(r1)
+})
+```
+
+# References`r R.cite_r(file = "~/GitHub/auxDocs/REFs.bib", footnote = FALSE)`
+
+---
+title: "s-meas.R"
+author: "rachel97"
+date: "Mon Oct 17 09:03:19 2016"
+---

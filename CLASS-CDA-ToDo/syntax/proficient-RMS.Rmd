@@ -1,0 +1,163 @@
+---
+title: "Categorical Data Visualization - Barchart"
+subtitle: "(CDA In-Class Example; Data: proficient.sav)"
+author: "Riley Smith"
+date: "03 October 2016"
+url: "web.pdx.edu/~newsomj/cdaclass"
+---
+
+```{r setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache=FALSE}
+source("../SETUP.R")
+knitr::opts_chunk$set(
+    tidy = TRUE,
+    echo = TRUE,
+    cache = FALSE,
+    fig.keep = 'high',
+    fig.show = 'asis',
+    results = 'asis',
+    autodep = T,
+    dev = 'pdf',
+    fig.path = "graphics/proficient/rplot_",
+    fig.width = 7,
+    out.widht = '\\linewidth',
+    fig.asp = 1
+    )
+```
+
+# @azen2011categorical's (Chapter 3) Proficiency Data
+
+```{marginfigure}
+"See ['Chapter3, Figure4'](https://people.uwm.edu/azen/files/2016/07/AWBookDatasets-1ydyjta.pdf)"
+```
+
+> "suppose that federal guidelines state that $80\%$$ of students should demonstrate proficiency in mathematics, and in a randomly selected sample of 10 students only $70\%$ of students were found to be proficient in mathematics. In such a case, we may wish to test whether the proportion of students who are proficient in mathematics in the population is significantly different than the federal guideline of $80\%$. In other words, we would like to know whether our obtained sample proportion of $0.7$ is significantly lower than $0.8$, so we would test the null hypothesis $H_{0}: \pi = 0.8$ against the (one-sided, in this case) alternative $H_{1}: \pi < 0.8$" (p. 23).
+>
+> > "Two variables are entered: the _proficiency level (`prof`)_ and the _frequency (`count`)_" (p. 32).
+> >
+> > > "Note that if raw data for $10$ individuals (i.e., $10$ `rows of data`) were analyzed, where the variable called `prof` consisted of _$7 yes$ responses_ and _$3 no$ responses_, the counts would be computed by the program and would not be needed as input" (p. 32).
+>
+> `r quote_footer("@azen2011categorical, (pp. 23 \\& 32)")`
+
+The `prof` variable should be read by `R` as a `string variable`.
+
+
+```{r dat, warning=FALSE, message=FALSE}
+library(foreign) ## read.spss() ##
+dat <- read.spss("data/proficient.sav", to.data.frame = TRUE)
+```
+
+## Data Inspection \& Cleaning
+
+```{r isNA}
+str(dat)
+    ## The proficient.sav dataset is HUGE!
+dat <- tbl_df(dat)
+    ## see the {dplyr} package - tbl_df's are just better
+    ## (than dataframes), particularly when it comes to
+    ## very large dataframes, such as these proficiency data.
+
+glimpse(dat) ## {pkg:dplyr} ##
+
+Risna <- function(x) sum(is.na(x))
+    ## Getting a count of NA values in the original dataframe ##
+
+sapply(dat, Risna)
+```
+
+It appears that there are several instances of `NA` in the `level` column. However, since I do not know these data too well just yet, I am apprehensive, to say the least, to just outright remove those rows containing `NAs`. Instead, I'm going to assign an arbitruary, but meaningful to me, value to all instances of `NA` throughout the dataset. `r margin_note("The output from \\texttt{sapply()} above indicates that the \\texttt{level} column is the only one with \\texttt{NAs}. So, in the next set of analyses, we should only see changes to that column in the end.")`
+
+To ensure that I do not accidentally override an existing value for the `level` variable by assigning an arbitruary value to `NA's`, I first call `unique(dat$level)` below to get a list of the numeric values currently assigned to the levels of `dat$level`. Then, I create a quick function (`R.na()`) to replace `NA` values within a given `R-object`.
+
+```{r cleanDat}
+unique(dat$level)
+levels(dat$level)
+lv <- c(levels(dat$level), "Unknown")
+    ## I'm going to have to re-assign the factor levels to dat$level, so
+    ## I am saving the labels, with an added level for the NAs, to use later
+
+R.na <- function(x, v = 0){
+    ## x = object to be manipulated,
+    ## v = value to assign to NAs ##
+    x <- ifelse(is.na(x), v, x)
+    return(x)
+}
+
+dat$level <- sapply(dat$level, R.na, v = 0)
+    ## 0 does not currently mean anything else in this data, so I am going
+    ## to use to represent it's acutal meaning, which is simply a NULL value
+
+dat$level <- factor(dat$level, levels = c(4, 3, 2, 1, 0), labels = lv)
+unique(dat$level)
+levels(dat$level)
+glimpse(dat)
+sapply(dat, R.isna)
+
+```
+
+## Setting up for binomial analysis
+
+Based on their description (and the fact that example pertains primarily to the Bernoulli Distribution), it appears that @azen2011categorical used a dichotomized version of the `level` variable in their analysis example. However, I am curious about the level of extant intformation available from this variable's original 4-categories^[i.e., `r levels(dat$level)`], as well as the difference, if any, between the two categorical data structuring methods.
+
+```{r datDich}
+rec <- "c('proficient', 'advanced') = 1; c('Unknown', 'minimal', 'basic') = 0"
+dat$lev.D <- car::recode(dat$level, rec)
+    ## "D" = "Dichotomous" ##
+summary(dat$lev.D)
+```
+
+`r newthought("Quick aside:")` Instead of the above dichotomization, I could have done the following:
+
+```{r}
+rec1 <- c("'minimal'=1; 'basic'=2; 'proficient'=3; 'advanced'=4; 'Unknown'=0")
+dat$lev.D1 <- car:::recode(dat$level, rec1)
+dat$lev.D1 <- as.integer(dat$lev.D1)
+dat$lev.D1 <- cut(dat$lev.D1, breaks = 2, right = FALSE)
+D1labs <- levels(dat$lev.D1)
+levels(dat$lev.D1) <- c("0", "1")
+summary(dat$lev.D1)
+
+```
+
+However, as you can see by the differences in the summary outputs above and the barplots below resulting from these different dichotomizing procedures, when I simply "cut()" the factor levels, I get a nicely split (i.e., "cut") factor. Unfortunately, the proportions of the newly dichotomized factor's levels do not necessarily reflect the actual proportions in the data.`r margin_note("Moral of the story - be careful when cutting and never assume that \\texttt{R} knows what you are trying to do (\\texttt{R}'s purpose is not to Harry Huidini your data by reading your mind (or your prof's/advisor's mind), but rather to provide you with a set (to put it mildly) of tools to help you do the work ... but you still have to do the actual thinking work).")`
+
+```{r}
+dat$level <- relevel(dat$level, ref = "Unknown")
+    ## re-ordering levels for presentation ##
+```
+
+```{r barChart1, echo=FALSE}
+table(dat$level) %>% ## see {dplyr} package ##
+    barplot(main = "All Possible Proficiency Levels", col = mpal2(5))
+table(dat$level)
+
+table(dat$lev.D) %>%
+    barplot(main = "Dichotomized Proficiency Levels", xlab = "Not Proficient                 Proficient", col = mpal2(5)[c(1, 5)])
+table(dat$lev.D)
+
+table(dat$lev.D1) %>%
+    barplot(main = "Dichotomized Proficiency Levels Resulting from 'cut(...)'", xlab = expression(paste(X <= 3,"                 ", X >= 3)), col = mpal2(5)[c(1, 5)])
+table(dat$lev.D1)
+
+```
+
+Below are the exact same plots, except with a random sample of $n = 10$ cases from the proficiency data per the example in @azen2011categorical (Chapter 3).
+
+```{r dat.s}
+dat.s <- sample_n(dat, 10)
+```
+
+```{r barChart2, echo=FALSE}
+table(dat.s$level) %>% ## see {dplyr} package ##
+    barplot(main = "All Possible Proficiency Levels", col = mpal2(5))
+table(dat.s$level)
+
+table(dat.s$lev.D) %>%
+    barplot(main = "Dichotomized Proficiency Levels", xlab = "Not Proficient                 Proficient", col = mpal2(5)[c(1, 5)])
+table(dat.s$lev.D)
+
+table(dat.s$lev.D1) %>%
+    barplot(main = "Dichotomized Proficiency Levels Resulting from 'cut(...)'", xlab = expression(paste(X <= 3, "                 ", X >= 3)), col = mpal2(5)[c(1, 5)])
+table(dat.s$lev.D1)
+```
+
+# References

@@ -1,0 +1,129 @@
+---
+title: "Homework 3-Outputs to Include"
+author: "Riley Smith"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+---
+
+```{r setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache=FALSE}
+source("../SETUP.R")
+knitr::opts_chunk$set(tidy = FALSE, echo = TRUE, cache = FALSE, fig.keep = 'high', fig.show = 'hold', results = 'asis', autodep = TRUE, Rplot = TRUE, dev = 'pdf', fig.path = 'graphics/HW3/rplot-q1-', fig.width = 7, fig.height = 7, out.width = "\\linewidth", echo = FALSE)
+```
+
+-----
+
+`r tufte::newthought("\\LARGE{Question-1}")`
+
+# Q1a (\checkmark):
+
+$$ M = a_{0} + aX + e+_{M} $$
+
+$$ \logit(Y) = b_{0} + bM + c′X + e_{y} $$
+
+1. Direct effect regression coefficients \checkmark
+    - $a (M ~ X): \beta_{a} = 0.082 (SE = 0.036), p = 0.023$
+    - $b (Y ~ M): \beta_{b} = 0.071 (SE = 0.023), p = 0.002$
+    - $c' (Y ~ X): \beta_{c} = 0.045 (SE = 0.015), p = 0.003$
+2. Indirect effect coefficient \checkmark
+    - $ab (M*X): \beta_{ab} = 0.006 (SE = 0.003), p = 0.064$
+    - $Total: \beta_{T} = 0.051 (SE = 0.015), p = 0.001$
+3. Bootstrap confidence limits \checkmark
+    - $a (M ~ X): LCL = 0.0103, UCL = 0.1553$
+    - $b (Y ~ M): LCL = 0.0306, UCL = 0.1213$
+    - $c' (Y ~ X): LCL = 0.0158, UCL = 0.0739$
+    - $ab (M*X): LCL = 0.0006, UCL = 0.0127$
+    - $Total: LCL = 0.0209, UCL = 0.0795$
+
+$$ M = `r fit2.par[8, 2]`a_{0} + `r fit2.par[2, 2]`aX + e_{M} $$
+
+$$ logit(\hat{Y}) = `r fit2.intercept`\beta_{0} + `r fit2.X`\beta_{1_{M}} + `r fit2.M`c'{X}} + e_{y}$$
+
+`r tufte::newthought("Mediation Model Summary.")` Two regression models were tested to investigate whether the association between mother's race (white or non-white) and any reported abuse (yes/no) is mediated by the number of child neglect reports. The hypothesized mediator variable, number of neglect reports, was first regressed on the mother's race (the hypothesized predictor variable), and in the second model any reported abuse was regressed on both the count of neglect reports and the mothers race variable. In the first regression model, mother's race was significantly related to higher counts of reported neglect, $b = 0.082, SE = .036, p < .05, 95\% CI = .0103, .1553$. In the model, both the mother's race, $b = .045, SE = .015, p = < .01, 95\% CI .016, .013$, and counts of neglect reports, $b = .071, SE = .023, 95\% CI = .031, .121$, were significantly associated whether there were any reports of abuse. In addition, the indirect effect was marginally significant, $b = .006, SE = .003, p = 0.064$, with the boostrap confidence intervals derived from 1000 samples not including 0 ($95\% CI = .0006, .0127$). Taken together, however, these regression analyses do not support the mediation hypothesis regarding the relations among the variables tested, as the hypothesized mediating variable's effect was not influentual on the relationship between the hypotehsized predictor and the outcome.
+
+# Q1b: \checkmark
+
+`r tufte::newthought("Include:")`
+
+- Residual plot with standardized residuals on the y-axis and predicted probabilities on the x-axis \checkmark
+- Residual plot of casewise values for $\Delta\chisq$ \checkmark
+- Residual plot of Casewise values for $\Delta D$ \checkmark
+- Residual plot ofCasewise values for $\Delta \beta$ \checkmark
+- 4-Column table of plotted residual residuals: \checkmark
+    - $\Delta\chisq$ \checkmark
+    - $\Delta Deviance$ \checkmark
+    - $\Delta\beta$ \checkmark
+
+`r tufte::newthought("Report:")`
+
+1. What each diagnostic test tells you \checkmark
+2. The diagnostic values for any cases that you judge to be possible outliers or influential data points \checkmark
+
+`r tufte::newthought("Multiple Logistic Regression Diagnostics Summary")`. In the second residual plot above, with standardized pearson resdiuals on the Y-axis and predicted values on the X-axis, _Case \#`1046`_ is identified as an outlier. Examining the $\Delta\chisq$ and $\Delta\beta$ for this case (see above) against the aggregated descriptives for the full set of observations included in the model (see below), it is clear that this case is is an outlier. This conclusion is supported by the studentized residual outlier test provided above. However, the residual data visualizations collectively suggest that this one observation (i.e., _Case \#`1046`_) is not necessarily heavily influential on the fitted model's coefficients. For example, in the first diagostic plot provided above, the solid line represents the fitted _loess model_ for the tested model's predicted values against the model's residuals. The fitted loess line's slope appears to correspond appropriately with the data with little influence from the outlier case^[Located and labeled in the bottom right corner of the plot]. The same behavior is observed across subsequent visualizations three plots respectively showing the $\Delta\chisq$, $\Delta\beta$, and $\Delta Deviance (D)$ plotted against the tested model's predicted probabilities, where the solid gray line in each plot represents the best fitting (loess) curve for each diagnostic statistic against the predicted probabilities. In all of the above-described visualizations, the best fitting line appears most heavily influened by the data clustered toward the lower ends of each diagnostic statistic's range, rather than the labeled outlying data point in each plot. However, the difference between _Case \#`1046`'s_ predicted probability ($P = 0.9914$ in the table above) against the mean predicted probability for the full set of observations included in the model ($M = 0.07$ in the table below), suggests that this particular data point's predicted value could be influentual on the tested model's outcome (_Abuse_). This influence could increase the risk of Type I error regarding the model's predictors relations with the outcome. In particular, _Case \#`1046`'s_ relatively high score on the _Welfare_ predictor ($Welfare_{1046} = 8$, whereas $\mu_{Welfare} = `r mean(dat$welfare)`$) could influence the regression coefficient obtained for this predictor ($\beta_{Welfare} = `r fit$coefficients[[5]]`$).
+
+\newpage
+
+`r tufte::newthought("\\LARGE{Question-2}")`
+
+# Q2a: \checkmark
+
+1. Regression coefficients \checkmark
+2. Odds ratios \checkmark
+3. Confidence limits \checkmark
+4. Model fit information \checkmark
+5. A pseudo-R2 measure \checkmark
+
+`r tufte::newthought("Lagged Regression Model Summary.")` A lagged logistic regression model was tested to investigate whether baseline reported income adequacy and health predicted loneliness at Time-2 after controlling for loneliness at Time-1.<!-- Respondents' self=reported Time-2 longliness was regressed on self-reported Time-1 loneliness and baseline self-reports of income adequecy and overall health.--> In line with expectations based on bivariate correlations among the outcome variable and each predicter included in the model (see Figure 1), income adequecy reported at baseline did not significantly relate to Time-2 reported loneliness ($b = `r b2`, SE = `r se2`, OR = `r OR2`, p = `r p2`$), whereas both Time-1 reported loneliness and baseline  health significantly predicted loneliness at Time-2. Specifically, respondents higher in loneliness at Time-1 were more likely to have higher levels of Time-2 loneliness relative to respondents with lower levels of loneliness at either timepoint, $b = `r b1`, SE = `r se1`, OR = `r OR1`, p < `r p1`$. In contrast, respondents with higher baseline health scores were more likely to have lower Time-2 reported loneliness relative to respondents with lower baseline health scores and higher Time-2 reported loneliness, $b = `r b3`, SE = `r se3`, OR = `r OR3`, p < `r p3`$. Overall, the model accounted for `r rsq.perc` of the variance in reported Time-2 loneliness (_McFadden's pseudo_-$R\sq = `r rsq.mf`$).
+
+
+# Q2b: \checkmark
+
+1. Regression coefficients \checkmark
+2. Odds ratios \checkmark
+3. Confidence limits \checkmark
+4. Model fit information \checkmark
+5. A pseudo-R2 measure. \checkmark
+
+`r tufte::newthought("Cumulative Logistic Regression Summary.")` An ordered logistic regression model was tested to investigate whether age, education, and health at baseline predicted baseline reported income adequacy. The predictors collectiely accounted for a significant amount of variance in the outcome, likelihood ratio $\chisq(3) = 9.379, p < .05$. However, only baseline health independently predicted income adequacy at baseline, $b = .3581, SE = .1607, OR = 1.4306, p < .05$; such that point increases in baseline health were each associated with approximately $35\%$ increases in baseline income adequacy. Overall, the model accounted for $1.3\%$ of the variance in reported baseline income adequacy (_McFadden's pseudo_-$R\sq = 0.013$).
+
+
+# Q2c:
+
+1. Regression coefficients \checkmark
+2. Confidence limits \checkmark
+3. Model fit information \checkmark
+4. A pseudo-R2 measure. \checkmark
+5. One or two sentences about how your  and conclusions compare to the logistic model above \checkmark
+
+`r tufte::newthought("Ordinal Probit Regression Summary.")` An ordinal probit regression model was tested to investigate whether age, education, and health at baseline predicted baseline reported income adequacy. The predictors collectiely accounted for a significant amount of variance in the outcome, likelihood ratio $\chisq(3) = 10.84, p < .05$. However, only baseline health independently predicted income adequacy at baseline, $b = .2384, SE = .0947, p < .05$; such that point increases in baseline health were each associated with approximately $23\%$ increases in baseline income adequacy. Overall, the model accounted for $1.5\%$ of the variance in reported baseline income adequacy (_McFadden's pseudo_-$R\sq = 0.015$).
+
+`r tufte::newthought("Comparison with Cumulative Logistic Model.")` The above described ordinal probit regression analysis findings only differ from the cumulative findings in terms of the magnitude of the coefficients and, somewhat in terms of total model's variance explained (i.e., _McFadden's pseudo_-$R\sq = 0.015$ versus $0.013$ in the logistic analysis). Overall, however, the same conclusions made based on the cumulative logistic regression model can be made based on findings from the probit model analysis here.
+
+
+\newpage
+`r tufte::newthought("\\LARGE{Question-3}")`
+
+# Q3a:
+
+
+`r tufte::newthought("Include:")`
+
+- Residual plot with standardized residuals on the y-axis and predicted probabilities on the x-axis
+- Residual plot of casewise values for $\Delta\chisq$
+- Residual plot of Casewise values for $\Delta D$
+- Residual plot ofCasewise values for $\Delta \beta$
+- 4-Column table of plotted residual residuals:
+    - $\Delta\chisq$
+    - $\Delta Deviance$
+    - $\Delta\beta$
+
+`r tufte::newthought("Report:")`
+
+1. What each diagnostic test tells you
+2. The diagnostic values for any cases that you judge to be possible outliers or influential data points
+
+# Q3b:
+
+1. Regression coefficients
+2. Confidence limits
+3. Model fit information
+4. A pseudo-R2 measure.
+5. One or two sentences about how your results and conclusions compare to the logistic model above.

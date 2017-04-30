@@ -1,0 +1,211 @@
+---
+title: "Homework 3 - Question 1a"
+author: "Riley Smith"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+---
+
+
+```{r setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache=FALSE}
+source("../SETUP.R")
+knitr::opts_chunk$set(tidy = FALSE, echo = TRUE, cache = FALSE, fig.keep = 'high', fig.show = 'hold', results = 'asis', autodep = TRUE, Rplot = TRUE, dev = 'pdf', fig.path = 'graphics/HW3/rplot-q1-', fig.width = 7, fig.height = 7, out.width = "\\linewidth", echo = FALSE)
+```
+
+
+# Question-1: Second Early Head Start data set
+
+
+```{r dat1, fig.cap="Bivariate correlations (upper), implied bivariate loess model curves (lower), and individual variable distributions (diagonal)", fig.fullwidth=TRUE}
+dat <- R.rspss("data/child2.sav")
+dat <- na.omit(dat)
+R.msmm(dat)[, -5]
+```
+
+
+
+# Mediation Model Data Descriptive Statistics
+
+
+```{r medDat}
+med.n <- dat[, c(1, 6, 5)] ## Predictor (x) as numeric ##
+names(med.n) <- c("Y", "M", "X")
+```
+
+
+
+
+```{r dat1Hists, fig.margin=TRUE, echo=FALSE}
+palette(pal_my)
+bcol <- pal_my[c(16, 13)] %>% sapply(adjustcolor, alpha.f = 0.85)
+barplot(table(med.n$X), xlab = " ", col = bcol, 
+		main = "Mother's Race", 
+		names.arg = c("\n0\n(Non-White)", "\n1\n(White)"))
+```
+
+
+
+
+```{r dat1Hists2, fig.margin=TRUE, echo=FALSE}
+library(MASS)
+truehist(med.n$M, xlab = " ", freq = FALSE, col = mpal(seq(1:9), a = 0.75),
+     main = "Child neglect reports"); lines(density(med.n$M),
+                                                      col = 19, lwd = 2.5)
+```
+
+
+
+
+```{r dat1Hists3, fig.margin=TRUE, echo=FALSE}
+barplot(table(med.n$Y), xlab = " ", col = bcol, 
+		main = "Any Abuse Reported", 
+		names.arg = c("\n0\n(No)", "\n1\n(Yes)"))
+```
+
+
+
+```{r }
+library(psych) ## pairs.panels() (which is an extension of pairs() from the base package) ##
+pairs.panels(med.n, hist.col = pal_my[16], cex.cor = TRUE, col = pal_my[17])
+```
+
+
+\newpage
+
+
+```{r interactionPlot, echo=FALSE}
+with(med.n, {
+    interaction.plot(X, M, Y, ## {pkg:stats} ##
+        trace.label = "Neglect", fixed = TRUE,
+        col = mpal(seq(1:length(unique(med.n$M))), p = sci), lwd = 2,
+        main = "Interaction Effects Implied by Variable Correlations",
+        ylab = expression(mu[Abuse]), xlab = "White")
+})
+```
+
+
+
+## Mediation Analysis using the `{lavaan}` `R`-Package
+
+
+```{r m, echo=TRUE}
+library(lavaan) ## "lavaan()", "sem()" ###'
+m <- '#Y ~ c*X
+       M ~ a*X
+       Y ~ b*M + c*X
+       ab := a*b
+       total := c + (a*b)'
+fit <- sem(m, data = med.n,
+        estimator = "ML", ## Maximum likelihood estimator
+                            ## yeilds estimates and params similar to SAS ##
+        link = "logit", 
+        ## ML only works with the probit link - UNLESS you set "se" to "bootstrap" (!!!) ##
+        se = "bootstrap")
+```
+
+
+
+```{r fit}
+## Model fit stats ##
+fit.fits <- fitMeasures(fit)[c('aic', 'bic')]
+fit.llr <- logLik(fit)
+fit.rsq <- inspect(fit, 'r2')
+
+## Model summary stats ##
+fit.mus <- fitted(fit)$mean
+fit.cov <- fitted(fit)$cov
+fit.cor <- cov2cor(fit.cov)
+
+fit.bci <- parameterEstimates(fit, level = 0.95, boot.ci.type = "bca.simple")
+
+fit.par <- parameterEstimates(fit) ## Y ~ 1 == model intercept ##
+    ## Below is for formatting purposes ##
+params2 <- matrix(paste0(fit.par[, 1], " ",
+                           fit.par[, 2], " ",
+                           fit.par[, 3]))
+fit.par <- cbind(params2, fit.par[, c(-1:-4)]) %>% data.frame()
+
+fit.se <- cbind(params2, fit.par$se)
+fit.coefs <- cbind(params2, fit.par$est)
+
+fit.int <- fit.par[7, 2] %>% as.numeric() %>% round(3) ## b0 ##
+
+fit.M <- fit.par[3, 2] %>% as.numeric() %>% round(3) ## Y ~ M (b2) ## 
+fit.a <- fit.par[2, 2] %>% as.numeric() %>% round(3) ## M ~ X ##
+fit.X <- fit.par[1, 2] %>% as.numeric() %>% round(3) ## Y ~ X (b1) ##
+fit.ab <- fit.par[10, 2] %>% as.numeric() %>% round(3) ## Y ~ X*M (b3) ##
+```
+
+
+
+## Mediation Model Summary Statistics and Model Fit Indices
+
+
+```{r fitKabs, echo=FALSE}
+fit.par[, -1] <- apply(fit.par[, -1], 2, round, digits = 4)
+fit.par <- apply(fit.par, 2, R.na, v = " ")
+
+labs <- c("Parameter", "Estimate", "SE", "Z", "P-Value", "$CI_{lower}$", "$CI_{upper}$")
+
+kable(
+    fit.par,
+    digits = 2,
+    caption = "Model 2 (Mediation Model) Summary Statistics",
+    align = c("c", rep("r", ncol(fit.par))), col.names = labs
+)
+
+
+
+kable(fit.rsq, caption = "Model 2 $R\\sq$")
+
+fit.cov[upper.tri(fit.cov)] <- 0
+kable(fit.cov, caption = "Model 2 Covariance Matrix",
+      format.args = list(zero.print = " "))
+kable(fit.mus, caption = "Model 2 Coefficients' Means")
+
+# fit.llr
+names(fit.fits) <- c("AIC", "BIC")
+kable(fit.fits, caption = "Absolute Fit Indices")
+
+anova(fit)
+```
+
+
+`r tufte::newthought("Mediation Analysis Summary.")` Two regression models were tested to investigate whether the association between mother's race (white/non-white) and any reported abuse (yes/no) is mediated by the number of child neglect reports. The hypothesized mediator variable, number of neglect reports, was first regressed on the mother's race (the hypothesized predictor variable), and in the second model any reported abuse was regressed on both the count of neglect reports and the mothers race variable. In the first regression model, mother's race was significantly related to higher counts of reported neglect, $b = 0.082, SE = .036, p < .05, 95\% CI = .0103, .1553$. In the model, both the mother's race, $b = .045, SE = .015, p = < .01, 95\% CI .016, .013$, and counts of neglect reports, $b = .071, SE = .023, 95\% CI = .031, .121$, were significantly associated whether there were any reports of abuse. In addition, the indirect effect was marginally significant, $b = .006, SE = .003, p = 0.064$, with the boostrap confidence intervals derived from 1000 samples not including 0 ($95\% CI = .0006, .0127$). Taken together, however, these regression analyses do not support the mediation hypothesis regarding the relations among the variables tested, as the hypothesized mediating variable's effect was not influentual on the relationship between the hypotehsized predictor and the outcome.
+
+
+$$ logit(\hat{Y}) = `r fit.int`\beta_{0} + `r fit.M`\beta_{1_{M}} + `r fit.X`c'X $$
+
+
+```{r fitpathMod, echo=FALSE, fig.cap="Fitted Model - Partial Mediation Effect Observed. '*': p < 0.05, '**': p < 0.01, '***': p < 0.001"}
+library(pathdiagram)
+palette(pal_my)
+iv <- list(X <- manifest("White\n(X)", x = 0, y = 0.25,
+                         width = 0.2, height = 0.1, cex = .75,
+                         fill = NA, col = 16, lwd = 1, border = 16))
+mv <- list(M <- manifest("Neglect\n(M)", x = 0.5, y = 0.75,
+                         width = 0.25, height = 0.1, cex = .75,
+                         fill = NA, col = 13, lwd = 1, border = 13))
+dv <- list(Y <- manifest("Abuse\n(Y)", x = 1, y = 0.25,
+                         width = 0.2, height = 0.1, cex = .75,
+                         fill = NA, col = 5, lwd = 1, border = 5))
+aPath <- paste0("a = ", fit.a, "***")
+bPath <- paste0("b = ", fit.M, "*")
+ab <- paste0("[a X b] = ", fit.ab)
+cPath <- paste0("c' = ", fit.X, "***")
+txt.x = list(aPath = 0.17, bPath = 0.82, ab = 0.5, cPath = 0.5)
+txt.y <- list(aPath = 0.5, bPath = 0.5, ab = 0.4, cPath = 0.19)
+R.mpathDia(iv, mv, dv, arrcol = 19, lty.c = 1); text(x = txt.x, y = txt.y,
+                                                     labels = c(aPath,
+                                                                bPath,
+                                                                ab,
+                                                                cPath),
+                                                     font = 3)
+```
+
+\newpage
+
+
+---
+title: "HW3-Q1a.R"
+author: "rachel97"
+date: "Mon Dec  5 13:58:35 2016"
+---

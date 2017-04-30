@@ -1,0 +1,45 @@
+VERSION 1.1.0
+INPUT
+TITLE:
+ Homework 3 - Question 1a
+DATA:
+  file is med.csv ;
+VARIABLE:
+  Names are Y M X;
+OUTPUT:
+    stdyx;
+MODEL:
+    M on X;
+    Y on X M;
+INPUT_END
+2
+2
+0
+2
+ML
+1
+GENERAL
+0
+2
+0
+1
+y m x
+3
+2 1 0
+0
+0
+1 1 x m    0.079    0.021
+1 1 x y    0.054    0.015
+1 1 m y   -0.043    0.019
+4 1 y    0.063    0.003
+4 1 m    0.137    0.006
+11 1 x m    0.105    0.028
+11 1 x y    0.106    0.028
+11 1 m y   -0.063    0.029
+14 1 y    0.986    0.007
+14 1 m    0.989    0.006
+31 1 x m    0.079    0.021
+31 1 x y    0.054    0.015
+31 1 m y   -0.043    0.019
+34 1 y    0.063    0.003
+34 1 m    0.137    0.006

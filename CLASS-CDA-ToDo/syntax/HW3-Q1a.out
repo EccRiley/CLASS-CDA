@@ -1,0 +1,367 @@
+Mplus VERSION 7.2 (Mac)
+MUTHEN & MUTHEN
+11/26/2016  12:07 PM
+
+INPUT INSTRUCTIONS
+
+  Title: Homework 3 - Question 1a
+  Data:
+    file is med.csv ;
+  Variable:
+    Names are Y M X;
+  Model:
+      M on X;
+      Y on X M;
+  Model indirect:
+      Y ind X;
+      Y via M X
+  Output:
+      stdyx;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+Homework 3 - Question 1a
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                        1217
+
+Number of dependent variables                                    2
+Number of independent variables                                  1
+Number of continuous latent variables                            0
+
+Observed dependent variables
+
+  Continuous
+   Y           M
+
+Observed independent variables
+   X
+
+
+Estimator                                                       ML
+Information matrix                                        OBSERVED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+
+Input data file(s)
+  med.csv
+
+Input data format  FREE
+
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+     THE STANDARD ERRORS OF THE MODEL PARAMETER ESTIMATES MAY NOT BE
+     TRUSTWORTHY FOR SOME PARAMETERS DUE TO A NON-POSITIVE DEFINITE
+     FIRST-ORDER DERIVATIVE PRODUCT MATRIX.  THIS MAY BE DUE TO THE STARTING
+     VALUES BUT MAY ALSO BE AN INDICATION OF MODEL NONIDENTIFICATION.  THE
+     CONDITION NUMBER IS       0.133D-11.  PROBLEM INVOLVING THE FOLLOWING PARAMETER:
+     Parameter 7, M
+
+     THIS IS MOST LIKELY DUE TO VARIABLE Y BEING DICHOTOMOUS BUT
+     DECLARED AS CONTINUOUS.
+
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                        7
+
+Loglikelihood
+
+          H0 Value                        -567.362
+          H1 Value                        -567.362
+
+Information Criteria
+
+          Akaike (AIC)                    1148.724
+          Bayesian (BIC)                  1184.453
+          Sample-Size Adjusted BIC        1162.219
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit
+
+          Value                              0.000
+          Degrees of Freedom                     0
+          P-Value                           0.0000
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.000
+          Probability RMSEA <= .05           0.000
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.000
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                             30.532
+          Degrees of Freedom                     3
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.000
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ M        ON
+    X                  0.079      0.021      3.691      0.000
+
+ Y        ON
+    X                  0.054      0.015      3.704      0.000
+    M                 -0.043      0.019     -2.216      0.027
+
+ Intercepts
+    Y                  0.052      0.010      5.165      0.000
+    M                  0.131      0.014      9.172      0.000
+
+ Residual Variances
+    Y                  0.063      0.003     24.668      0.000
+    M                  0.137      0.006     24.668      0.000
+
+
+STANDARDIZED MODEL RESULTS
+
+
+STDYX Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ M        ON
+    X                  0.105      0.028      3.712      0.000
+
+ Y        ON
+    X                  0.106      0.028      3.724      0.000
+    M                 -0.063      0.029     -2.220      0.026
+
+ Intercepts
+    Y                  0.205      0.040      5.101      0.000
+    M                  0.352      0.040      8.861      0.000
+
+ Residual Variances
+    Y                  0.986      0.007    148.223      0.000
+    M                  0.989      0.006    165.761      0.000
+
+
+R-SQUARE
+
+    Observed                                        Two-Tailed
+    Variable        Estimate       S.E.  Est./S.E.    P-Value
+
+    Y                  0.014      0.007      2.081      0.037
+    M                  0.011      0.006      1.856      0.063
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.116E-01
+       (ratio of smallest to largest eigenvalue)
+
+
+TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS
+
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+Effects from X to Y
+
+  Total                0.051      0.015      3.483      0.000
+  Total indirect      -0.003      0.002     -1.900      0.057
+
+  Specific indirect
+
+    Y
+    M
+    X                 -0.003      0.002     -1.900      0.057
+
+  Direct
+    Y
+    X                  0.054      0.015      3.704      0.000
+
+
+Effects from X to Y via M
+
+  Sum of indirect     -0.003      0.002     -1.900      0.057
+
+  Specific indirect
+    Y
+    M
+    X                 -0.003      0.002     -1.900      0.057
+
+
+STANDARDIZED TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS
+
+
+STDYX Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+Effects from X to Y
+
+  Total                0.099      0.028      3.500      0.000
+  Total indirect      -0.007      0.004     -1.902      0.057
+
+  Specific indirect
+
+    Y
+    M
+    X                 -0.007      0.004     -1.902      0.057
+
+  Direct
+    Y
+    X                  0.106      0.028      3.724      0.000
+
+
+Effects from X to Y via M
+
+  Sum of indirect     -0.007      0.004     -1.902      0.057
+
+  Specific indirect
+    Y
+    M
+    X                 -0.007      0.004     -1.902      0.057
+
+
+
+TECHNICAL 1 OUTPUT
+
+
+     PARAMETER SPECIFICATION
+
+
+           NU
+              Y             M             X
+              ________      ________      ________
+      1           0             0             0
+
+
+           LAMBDA
+              Y             M             X
+              ________      ________      ________
+ Y                  0             0             0
+ M                  0             0             0
+ X                  0             0             0
+
+
+           THETA
+              Y             M             X
+              ________      ________      ________
+ Y                  0
+ M                  0             0
+ X                  0             0             0
+
+
+           ALPHA
+              Y             M             X
+              ________      ________      ________
+      1           1             2             0
+
+
+           BETA
+              Y             M             X
+              ________      ________      ________
+ Y                  0             3             4
+ M                  0             0             5
+ X                  0             0             0
+
+
+           PSI
+              Y             M             X
+              ________      ________      ________
+ Y                  6
+ M                  0             7
+ X                  0             0             0
+
+
+     STARTING VALUES
+
+
+           NU
+              Y             M             X
+              ________      ________      ________
+      1         0.000         0.000         0.000
+
+
+           LAMBDA
+              Y             M             X
+              ________      ________      ________
+ Y              1.000         0.000         0.000
+ M              0.000         1.000         0.000
+ X              0.000         0.000         1.000
+
+
+           THETA
+              Y             M             X
+              ________      ________      ________
+ Y              0.000
+ M              0.000         0.000
+ X              0.000         0.000         0.000
+
+
+           ALPHA
+              Y             M             X
+              ________      ________      ________
+      1         0.069         0.167         0.449
+
+
+           BETA
+              Y             M             X
+              ________      ________      ________
+ Y              0.000         0.000         0.000
+ M              0.000         0.000         0.000
+ X              0.000         0.000         0.000
+
+
+           PSI
+              Y             M             X
+              ________      ________      ________
+ Y              0.032
+ M              0.000         0.069
+ X              0.000         0.000         0.247
+
+
+DIAGRAM INFORMATION
+
+  Use View Diagram under the Diagram menu in the Mplus Editor to view the diagram.
+  If running Mplus from the Mplus Diagrammer, the diagram opens automatically.
+
+  Diagram output
+    /Users/rachel97/CDA-HW3-mplus/HW3-Q1a.dgm
+
+     Beginning Time:  12:07:55
+        Ending Time:  12:07:55
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2014 Muthen & Muthen

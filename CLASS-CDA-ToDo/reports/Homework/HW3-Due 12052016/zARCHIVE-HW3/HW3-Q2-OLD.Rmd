@@ -1,0 +1,251 @@
+---
+title: "Homework 3 - Question 2"
+author: "Riley Smith"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+---
+
+```{r setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache=FALSE}
+source("../SETUP.R")
+knitr::opts_chunk$set(tidy = FALSE, echo = FALSE, cache = FALSE, fig.keep = 'high', fig.show = 'hold', results = 'asis', autodep = TRUE, Rplot = TRUE, dev = 'pdf', fig.path = 'graphics/HW3/rplot-q2-', fig.width = 7, fig.height = 7, out.width = "\\linewidth")
+```
+
+For the problem below, a new data set (**`widow.sav`**) was taken from a study conducted by David Morgan and Margaret Neal that examined social relationships among recent widows.
+
+- $T1 - T2 = 6 months$
+
+`r tufte::newthought("Assessed at $Time-1$ \\& $Time-2$")`:
+
+- "**`LONELY`**" (`LONELY2` & `LONELY2`): A yes/no question about whether the respondent felt lonely.
+
+
+`r tufte::newthought("Assessed at $Time-1$ only")`:
+
+- "**`AGE1`**": Age of each respondent.
+- "**`EDUC1`**": Respondent's years of education.
+- "**`INCADQ1`**": A 4-point rating of the extent to which she felt she had enough money each month to get by, was assessed at the first time point.
+- "**`HEALTH1`**": Each respondent's self-rated health.
+
+```{r dat}
+dat <- R.rspss("data/widow.sav")
+R.msmm(dat)
+psych::pairs.panels(dat[, -1], hist.col = pal_my[16], cex.cor = TRUE)
+```
+
+
+# Question 2.a. \inprogress
+
+Use `SPSS`, `R`, or `SAS` to test a lagged regression model to investigate whether income adequacy (`INCADQ1`) and health (`HEALTH1`) predicted loneliness at Time 2 (`LONELY2`) after controlling for loneliness at Time 1 (LONELY1). Report and interpret your findings, with special attention to the interpretation of the longitudinal model. Be sure to include the regression coefficients, the odds ratios, confidence limits, model fit information, and a pseudo-R2 measure.
+
+```{r lglm, fig.margin=TRUE}
+fit <- glm(lonely2 ~ lonely1 + incadq1 + health1, data = dat, family = binomial(link = "logit"))
+fit
+anova(fit, test = "LRT")
+library(popbio)
+logi.hist.plot(dat$lonely1, dat$lonely2, boxp = FALSE, type = "hist", col = "gray", main = "Lonely (T1)")
+logi.hist.plot(dat$incadq1, dat$lonely2, boxp = FALSE, type = "hist", col = "gray", main = "Income Adequacy")
+logi.hist.plot(dat$health1, dat$lonely2, boxp = FALSE, type = "hist", col = "gray", main = "Health")
+
+```
+
+```{r lglmFits}
+## **Null Deviance** ##
+nulldev <- fit$null.deviance
+nulldev.df <- fit$df.null
+nulldev.p <- c(round(nulldev, 2), nulldev.df)
+
+## **Residual Deviance** ##
+dev <- fit$deviance
+dev.df <- fit$df.residual
+dev.p <- c(round(dev, 2), dev.df)
+
+## **AIC** ##
+aic <- fit$aic
+aic.p <- c(round(aic, 2), " ")
+
+fits <- as.data.frame(rbind(nulldev.p, dev.p, aic.p))
+rownames(fits) <- c("**Null Deviance**", "**Residual Deviance**", "**AIC**")
+names(fits) <- c("Estimate", "Degrees of Freedom")
+
+CI.b <- confint(fit, trace = FALSE)
+
+OR <- exp(coef(fit)) 
+CI <- confint(fit)
+
+CIb <- cbind(coef(fit), CI.b)
+CIb.labs <- c("**$\\beta$**", dimnames(confint(fit))[[2]])
+CIb <- rbind(CIb.labs, round(CIb, 4))
+dimnames(CIb)[[1]][1] <- " "
+dimnames(CIb)[[2]] <- c(" ", "$CI_{\\beta}$", " ")
+
+## odds ratios and 95% CI ##
+ORCI <- exp(cbind(coef(fit), CI))
+ORCI.labs <- c("**$\\Phi$**", dimnames(confint(fit))[[2]])
+ORCI <- rbind(ORCI.labs, round(ORCI, 4))
+dimnames(ORCI)[[1]][1] <- " "
+dimnames(ORCI)[[2]] <- c(" ", "$CI_{\\Phi}$", " ")
+
+library(lmtest) ## "lrtest()" ##
+lrchsq <- lrtest(fit)[2, -3]
+lrchsq <- lrchsq[, c(2, 1, 3, 4)]
+names(lrchsq) <- c("Log Likelihood", "_df_", "$\\chi^{2}$", "_p_")
+
+library(modEvA)
+rsq <- RsqGLM(model = fit) %>% sapply(round, 4)
+pander(rsq)
+rsq.perc <- (rsq[2]*100)
+kable(lrchsq, row.names = FALSE, caption = "Likelihood Ratio $\\chi^{2}$")
+```
+
+`r tufte::newthought("Confidence Intervals (CI) \\& Odds Ratios (OR)")`
+
+```{r lrmresults2, results='asis'}
+kable(CIb, align = rep('r', ncol(CIb)), 
+      caption = "Logistic Regression Coefficients ($\\beta$) \\& 
+      Coresponding Confidence Intervals (_CI_)")
+
+kable(ORCI, align = rep('r', ncol(ORCI)), 
+      caption = "Logistic Regression Odds Ratios ($\\Phi$) \\& 
+      Coresponding Confidence Intervals (_CI_) [note]") %>%
+    add_footnote("Confidence intervals are based on the logistic regression 
+                 model's profiled log-likelihood function, 
+                 rather than the standard errors", 
+                 threeparttable = TRUE)
+```
+
+```{r lrmresults3, results='asis'}
+kable(fits, caption = "Logistic Regression Model Fit Statistics")
+```
+
+## Lagged Logistic Regression Summary \todo
+
+<!--SAMPLE WRITE-UP: Clinical depression measured at the six-month follow-up was regressed on negative social exchanges and clinical depression measured at baseline. Both baseline predictors significantly predicted clinical depression at follow-up. As expected, those who were depressed at baseline were more likely to be depressed at follow-up, b = 1.64, SE = .13, OR = 5.16, p < .001. Of greater interest was that those who reported more frequent negative social exchanges were more likely to be depressed at follow-up after controlling for initial depression, b = .45, SE = .20, OR = 1.57, p < .05, suggesting that negative social exchanges at baseline were predictive of an increase in clinical depression over the six-month interval.-->
+
+# Question 2.b. \inprogress
+
+Use `SPSS`, `R`, or `SAS` to test a cumulative logistic model predicting the ordinal variable income adequacy (`INCADQ1`) with age (`AGE1`), education (`EDUC1`), and health (`HEALTH1`) as predictors. Report and interpret your findings. Be sure to include the regression coefficients, the odds ratios, confidence limits, model fit information, and a pseudo-$R^{2}$ measure.
+
+```{r clgm}
+library(MASS)
+fit <- polr(factor(incadq1) ~ age1 + educ1  + health1, data = dat, contrasts = NULL, method = "logistic")
+summary(fit)
+```
+
+```{r lglmFits}
+CI.b <- confint(fit, trace = FALSE)
+
+OR <- exp(coef(fit)) 
+CI <- confint(fit)
+
+CIb <- cbind(coef(fit), CI.b)
+CIb.labs <- c("**$\\beta$**", dimnames(confint(fit))[[2]])
+CIb <- rbind(CIb.labs, round(CIb, 4))
+dimnames(CIb)[[1]][1] <- " "
+dimnames(CIb)[[2]] <- c(" ", "$CI_{\\beta}$", " ")
+
+## odds ratios and 95% CI ##
+ORCI <- exp(cbind(coef(fit), CI))
+ORCI.labs <- c("**$\\Phi$**", dimnames(confint(fit))[[2]])
+ORCI <- rbind(ORCI.labs, round(ORCI, 4))
+dimnames(ORCI)[[1]][1] <- " "
+dimnames(ORCI)[[2]] <- c(" ", "$CI_{\\Phi}$", " ")
+
+
+library(lmtest) ## "lrtest()" ##
+lrchsq <- lrtest(fit)[2, -3]
+lrchsq <- lrchsq[, c(2, 1, 3, 4)]
+names(lrchsq) <- c("Log Likelihood", "_df_", "$\\chi^{2}$", "_p_")
+
+library(modEvA)
+kable(lrchsq, row.names = FALSE, caption = "Likelihood Ratio $\\chi^{2}$")
+```
+
+`r tufte::newthought("Confidence Intervals (CI) \\& Odds Ratios (OR)")`
+
+```{r lrmresults2, results='asis'}
+kable(CIb, align = rep('r', ncol(CIb)), 
+      caption = "Logistic Regression Coefficients ($\\beta$) \\& 
+      Coresponding Confidence Intervals (_CI_)")
+
+kable(ORCI, align = rep('r', ncol(ORCI)), 
+      caption = "Logistic Regression Odds Ratios ($\\Phi$) \\& 
+      Coresponding Confidence Intervals (_CI_) [note]") %>%
+    add_footnote("Confidence intervals are based on the logistic regression 
+                 model's profiled log-likelihood function, 
+                 rather than the standard errors", 
+                 threeparttable = TRUE)
+```
+
+## Cumulative Logistic Regression Summary \todo
+
+<!-- SAMPLE WRITE-UP: An ordered logit model was estimated to investigate whether months on medical insurance, depression, education, and marital status predict how often meals were cut (“never,” “some months,” “almost every month”). Together, the predictors accounted for a significant amount of variance in the outcome, likelihood ratio 2(4) = 31.371, p < .001. Only depression, b = .201, SE = .039, OR = 1.22, p < .001, and marital status, b = .463, SE = .235, OR = 1.59, p < .05, predicted the frequency of cutting meals. Each point increase on the depression scale was associated with about 22% increase in the frequency of cutting meals compared to the lower frequency categories. Married individuals were approximately 50% more likely to have in increase in the frequency of cutting meals compared to the lower categories. Overall the model accounted for approximately 4% of the variance in the outcome, McFadden’s pseudo- R2 = .042.-->
+
+# Question 2.c. \inprogress
+
+Use `SPSS`, `R`, or `SAS` to test an ordinal probit model with the same outcome and predictors as you used in the cumulative logistic model. Report and interpret your findings. Be sure to include the regression coefficients, confidence limits, model fit information, and a pseudo-$R^{2}$ measure. Write one or two sentences about how your results and conclusions compare to the logistic model above.
+
+
+```{r clgm}
+library(MASS)
+
+dat <- within(dat, {
+    age1.c <- age1 - mean(age1)
+    educ1.c <- educ1 - mean(educ1)
+    health1.c <- health1 - mean(health1)
+})
+names(dat.x) <- names(dat.x1)
+fit <- polr(factor(incadq1) ~ age1 + educ1  + health1, data = dat, contrasts = NULL, method = "probit")
+summary(fit)
+fit.c <- polr(factor(incadq1) ~ age1.c + educ1.c  + health1.c, data = dat, contrasts = NULL, method = "probit")
+summary(fit.c)
+```
+
+```{r lglmFits}
+CI.b <- confint(fit, trace = FALSE)
+
+OR <- exp(coef(fit)) 
+CI <- confint(fit)
+
+CIb <- cbind(coef(fit), CI.b)
+CIb.labs <- c("**$\\beta$**", dimnames(confint(fit))[[2]])
+CIb <- rbind(CIb.labs, round(CIb, 4))
+dimnames(CIb)[[1]][1] <- " "
+dimnames(CIb)[[2]] <- c(" ", "$CI_{\\beta}$", " ")
+
+## odds ratios and 95% CI ##
+ORCI <- exp(cbind(coef(fit), CI))
+ORCI.labs <- c("**$\\Phi$**", dimnames(confint(fit))[[2]])
+ORCI <- rbind(ORCI.labs, round(ORCI, 4))
+dimnames(ORCI)[[1]][1] <- " "
+dimnames(ORCI)[[2]] <- c(" ", "$CI_{\\Phi}$", " ")
+
+
+library(lmtest) ## "lrtest()" ##
+lrchsq <- lrtest(fit)[2, -3]
+lrchsq <- lrchsq[, c(2, 1, 3, 4)]
+names(lrchsq) <- c("Log Likelihood", "_df_", "$\\chi^{2}$", "_p_")
+
+library(modEvA)
+kable(lrchsq, row.names = FALSE, caption = "Likelihood Ratio $\\chi^{2}$")
+```
+
+`r tufte::newthought("Confidence Intervals (CI) \\& Odds Ratios (OR)")`
+
+```{r lrmresults2, results='asis'}
+kable(CIb, align = rep('r', ncol(CIb)), 
+      caption = "Logistic Regression Coefficients ($\\beta$) \\& 
+      Coresponding Confidence Intervals (_CI_)")
+
+kable(ORCI, align = rep('r', ncol(ORCI)), 
+      caption = "Logistic Regression Odds Ratios ($\\Phi$) \\& 
+      Coresponding Confidence Intervals (_CI_) [note]") %>%
+    add_footnote("Confidence intervals are based on the logistic regression 
+                 model's profiled log-likelihood function, 
+                 rather than the standard errors", 
+                 threeparttable = TRUE)
+```
+
+
+## Ordinal Probit Model Summary \inprogress
+
+<!-- SAMPLE WRITE-UP: An ordered progit model was estimated to investigate whether months on medical insurance, depression, education, and marital status predict how often meals were cut (“never,” “some months,” “almost every month”). Together, the predictors accounted for a significant amount of variance in the outcome, likelihood ratio 2(4) = 31.371, p < .001. Only depression, b = .201, SE = .039, OR = 1.22, p < .001, and marital status, b = .463, SE = .235, OR = 1.59, p < .05, predicted the frequency of cutting meals. Each point increase on the depression scale was associated with about 22% increase in the frequency of cutting meals compared to the lower frequency categories. Married individuals were approximately 50% more likely to have in increase in the frequency of cutting meals compared to the lower categories. Overall the model accounted for approximately 4% of the variance in the outcome, McFadden’s pseudo- R2 = .042.-->
+

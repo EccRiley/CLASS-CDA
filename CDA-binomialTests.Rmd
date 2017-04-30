@@ -13,7 +13,7 @@ knitr::knit_theme$set("bclear")
 
 
 ```{r setup, echo=TRUE, message=FALSE, warning=FALSE, cache=FALSE}
-source("SETUP.R")
+source("../SETUP.R")
 options(width = 70)
 knitr::opts_chunk$set(
     tidy = FALSE,
@@ -33,7 +33,7 @@ knitr::opts_chunk$set(
     )
 library(foreign) ## read.spss() ##
 library(car) ## recode() ##
-dat <- read.spss("data/reuters.sav", to.data.frame = TRUE)
+dat <- read.spss("../CLASS-CDA/data/reuters.sav", to.data.frame = TRUE)
 dat <- within(dat, {recode(response, c("1=0", "2=1", "3=2"))})
 
 ```
@@ -84,7 +84,7 @@ R.na <- function(x, v = 0){
 ```
 
 ```{r echo=FALSE}
-kable(R.msmm(dat$party), caption = "Summary information for '**party**'
+kable(Rmsmm(dat$party), caption = "Summary information for '**party**'
         data column _before_ recoding \\texttt{NA}s")
 ```
 
@@ -98,18 +98,18 @@ unique(dat$party)
 
 
 ```{r echo=FALSE}
-kable(R.msmm(dat$party), caption = "Summary information for '**party**'
+kable(Rmsmm(dat$party), caption = "Summary information for '**party**'
         data column _after_ recoding \\texttt{NA}s")
 ```
 
 
 ```{r}
 
-dat$response <- recode_factor(dat$response, 
+dat$response <- recode_factor(dat$response,
                               "other/no opinion" = NA_character_)
 ## see "recode_factor()" in the {dplyr} package ##
 dat <- na.omit(dat)
-sapply(dat, R.isna) ## bye-bye NAs! ... again ##
+sapply(dat, Risna) ## bye-bye NAs! ... again ##
     ## but this time we only lost data for rows with NA
     ## in dat$response (but we did lose ALL of the data
     ## for those rows, as these were removed from the
@@ -132,7 +132,7 @@ poll.t <- table(dat$response)
 
 
 ```{r echo=FALSE}
-kable(as.data.frame(poll.t), caption = "Frequency Table of Polling Data", 
+kable(as.data.frame(poll.t), caption = "Frequency Table of Polling Data",
       col.names = c("Response", "Frequency"))
 ```
 
@@ -165,30 +165,30 @@ _Value (`R.binomTest()`):_ Returns a `data.frame` object containing the values r
 
 
 ```{r}
-R.binom_test <- function(p, N, pi0 = 0.5, exact = FALSE, correct = FALSE, 
+R.binom_test <- function(p, N, pi0 = 0.5, exact = FALSE, correct = FALSE,
                          digits = 2, ...){
     if (exact) { ## Hypothesis Testing
         BT <- stats::binom.test(x = p, n = N, p = pi0, ...)
         }
         else {
-            BT <- stats::prop.test(x = p, n = N, p = pi0, 
+            BT <- stats::prop.test(x = p, n = N, p = pi0,
                                    correct = correct, ...)
         }
     ## The rest deals with formatting the output ##
-        BT$data.name <- paste0(p, " out of ", N, " null probability ", 
+        BT$data.name <- paste0(p, " out of ", N, " null probability ",
                                BT$null.value)
         ## Above, I modified the default output value for *.test$data.name
-            ## to print the actual data values, rather than the object 
+            ## to print the actual data values, rather than the object
             ## names the values are stored under (see output below) ##
-        BTCI <- paste0(round(BT$conf.int[[1]], digits = digits), ", ", 
+        BTCI <- paste0(round(BT$conf.int[[1]], digits = digits), ", ",
                        round(BT$conf.int[[2]], digits = digits))
         BT$p.value <- round(BT$p.value, digits = 7)
-        BT.df <- data.frame(c(BT[c("alternative", 
-                                   "null.value", 
-                                   "parameter", 
-                                   "estimate", 
-                                   "statistic", 
-                                   "p.value")], 
+        BT.df <- data.frame(c(BT[c("alternative",
+                                   "null.value",
+                                   "parameter",
+                                   "estimate",
+                                   "statistic",
+                                   "p.value")],
                               BTCI))
         row.names(BT.df) <- NULL
         return(BT.df)
@@ -209,10 +209,10 @@ pt <- R.binom_test(p = poll.t["Clinton"], N = nrow(dat), pi0 = 0.5)
 
 
 ```{r echo=FALSE}
-kable(pt, caption = "1-sample proportions test without continuity 
-      correction: \\textit{677 out of 1231}", 
-      col.names = c("$H_{1}$", "$\\pi_{0}$", "$df$", "$p$", 
-                    "$\\chi_{2}$", "_p-value_", "CI"), 
+kable(pt, caption = "1-sample proportions test without continuity
+      correction: \\textit{677 out of 1231}",
+      col.names = c("$H_{1}$", "$\\pi_{0}$", "$df$", "$p$",
+                    "$\\chi_{2}$", "_p-value_", "CI"),
       format.args = list(digits = 2))
 ```
 
@@ -220,16 +220,16 @@ kable(pt, caption = "1-sample proportions test without continuity
 
 
 ```{r}
-et <- R.binom_test(p = poll.t["Clinton"], 
-                   N = nrow(dat), pi0 = 0.5, 
+et <- R.binom_test(p = poll.t["Clinton"],
+                   N = nrow(dat), pi0 = 0.5,
                    exact = TRUE)
 ```
 
 
 ```{r echo=F}
-kable(et, caption = "1-sample _exact_ binomial test with continuity 
-      correction: \\textit{677 out of 1231}", 
-      col.names = c("$H_{1}$", "$\\pi_{0}$", "$n_{trials}$", "$p$", 
+kable(et, caption = "1-sample _exact_ binomial test with continuity
+      correction: \\textit{677 out of 1231}",
+      col.names = c("$H_{1}$", "$\\pi_{0}$", "$n_{trials}$", "$p$",
                     "$n_{successes}$", "_p-value_", "CI"), format.args = list(digits = 2))
 ```
 
@@ -244,7 +244,7 @@ electpal <- c("red", "blue")
 electpal <- sapply(electpal, adjustcolor, alpha = 0.75, USE.NAMES = FALSE)
 
 bpoll <- ggplot( poll.df, aes(x = Frequency, y = Response)) +
-    geom_segment(aes(yend = Response), xend = 0, colour = mypal[20]) +
+    geom_segment(aes(yend = Response), xend = 0, colour = pal_my[20]) +
     geom_point(size = 5, aes(colour = Response)) +
     scale_colour_manual(values = electpal, guide = FALSE) +
     labs(y = "", x = "") + thm_tft(xline = TRUE, yline = TRUE)
@@ -253,7 +253,7 @@ bpoll2 <- bpoll + scale_x_continuous(breaks = c(0, n),
                                      limits = c(0, max(n)))
 
 bpoll2 + geom_text(vjust = -1.5, hjust = 0.5, stat = 'identity',
-                   position = 'identity', colour = mypal[19],
+                   position = 'identity', colour = pal_my[19],
                    size = rel(4), aes(family = "ETBembo",
                                       fontface = "italic",
                                       label = paste("p  = ",
@@ -268,7 +268,7 @@ bpoll2 + geom_text(vjust = -1.5, hjust = 0.5, stat = 'identity',
 
 # $z$-$Score$ Test
 
-Here we are taking one of the favorability proportions (i.e. "sucess proportions") and comparing it to the _Null Hypothesis_ ($H_{0}$) represented by $\pi_{0}$ (i.e., 0.50) [@agresti2013categorical; @agresti1998approx].
+Here we are taking one of the favorability proportions (i.e. "success proportions") and comparing it to the _Null Hypothesis_ ($H_{0}$) represented by $\pi_{0}$ (i.e., 0.50) [@agresti2013categorical; @agresti1998approx].
 
 `r tufte::margin_note("Data: \\rhref{http://projects.fivethirtyeight.com/2016-election-forecast/?ex_cid=rrpromo}{2016 Polling data}")`
 

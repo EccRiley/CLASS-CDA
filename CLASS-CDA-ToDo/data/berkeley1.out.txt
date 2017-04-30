@@ -1,0 +1,513 @@
+> #############################
+> ### Berkeley admissions data for log-linear models
+> ### Lessons 4 & 5
+> ### See also berkeley.R in Lesson 4 for a different code 
+> ### R code that matches SAS default setting
+> ### See also related berkeleyLoglin.R in Lesson 5
+> #############################
+> 
+> ### Reading in the text files instead of using dataset from R 
+> ### Make sure you specify the correct path on your computer
+> ### You can also read it directly from the internet, if you know ### the internet address and you are connected.
+> ### berkeley=read.table("http://onlinecourses.science.psu.edu/stat504/sites/onlinecourses.science.psu.edu.stat504/files/lesson05/berkeley.txt")
+> berkeley=read.table("berkeley.txt")
+> colnames(berkeley)=c("D","S","A","count")
+> berkeley
+       D      S      A count
+1  DeptA   Male Reject   313
+2  DeptA   Male Accept   512
+3  DeptA Female Reject    19
+4  DeptA Female Accept    89
+5  DeptB   Male Reject   207
+6  DeptB   Male Accept   353
+7  DeptB Female Reject     8
+8  DeptB Female Accept    17
+9  DeptC   Male Reject   205
+10 DeptC   Male Accept   120
+11 DeptC Female Reject   391
+12 DeptC Female Accept   202
+13 DeptD   Male Reject   278
+14 DeptD   Male Accept   139
+15 DeptD Female Reject   244
+16 DeptD Female Accept   131
+17 DeptE   Male Reject   138
+18 DeptE   Male Accept    53
+19 DeptE Female Reject   299
+20 DeptE Female Accept    94
+21 DeptF   Male Reject   351
+22 DeptF   Male Accept    22
+23 DeptF Female Reject   317
+24 DeptF Female Accept    24
+> 
+> ### Here are some different ways to create tables
+> ###Table  A*D*S
+> temp=xtabs(berkeley$count~berkeley$D+berkeley$S+berkeley$A)
+> temp
+, , berkeley$A = Accept
+
+          berkeley$S
+berkeley$D Female Male
+     DeptA     89  512
+     DeptB     17  353
+     DeptC    202  120
+     DeptD    131  139
+     DeptE     94   53
+     DeptF     24   22
+
+, , berkeley$A = Reject
+
+          berkeley$S
+berkeley$D Female Male
+     DeptA     19  313
+     DeptB      8  207
+     DeptC    391  205
+     DeptD    244  278
+     DeptE    299  138
+     DeptF    317  351
+
+> temp=xtabs(berkeley$count~., data=berkeley)
+> temp
+, , A = Accept
+
+       S
+D       Female Male
+  DeptA     89  512
+  DeptB     17  353
+  DeptC    202  120
+  DeptD    131  139
+  DeptE     94   53
+  DeptF     24   22
+
+, , A = Reject
+
+       S
+D       Female Male
+  DeptA     19  313
+  DeptB      8  207
+  DeptC    391  205
+  DeptD    244  278
+  DeptE    299  138
+  DeptF    317  351
+
+> 
+> 
+> ### Table 1-6 of S*A
+> temp=xtabs(berkeley$count~berkeley$S+berkeley$A+berkeley$D)
+> temp
+, , berkeley$D = DeptA
+
+          berkeley$A
+berkeley$S Accept Reject
+    Female     89     19
+    Male      512    313
+
+, , berkeley$D = DeptB
+
+          berkeley$A
+berkeley$S Accept Reject
+    Female     17      8
+    Male      353    207
+
+, , berkeley$D = DeptC
+
+          berkeley$A
+berkeley$S Accept Reject
+    Female    202    391
+    Male      120    205
+
+, , berkeley$D = DeptD
+
+          berkeley$A
+berkeley$S Accept Reject
+    Female    131    244
+    Male      139    278
+
+, , berkeley$D = DeptE
+
+          berkeley$A
+berkeley$S Accept Reject
+    Female     94    299
+    Male       53    138
+
+, , berkeley$D = DeptF
+
+          berkeley$A
+berkeley$S Accept Reject
+    Female     24    317
+    Male       22    351
+
+> ### Table of S*A withOUT conditioning on berkeley$D
+> table=addmargins(temp)[1:2,1:2,7]
+> ### The same table created with xtabs
+> table=xtabs(berkeley$count~berkeley$S+berkeley$A)
+> 
+> ### Please repeat doing all the following steps for all tables of S*A: temp[,,1]-temp[,,6]
+> ####----------------------------------------------------------------------------
+> table=temp[1:2,1:2,1]
+> #table=temp[1:2,1:2,2]
+> #table=temp[1:2,1:2,3]
+> #table=temp[1:2,1:2,4]
+> #table=temp[1:2,1:2,5]
+> #table=temp[1:2,1:2,6]
+> 
+> ### Chi-Square Test for Table 1 of s*A
+> ### temp[,,i] denotes the ith table
+> 
+> result=chisq.test(table,correct=FALSE)
+> result$expected
+          berkeley$A
+berkeley$S    Accept    Reject
+    Female  69.56913  38.43087
+    Male   531.43087 293.56913
+> Table_SA6=list(Frequency=table,Expected=result$expected,Percent=prop.table(table))
+> 
+> ### Fisher Exact Test for Table 1 of s*A
+> 
+> Fisher_Exact_TwoSided=fisher.test(table,alternative = "two.sided")
+> Fisher_Exact_Less=fisher.test(table,alternative = "less")
+> Fisher_Exact_Greater=fisher.test(table,alternative = "greater")
+> list(Fisher_Exact_TwoSided=Fisher_Exact_TwoSided,Fisher_Exact_Less=Fisher_Exact_Less,Fisher_Exact_Greater=Fisher_Exact_Greater)
+$Fisher_Exact_TwoSided
+
+	Fisher's Exact Test for Count Data
+
+data:  table 
+p-value = 1.669e-05
+alternative hypothesis: true odds ratio is not equal to 1 
+95 percent confidence interval:
+ 1.68907 5.07506 
+sample estimates:
+odds ratio 
+  2.860716 
+
+
+$Fisher_Exact_Less
+
+	Fisher's Exact Test for Count Data
+
+data:  table 
+p-value = 1
+alternative hypothesis: true odds ratio is less than 1 
+95 percent confidence interval:
+ 0.00000 4.62975 
+sample estimates:
+odds ratio 
+  2.860716 
+
+
+$Fisher_Exact_Greater
+
+	Fisher's Exact Test for Count Data
+
+data:  table 
+p-value = 1.151e-05
+alternative hypothesis: true odds ratio is greater than 1 
+95 percent confidence interval:
+ 1.821922      Inf 
+sample estimates:
+odds ratio 
+  2.860716 
+
+
+> 
+> ### Relative Risk for Table 1 of s*A
+> RowSums=rowSums(table)
+> ColSums=colSums(table)
+> ### Estimate of the Odds of the two rows
+> odds1=(table[2,1]/RowSums[2])/(table[1,1]/RowSums[1])
+> odds2=(table[2,2]/RowSums[2])/(table[1,2]/RowSums[1])
+> odds1
+    Male 
+0.753095 
+> odds2
+    Male 
+2.156555 
+> ### Odds Ratio
+> oddsratio=odds2/odds1
+> oddsratio
+    Male 
+2.863590 
+> 
+> ### Confidence Interval of the odds ratio
+> log_CI=cbind(log(oddsratio)-qnorm(0.975)*sqrt(sum(1/table)),log(oddsratio)+qnorm(0.975)*sqrt(sum(1/table)))
+> CI_oddsratio=exp(log_CI)
+> CI_oddsratio
+         [,1]     [,2]
+Male 1.711170 4.792127
+> 
+> 
+> ### Table of D*S if A=Accept
+> Table_ADS=list(Frequency=temp[,,1],Expected=temp[,,1]$expected,Percent=prop.table(temp[,,1]))
+Warning message:
+In temp[, , 1]$expected :
+  $ operator is invalid for atomic vectors, returning NULL
+> Table_ADS
+$Frequency
+          berkeley$A
+berkeley$S Accept Reject
+    Female     89     19
+    Male      512    313
+
+$Expected
+NULL
+
+$Percent
+          berkeley$A
+berkeley$S     Accept     Reject
+    Female 0.09539121 0.02036442
+    Male   0.54876742 0.33547696
+
+> 
+> ### Table of D*S if A=Reject
+> Table_ADS=list(Frequency=temp[,,2],Expected=temp[,,2]$expected,Percent=prop.table(temp[,,2]))
+Warning message:
+In temp[, , 2]$expected :
+  $ operator is invalid for atomic vectors, returning NULL
+> Table_ADS
+$Frequency
+          berkeley$A
+berkeley$S Accept Reject
+    Female     17      8
+    Male      353    207
+
+$Expected
+NULL
+
+$Percent
+          berkeley$A
+berkeley$S     Accept     Reject
+    Female 0.02905983 0.01367521
+    Male   0.60341880 0.35384615
+
+> 
+> ### Table of D*S withOUT conditioning on berkeley$A
+> addmargins(temp)
+, , berkeley$D = DeptA
+
+          berkeley$A
+berkeley$S Accept Reject  Sum
+    Female     89     19  108
+    Male      512    313  825
+    Sum       601    332  933
+
+, , berkeley$D = DeptB
+
+          berkeley$A
+berkeley$S Accept Reject  Sum
+    Female     17      8   25
+    Male      353    207  560
+    Sum       370    215  585
+
+, , berkeley$D = DeptC
+
+          berkeley$A
+berkeley$S Accept Reject  Sum
+    Female    202    391  593
+    Male      120    205  325
+    Sum       322    596  918
+
+, , berkeley$D = DeptD
+
+          berkeley$A
+berkeley$S Accept Reject  Sum
+    Female    131    244  375
+    Male      139    278  417
+    Sum       270    522  792
+
+, , berkeley$D = DeptE
+
+          berkeley$A
+berkeley$S Accept Reject  Sum
+    Female     94    299  393
+    Male       53    138  191
+    Sum       147    437  584
+
+, , berkeley$D = DeptF
+
+          berkeley$A
+berkeley$S Accept Reject  Sum
+    Female     24    317  341
+    Male       22    351  373
+    Sum        46    668  714
+
+, , berkeley$D = Sum
+
+          berkeley$A
+berkeley$S Accept Reject  Sum
+    Female    557   1278 1835
+    Male     1199   1492 2691
+    Sum      1756   2770 4526
+
+> table=addmargins(temp)[1:6,1:2,3]
+Error: subscript out of bounds
+> result=chisq.test(table,correct=FALSE)
+> Contigency_Table=list(Frequency=table,Expected=chisq.test(table)$expected,Percent=prop.table(table),RowPCt=prop.table(table,1),ColPct=prop.table(table,2))
+> Contigency_Table
+$Frequency
+          berkeley$A
+berkeley$S Accept Reject
+    Female     89     19
+    Male      512    313
+
+$Expected
+          berkeley$A
+berkeley$S    Accept    Reject
+    Female  69.56913  38.43087
+    Male   531.43087 293.56913
+
+$Percent
+          berkeley$A
+berkeley$S     Accept     Reject
+    Female 0.09539121 0.02036442
+    Male   0.54876742 0.33547696
+
+$RowPCt
+          berkeley$A
+berkeley$S   Accept    Reject
+    Female 0.824074 0.1759259
+    Male   0.620606 0.3793939
+
+$ColPct
+          berkeley$A
+berkeley$S    Accept     Reject
+    Female 0.1480865 0.05722892
+    Male   0.8519135 0.94277108
+
+> 
+> ### /* joint independence of D and S from A*/
+> D=factor(berkeley$D)
+> S=factor(berkeley$S)
+> A=factor(berkeley$A)
+> model=glm(berkeley$count~D+S+A+D*S,family=poisson(link=log))
+> summary(model)
+
+Call:
+glm(formula = berkeley$count ~ D + S + A + D * S, family = poisson(link = log))
+
+Deviance Residuals: 
+      Min         1Q     Median         3Q        Max  
+-12.74948   -3.21344   -0.05862    2.49490    9.85814  
+
+Coefficients:
+             Estimate Std. Error z value Pr(>|z|)    
+(Intercept)   3.73533    0.09802  38.108  < 2e-16 ***
+DDeptB       -1.46326    0.22194  -6.593 4.31e-11 ***
+DDeptC        1.70306    0.10462  16.278  < 2e-16 ***
+DDeptD        1.24479    0.10921  11.399  < 2e-16 ***
+DDeptE        1.29168    0.10865  11.889  < 2e-16 ***
+DDeptF        1.14975    0.11042  10.413  < 2e-16 ***
+SMale         2.03325    0.10233  19.870  < 2e-16 ***
+AReject       0.45581    0.03050  14.943  < 2e-16 ***
+DDeptB:SMale  1.07581    0.22860   4.706 2.52e-06 ***
+DDeptC:SMale -2.63462    0.12343 -21.345  < 2e-16 ***
+DDeptD:SMale -1.92709    0.12464 -15.461  < 2e-16 ***
+DDeptE:SMale -2.75479    0.13510 -20.391  < 2e-16 ***
+DDeptF:SMale -1.94356    0.12683 -15.325  < 2e-16 ***
+---
+Signif. codes:  0 Ô***Õ 0.001 Ô**Õ 0.01 Ô*Õ 0.05 Ô.Õ 0.1 Ô Õ 1 
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 2648.70  on 23  degrees of freedom
+Residual deviance:  876.57  on 11  degrees of freedom
+AIC: 1061.6
+
+Number of Fisher Scoring iterations: 5
+
+> 
+> 
+> ###-----------------------------------------------------------------------
+> ### To set up the same codinga is in default SAS
+> ### First we set the type of contrast to treatment contrasts for factors
+> options(contrast=c("contr.treatment","contr.poly"))
+> D=berkeley$D
+> S=berkeley$S
+> A=berkeley$A
+> count=berkeley$count
+> 
+> ### Notice that R uses base level Department A,Female and Accept which is different from SAS.
+> ### Below we fit various log-linear models for Lesson 5 
+> ### using glm() function
+> ### Complete Independence
+> temp=glm(count~D+S+A,family=poisson(link=log))
+> temp
+
+Call:  glm(formula = count ~ D + S + A, family = poisson(link = log)) 
+
+Coefficients:
+(Intercept)       DDeptB       DDeptC       DDeptD       DDeptE       DDeptF        SMale      AReject  
+    4.98881     -0.46679     -0.01621     -0.16384     -0.46850     -0.26752      0.38287      0.45581  
+
+Degrees of Freedom: 23 Total (i.e. Null);  16 Residual
+Null Deviance:	    2649 
+Residual Deviance: 2097 	AIC: 2272 
+> ###/* joint independence of D and S from A*/
+> temp=glm(count~D+S+A+D*S,family=poisson(link=log))
+> temp
+
+Call:  glm(formula = count ~ D + S + A + D * S, family = poisson(link = log)) 
+
+Coefficients:
+ (Intercept)        DDeptB        DDeptC        DDeptD        DDeptE        DDeptF         SMale       AReject  
+      3.7353       -1.4633        1.7031        1.2448        1.2917        1.1498        2.0333        0.4558  
+DDeptB:SMale  DDeptC:SMale  DDeptD:SMale  DDeptE:SMale  DDeptF:SMale  
+      1.0758       -2.6346       -1.9271       -2.7548       -1.9436  
+
+Degrees of Freedom: 23 Total (i.e. Null);  11 Residual
+Null Deviance:	    2649 
+Residual Deviance: 876.6 	AIC: 1062 
+> 
+> ### /*conditional independence of D and A given S */
+> temp=glm(count~D+S+A+D*S+A*S,family=poisson(link=log))
+> temp
+
+Call:  glm(formula = count ~ D + S + A + D * S + A * S, family = poisson(link = log)) 
+
+Coefficients:
+  (Intercept)         DDeptB         DDeptC         DDeptD         DDeptE         DDeptF          SMale  
+       3.4899        -1.4633         1.7031         1.2448         1.2917         1.1498         2.4171  
+      AReject   DDeptB:SMale   DDeptC:SMale   DDeptD:SMale   DDeptE:SMale   DDeptF:SMale  SMale:AReject  
+       0.8305         1.0758        -2.6346        -1.9271        -2.7548        -1.9436        -0.6119  
+
+Degrees of Freedom: 23 Total (i.e. Null);  10 Residual
+Null Deviance:	    2649 
+Residual Deviance: 782.6 	AIC: 969.7 
+> ### /*homogeneous associations */
+> temp=glm(count~D+S+A+D*S+D*A+A*S,family=poisson(link=log))
+> temp
+
+Call:  glm(formula = count ~ D + S + A + D * S + D * A + A * S, family = poisson(link = log)) 
+
+Coefficients:
+   (Intercept)          DDeptB          DDeptC          DDeptD          DDeptE          DDeptF           SMale  
+       4.27197        -1.47815         1.08747         0.61185         0.34557        -1.13608         1.99965  
+       AReject    DDeptB:SMale    DDeptC:SMale    DDeptD:SMale    DDeptE:SMale    DDeptF:SMale  DDeptB:AReject  
+      -0.67913         1.07485        -2.66414        -1.95719        -2.79388        -2.00044         0.04362  
+DDeptC:AReject  DDeptD:AReject  DDeptE:AReject  DDeptF:AReject   SMale:AReject  
+       1.26090         1.28782         1.73751         3.30527         0.09673  
+
+Degrees of Freedom: 23 Total (i.e. Null);  5 Residual
+Null Deviance:	    2649 
+Residual Deviance: 20.23 	AIC: 217.3 
+> 
+> ###  /*saturated model */
+> temp=glm(count~D+S+A+D*S+D*A+S*A+D*S*A,family=poisson(link=log))
+> temp
+
+Call:  glm(formula = count ~ D + S + A + D * S + D * A + S * A + D *      S * A, family = poisson(link = log)) 
+
+Coefficients:
+         (Intercept)                DDeptB                DDeptC                DDeptD                DDeptE  
+             4.48864              -1.65542               0.81963               0.38656               0.05466  
+              DDeptF                 SMale               AReject          DDeptB:SMale          DDeptC:SMale  
+            -1.31058               1.74969              -1.54420               1.28357              -2.27046  
+        DDeptD:SMale          DDeptE:SMale          DDeptF:SMale        DDeptB:AReject        DDeptC:AReject  
+            -1.69041              -2.32269              -1.83670               0.79043               2.20464  
+      DDeptD:AReject        DDeptE:AReject        DDeptF:AReject         SMale:AReject  DDeptB:SMale:AReject  
+             2.16617               2.70135               4.12505               1.05208              -0.83205  
+DDeptC:SMale:AReject  DDeptD:SMale:AReject  DDeptE:SMale:AReject  DDeptF:SMale:AReject  
+            -1.17700              -0.98090              -1.25226              -0.86318  
+
+Degrees of Freedom: 23 Total (i.e. Null);  0 Residual
+Null Deviance:	    2649 
+Residual Deviance: 1.767e-13 	AIC: 207.1 

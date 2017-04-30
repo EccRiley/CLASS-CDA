@@ -1,0 +1,862 @@
+---
+title: "HW1 - R Notebook"
+author: "Rachel M. Smith"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+---
+
+-----
+
+\newpage
+# Question-$1$
+
+```{r setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE, error=FALSE, cache=FALSE}
+
+source("../SETUP.R")
+
+opts_chunk$set(echo = FALSE, results = 'markup', fig.keep = 'high', fig.show = 'asis', echo = FALSE, fig.path = "graphics/HW1/rplot_", fig.width = 7, out.widht = '\\linewidth')
+opts_template$set(kab = list(echo = FALSE, results = 'asis'))
+options(digits = 3, scipen = 100)
+panderOptions('digits', 3)
+#     ## overriding the "panderOptions('digits', 2)" `{pkg:pander}`in my
+#     ## `"SETUP.R"` file, since the computations here are tending to
+#     ## result in very small numeric values with more than 2 leading "0"s
+#     ## after the decimal (e.g., "0.00002"), which are printed as "0"
+#     ## when "panderOptions('digits', 2)" is set ##
+library(foreign)
+```
+
+```{r Q1vals, echo=FALSE}
+PAA <- 0.084
+#     ## % of PPB Traffic Division stops involving
+#     ## African American Drivers [@stewart2014stops, p. 19] ##
+PWH <- 0.916
+#     ## % of PPB Traffic Division stops involving
+#     ## White American Drivers [@stewart2014stops, p. 19] ##
+
+FAA <- 985
+
+FWH <- 10782
+
+n <- 11769 ## 10784 (WH) + 985 (AA) [@stewart2014stops, p.19] ##
+n.print <- Rformat(n)
+
+pi0 <- 0.5
+zCr <- 1.96
+
+DAA <- 0.063
+#     ## % of Portland drivers who are
+#     ## African American [@stewart2014stops, p.9] ##
+DWH <- 0.77
+#     ## % of Portland drivers who are
+#     ## White American [@stewart2014stops, p.9] ##
+
+```
+
+`r tufte::newthought("\\large{General Parameters for Hypothesis Testing}")`
+
+Underlying Distribution.
+:    The data are assumed to occur _randomly_ along a _Binomial Distribution._ `r margin_note("$$ k \\thicksim B(n, p) $$")` `r margin_note("$$ \\binom{n}{k} \\pi^{n-k} = \\frac{n!}{k!(n-k)!}\\pi^{k}(1-\\pi)^{n-k} $$")`
+
+Assumed Population Proportion.
+:   Equal proportions across racial categories.
+
+`r margin_note("$$ \\pi_{0} = 0.5 $$")`
+
+Null Hypothesis ($H_{0}$).
+:   The sample proportion ($p$) is equivalent to the proportion assumed to exist within the population ($\pi_{0}$).`r margin_note("$$ H_{0}: p - \\pi_{0} = 0 $$")`
+
+Alternative Hypothesis ($H_{1}$).
+:   The sample proportion ($p$) is not equivalent to the proportion assumed to exist within the population ($\pi_{0}$).`r margin_note("$$ H_{1}: p - \\pi_{0} \\neq 0 $$")`
+
+-----
+
+## Question-$1a$
+
+```{r Q1Akab1, opts.label='kab'}
+data.frame(n, PAA, PWH, pi0, paste(zCr)) %>%
+    kable(col.names = c("N", "$P_{AA}$^$\\dag$^", "$P_{WH}$^$\\ddag$^", "$\\pi_{0}$", "$z_{critical}$"), caption = "Known Values and Parameters for Binomial ($z$-$Score$) Test")
+```
+
+`r margin_note("\\textsc{Note:} \\textsuperscript{\\dag} $P_{AA}$ = \\textit{Proportion ($p$) of traffic stops involving \\textbf{American American (AA) drivers}.} \\textsuperscript{\\ddag} $P_{WH}$ = \\textit{Proportion ($p$) of traffic stops involving \\textbf{White American (WH) drivers}.}")`
+
+<!-- Below is a summary of some data provided in a 2014 report from the Portland police related to racial profiling in traffic stops. To simplify, the frequencies below use only data from African American and White drivers or pedestrians. -->
+
+<!--  The observed proportions for traffic stops are .084 for African American drivers and .916 for White drivers, and the sample size is n = 11,769. Compute the binomial test (z-test for proportions), the confidence limits, and the margin of error by hand (please show your work). Specify which type of test and confidence limits you used. Use .5 as the test proportion. Report and interpret your findings in terms of the research problem. -->
+
+## Question-$1.a.i$. **$z$-$Score$ Test Computation**
+
+```{r Q1Aztest, echo=FALSE}
+p <- PWH
+#     ## focal proportion ##
+z1 <- p - pi0
+#     ## numerator: p-\pi_{0} ##
+z2 <- sqrt((pi0*(1 - pi0))/n)
+#     ## denominator: \sqrt{\pi(1-\pi_{0}) / n} ##
+zscore <- z1/z2
+#     ## complete computation ##
+
+# ## ------------------------------------------------ ##
+# ## z-Score Test Denominator Breakdown (for display) ##
+# ## ------------------------------------------------ ##
+
+z2a <- 1 - pi0
+#     ## "(1 - \pi_{0})" ##
+z2b <- pi0*z2a
+#     ## "\pi(1 - \pi_{0})" ##
+z2c <- z2b/n
+#     ## "\pi(1 - \pi_{0}) / n" ##
+z2d <- sqrt(z2c)
+#     ## denominator (i.e., "SE_{\pi}"): "\sqrt{\pi(1 - \pi_{0}) / n}" ##
+
+# ## -------------------- ##
+# ## CI_{z} Computation   ##
+# ## -------------------- ##
+
+SEp.z <- z2d
+zCr <- 1.96
+CIu.z <- p + (zCr*SEp.z)
+CIl.z <- p - (zCr*SEp.z)
+CIz.print <- paste0(round(CIl.z, digits = 2), " < ", "$\\pi_{0}$", " < ", round(CIu.z, digits = 2))
+
+MEz <- ((CIl.z - CIu.z)/2)*100
+MEz.print <- paste0(round(abs(MEz), digits = 2), "\\%")
+```
+
+$$ z = \frac{`r PWH` - `r pi0`}{\sqrt{\frac{`r pi0`(1-`r pi0`)}{`r n`}}} \Rightarrow \frac{`r z1`}{\sqrt{\frac{`r pi0`(`r z2a`)}{`r n`}}} \Rightarrow \frac{`r z1`}{\sqrt{\frac{`r z2b`}{`r n`}}} \Rightarrow \frac{`r z1`}{\sqrt{`r round(as.integer(z2c), 2)`}} \Rightarrow \frac{`r z1`}{`r z2`} $$
+
+`r margin_note("$$ z = \\frac{p - \\pi_{0}}{SE_{\\pi}} $$")` `r margin_note("$$ SE_{\\pi} = \\sqrt{\\frac{\\pi_{0}(1-\\pi_{0})}{n}} $$")`
+
+$$ z = \textbf{`r zscore`} $$
+
+## Question $1.a.ii$. $z$-$Score$ Test **Confidence Interval** ($CI_{z}$)
+
+`r margin_note("$$ CI_{z} = p \\pm (z_{critical})(SE_{\\pi}) $$")`
+
+`r margin_note("$$ z_{critical} = 1.96 $$")`
+
+`r margin_note("$$ p = 0.916 $$")`
+
+$$ LCL_{z} = p - (`r zCr`)(`r SEp.z`) \Rightarrow p - `r zCr*SEp.z` \Longrightarrow \textbf{`r p - (zCr*SEp.z)`} $$
+
+$$ UCL_{z} = p + (`r zCr`)(`r SEp.z`) \Rightarrow p + `r zCr*SEp.z` \Longrightarrow \textbf{`r p + (zCr*SEp.z)`} $$
+
+$$ CI_{z} = \textbf{`r round(CIl.z, digits = 2)`} < p < \textbf{`r round(CIu.z, digits = 2)`} $$
+
+## Question-$1.a.iii$. $z$-$Score$ **Test Margin of Error** ($ME_{z}$)
+
+`r margin_note("$$ ME_{z} = \\left(\\frac{CI_{z}^{+} - CI_{z}^{-}}{2}\\right)(100) $$")`
+
+
+$$ ME_{z} = \frac{(`r CIl.z` - `r CIu.z`)}{2}(100) \Rightarrow \frac{(`r CIl.z - CIu.z`)}{2}(100) \Rightarrow (`r (CIl.z - CIu.z)/2`)(100) $$
+
+$$ ME_{z} = \textbf{`r (CIl.z - CIu.z)/2*100`} $$
+
+```{r Q1Akab2, opts.label='kab'}
+data.frame(n.print, zscore, CIz.print, MEz.print) %>%
+    kable(col.names = c("$N$", "$z$-$Score$", "$CI_{z}$", "$ME_{z}$"), caption = "Summary of $z$-$Score$ Test Calculations", align = rep('c', 4))
+```
+
+
+-----
+
+\centerline{\Large{\color{patriarch}{Summary}}}
+
+A binomal ($z$-$Score$) test was used to determine whether there was a significant difference between traffic stops involving White drivers and those involving African American drivers. Results for the $z$-$Score$ test are provided in {+tbl:zscore}. Of the $`r n`$ cases of traffic stops involving White or African American drivers, $`r PWH`\%$ involved White drivers, while $`r PAA` \%$ involved African American drivers. The difference score was computed as $z = `r zscore`$, with a $95\%$ confidence interval of $CIs = `r round(CIl.z, digits = 2)`, `r round(CIu.z, digits = 2)`$. The null hypothesis ($H_{0}$) value of equal proportions ($\pi_{0} = `r pi0`$) is not included in the computed $z$-$Score$ confidence interval, suggesting that the observed difference in the sample's proportions is larger than would be expected by chance alone. The margin of error for these data was calculated at $`r (CIl.z - CIu.z)/2*100`\%$.
+
+
+\newpage
+## Question-$1b$
+
+<!-- For the same data, compute a Pearson chi-square test by hand, also assuming an equal null frequency for the two groups. The corresponding frequencies are 985 African American drivers and 10,782 White drivers. Report and interpret your findings in terms of the research problem. -->
+
+```{r Q1Bvals, echo=FALSE}
+FAA <- 985
+FWH <- 10782
+FWH.print <- Rformat(FWH)
+n <- 11769
+pi0 <- 0.5
+zCr <- 3.84
+```
+
+`r margin_note("\\textsc{Note:} \\textsuperscript{\\dag} $n_{AA}$ = \\textit{Frequency value ($n$) of the proportion ($p$) of traffic stops involving \\textbf{American American (AA) drivers}.} \\textsuperscript{\\ddag} $n_{WH}$ = \\textit{Frequency value ($n$) of the proportion ($p$) of traffic stops involving \\textbf{White American (WH) drivers}.}")`
+
+```{r Q1Bkab1, opts.label='kab'}
+data.frame(n, FAA, FWH.print, paste(zCr)) %>%
+    kable(col.names = c("N", "$n_{AA}$^$\\dag$^", "$n_{WH}$^$\\ddag$^", "$z_{critical}$ ($df = 1$)"), caption = "Summary of Known Values and Parameters for Pearson's $\\chi^{2}$ Goodness-of-Fit Test")
+```
+
+## Question $1.b.i$. Pearson $\chi^2$ Computation
+
+`r margin_note("$$ \\chi^2 = \\sum{\\frac{(O_{i} - E_{i})^2}{E_{i}}} $$")`
+
+`r margin_note("$$ O_{1} = 985 $$")`
+
+`r margin_note("$$ O_{2} = 10,782 $$")`
+
+$$ E_{i} = \frac{(O_{1} + O_{2})}{2} $$
+
+
+```{r echo=FALSE}
+Ei1 <- FAA + FWH
+Ei2 <- Ei1/2
+
+EI <- (FAA + FWH)/2
+
+csq1a <- FAA - EI
+csq1b <- (csq1a)^2
+csq1c <- csq1b/EI
+
+csq1 <- ((FAA - EI)^2)/EI
+
+csq2a <- FWH - EI
+csq2b <- csq2a^2
+csq2c <- csq2b/EI
+
+csq2 <- ((FWH - EI)^2)/EI
+
+chisq <- csq1 + csq2
+
+# prop.test(x = FAA, n = n-2, p = 0.5, correct = FALSE)
+```
+
+$$ E_{i} = \frac{(`r FAA` + `r FWH`)}{2} \Rightarrow \frac{(`r Ei1`)}{2} $$
+
+$$ E_{i} = \textbf{`r EI`} $$
+
+$$ \chi^{2} = \frac{(`r FAA` - `r EI`)^{2}}{`r EI`} + \frac{(`r FWH` - `r EI`)^{2}}{`r EI`} $$
+
+$$ \Longrightarrow \frac{(`r csq1a`)^{2}}{`r EI`} + \frac{(`r csq2a`)^{2}}{`r EI`} $$
+
+$$ \Longrightarrow \frac{(`r csq1b`)}{`r EI`} + \frac{(`r csq2b`)}{`r EI`} $$
+
+$$ \Longrightarrow `r csq1c` + `r csq2c` $$
+
+$$ \chi^{2} = \textbf{`r chisq`} $$
+
+------
+
+
+```{r Q1Ah0, fig.margin=TRUE, fig.asp=1}
+# H0 <- pbinom(q = 0:n, size = n, prob = pi0)
+# H0.c <- cut(H0, breaks = 2, labels = c("0", "1"))
+H0 <- rbinom(n, 1, pi0)
+
+labs <- c("African American Drivers", "White Drivers")
+barplot(table(H0), names.arg = labs, ylab = "Count", family = "sans", font.main = 1, col = pal_my[2], border = pal_my[18], main = "Null Hypothesis", sub = expression(H[0]:~~p - pi[0] == 0), cex.sub = 1.5, cex.main = 1.5)
+```
+
+
+
+
+```{r Q1Aobserved, fig.margin = TRUE, fig.asp=1}
+Wh <- rbinom(n, 1, PWH)
+barplot(table(Wh), names.arg = labs, ylab = "Count", family = "sans", font.main = 1, col = pal_my[16], border = pal_my[18], main = "Observed Sample Proportions", sub = expression(H[1]:~~p - pi[0] != 0), cex.sub = 1.5, cex.main = 1.5)
+```
+
+\centerline{\LARGE{\color{patriarch}{Summary}}}
+
+A Pearson chi-square ($\chi^2$) test was conducted to determine whether there was a significant difference between traffic stops involve White drivers and those involving African American drivers. Of the $`r n`$ cases of traffic stops involving White or African American drivers, $`r FWH`$ involved White drivers, while $`r FAA`$ involved African American drivers. The computed difference, $\chi^{2}(1) = `r chisq`$, was larger than the critical value for the two-tailed $1 - df$ test ($3.84$). These findings suggest that a significant difference exists between the two proportions in this sample than could be expected due to chance alone.
+
+
+\newpage
+# Question-$2$
+
+
+`r tufte::newthought("Benchmarks Proportions for Expected Frequencies.")` @stewart2014stops identify the proportion of injury accidents as a, relatively, valid benchmark value for estimating the expected race-based proportions among drivers involved in Portland Police traffic stops. For this analysis, the benchmark proportions reflect the proportions of a sub-sample of the reported data comprised of only African American and White American drivers. Within this sub-sample, the _proportion of African American drivers involved in injury accidents is **$.080389769$**_. _Table 4_ below provides a summary of the expected and observed proportions and corresponding frequencies using this benchmark for the sub-sample.
+
+```{r isNA, results='hide'}
+Q2dat <- read.spss("data/race.sav", to.data.frame = TRUE)
+sapply(Q2dat, class)
+#     ## Getting description of the type(s) (i.e., "classes") of data we're dealing with ##
+
+Risna <- function(x) sum(is.na(x))
+#     ## Getting a count of NA values in the original dataframe ##
+sapply(Q2dat, Risna)
+#     ## No NAs, so no more data cleaning :) ##
+```
+
+```{r}
+n <- nrow(Q2dat)
+
+drive.t <- table(Q2dat$driver)
+
+drive.f <- as.data.frame(drive.t)
+
+fr.prop <- function(x, N = n) {x/N}
+
+drive.p <- sapply(drive.t, fr.prop)
+
+drive.df <- data.frame(race = levels(Q2dat$driver), prop = drive.p, freq = drive.f[, 2], row.names = NULL)
+
+EAA <- 0.080389769
+#     ## Proportion of African American drivers involved in injury accidents
+#         ## [n_{AA}$ = 23 (out of 285) @stewart2014stops, Table 4, p. 12] ##
+EWH <- 1 - EAA
+#     ## Proportion of White American drivers involved in injury accidents ##
+#         ## [n_{AA}$ = 262 (out of 285) @stewart2014stops, Table 4, p. 12] ##
+drive.exp <- data.frame(race = c("White", "African American"), prop = c(EWH, EAA), freq = c(EWH*n, EAA*n))
+```
+
+
+```{r opts.label='kab'}
+drive <- cbind(race = paste0(drive.df[, 1]), p.exp = round(drive.exp[, 2], 3), p.obs = round(drive.df[, 2], 3), f.exp = as.integer(drive.exp[, 3]), f.obs = as.integer(drive.df[, 3]))
+kable(drive, caption = "Observed Traffic Stop Frequency per Race", col.names = c("Driver's Race", "$P_{Benchmark}$" , "P_{Observed}$", "$Frequency_{Expected}$", "$Frequency_{Observed}$"), format.args = list(digits = 2), align = c('l', rep('r', ncol(drive) - 1)))
+```
+
+```{r echo=FALSE}
+R.binom_test <- function(p, N, pi0 = 0.5, exact = FALSE, correct = FALSE, digits = 2, ...){
+    if (exact) { ## Hypothesis Testing
+        BT <- stats::binom.test(x = p, n = N, p = pi0, ...)
+        }
+        else {
+            BT <- stats::prop.test(x = p, n = N, p = pi0, correct = correct, ...)
+        }
+#     ## The rest deals with formatting the output ##
+        BT$data.name <- paste0(p, " out of ", N, " null probability ", BT$null.value)
+#         ## Above, I modified the default output value for *.test$data.name
+#             ## to print the actual data values, rather than the object names the
+#             ## values are stored under (see output below) ##
+        BTCI <- paste0(round(BT$conf.int[[1]], digits = digits), ", ", round(BT$conf.int[[2]], digits = digits))
+        BT$p.value <- round(BT$p.value, digits = 7)
+        BT.df <- data.frame(c(BT[c("alternative", "null.value", "parameter", "estimate", "statistic", "p.value")], BTCI))
+        row.names(BT.df) <- NULL
+        return(BT.df)
+}
+
+
+pt <- R.binom_test(p = drive.t["African American"], N = nrow(Q2dat), pi0 = EAA, alternative = "greater")
+```
+
+```{r opts.label='kab'}
+kable(pt, caption = paste0("1-sample proportions test without continuity correction: \\textit{", drive.t['African American'], " out of ", nrow(Q2dat), "}"), col.names = c("$H_{1}$", "$\\pi_{0}$", "$df$", "$p$", "$\\chi_{2}$", "_p-value_", "CI"), format.args = list(digits = 2))
+```
+
+```{r echo=FALSE, fig.fullwidth=TRUE, fig.asp=0.5}
+exp.AA <- t(drive.exp[2, 2:3])
+obs.AA <- t(drive.df[2, 2:3])
+drive.AA <- data.frame(Y = c("Expected", "Observed"), prop = c(exp.AA[1], obs.AA[1]), freq = c(exp.AA[2], obs.AA[2]))
+drive.AA$freq <- sapply(drive.AA$freq, as.integer)
+
+exp.WH <- t(drive.exp[2, 2:3])
+obs.WH <- t(drive.df[1, 2:3])
+drive.WH <- data.frame(Y = c("Expected", "Observed"), prop = c(exp.WH[1], obs.WH[1]), freq = c(exp.WH[2], obs.WH[2]))
+drive.WH$freq <- sapply(drive.WH$freq, as.integer)
+
+gAA <- ggplot(drive.AA, aes(x = freq, y = Y)) + geom_segment(aes(yend = Y), xend = 0, colour = pal_my[20]) + geom_point(size = 5, aes(colour = Y), alpha = 0.85) + scale_colour_manual(values = pal_my[c(18, 5)], guide = FALSE) + labs(y = "", x = "", title = "Frequency of African American Drivers") + thm_tft(xline = TRUE, yline = TRUE, ptitle = TRUE)
+
+plabs <- function(x) {paste0(round(x * 100, digits = 1), "%")}
+plab.AA <- sapply(drive.AA$prop, plabs)
+
+gAA2 <- gAA + scale_x_continuous(breaks = c(0, drive.AA$freq), limits = c(0, max(drive.AA$freq))) + geom_text(vjust = -1, hjust = 1, stat = 'identity', position = 'identity', colour = pal_my[19], size = rel(4), aes(family = "ETBembo", fontface = "italic", label = paste("p  = ", plab.AA)))
+
+pt.lab <- as.character(as.expression("chi^2 ==, pt$statistic, \n, 'p == ', pt$p.value"))
+
+eqn <- as.character(as.expression(substitute(
+    italic(chi^2) == a ~~ italic(p) == b,
+    list(a = format(pt$statistic, digits = 3),
+         b = format(pt$p.value, digits = 3)
+    ))))
+# eqn
+
+gAA3 <- gAA2 + geom_text(aes(x = max(drive.AA$freq)/2, y = 1.5, family = "serif", label = eqn), parse = TRUE)
+gAA3
+```
+
+\newpage
+
+# Question-$3$
+
+<!--A second data set (race2.sav), which concerns police stops of pedestrians, is available at the data page) and is derived from the same report. There are five race categories (African American, Asian, Hispanic, Native American, White) and two categories of reasons given for the stop (major offense, minor offense).2-->
+```{r results='hide'}
+Q3dat <- read.spss("data/race2.sav", to.data.frame = TRUE)
+
+sapply(Q3dat, class)
+unique(Q3dat$offense)
+unique(Q3dat$ped)
+
+Risna <- function(x) sum(is.na(x))
+# sapply(Q3dat, Risna)
+
+Q3dat2 <- na.omit(Q3dat)
+Q3dat2 <- within(Q3dat2, {
+    ped.n <- as.numeric(ped)
+    ped <- factor(ped.n, levels = c(1, 2, 3, 4, 5), labels = c("African American", "Asian", "Hispanic", "Native American", "White"))
+})
+
+# summary(Q3dat2)
+
+R.na <- function(x, v = 0){
+    ## x = object to be manipulated,
+    ## v = value to assign to NAs ##
+    x <- ifelse(is.na(x), v, x)
+    return(x)
+}
+
+unique(Q3dat$offense)
+unique(Q3dat$ped)
+Q3dat <- within(Q3dat, {
+    offense.n <- sapply(offense, R.na, v = 0)
+    offense <- factor(offense.n, levels = c(0, 1, 2), labels = c("Unknown", "Major", "Minor"))
+    ped.n <- as.numeric(ped)
+    ped <- factor(ped.n, levels = c(1, 2, 3, 4, 5), labels = c("African American", "Asian", "Hispanic", "Native American", "White"))
+})
+
+```
+
+
+\newpage
+## Question-$3a$. Test of Racial Differences in Portland Police Pedestrian Stops
+
+```{r opts.label='kab'}
+#par(family = "ETBembo", font.main = 2, font.sub = 3, cex.lab = 0.75)
+
+# sort(table(Q3dat$ped)) %>% ## see {dplyr} package ##
+#     barplot(main = "Frequency Counts per Pedestrian Race\n(sorted from least-to-most)", col = grad(1:nlevels(Q3dat$ped), p = mag), family = "ETBembo", font.main = 3, cex.lab = 0.75)
+# as.data.frame(table(Q3dat$ped)) %>%
+#     kable(caption = "Factor Levels and Corresponding Frequency Counts for Pedestrians", col.names = c("Race", "Frequency"))
+# 
+# sort(table(Q3dat$offense)) %>% ## see {dplyr} package ##
+#     barplot(main = "Frequency Counts per Pedestrian Offense\n(sorted from least-to-most)", col = grad(1:nlevels(Q3dat$offense), p = grblues2), family = "ETBembo", font.main = 3, font.sub = 3, cex.lab = 0.75)
+# as.data.frame(table(Q3dat$offense)) %>%
+#     kable(caption = "Factor Levels and Corresponding Frequency Counts for Offenses", col.names = c("Offense", "Frequency"))
+
+
+tbl <- ftable(Q3dat$ped, Q3dat$offense)
+dimnames(tbl) <- list(Race = levels(Q3dat$ped), Offense = levels(Q3dat$offense))
+
+tbl.df <- as.data.frame(tbl)
+names(tbl.df) <- c("Race", "Offense", "Frequency")
+# tbl.df[tbl.df$Offense == "Unknown", c(1, 3)] %>%
+    # kable(caption = "'Unknown' Offense", col.names = c("Race", "Frequency"), row.names = FALSE)
+# tbl.df[tbl.df$Offense == "Major", c(1, 3)] %>%
+    # kable(caption = "'Major' Offense", col.names = c("Race", "Frequency"), row.names = FALSE)
+# tbl.df[tbl.df$Offense == "Minor", c(1, 3)] %>%
+    # kable(caption = "'Minor'", col.names = c("Race", "Frequency"), row.names = FALSE)
+
+# tbl
+
+# library(vcd)
+# labs.p <- c("AA", "AS", "HI", "NV", "WH")
+# labs.o <- c("NA", "Major", "Minor")
+# dimnames(tbl) <- list(Race = paste(levels(Q3dat$ped)), Offense = paste(labs.o))
+# mosaic(t(tbl))
+```
+
+```{r results='asis'}
+tbl.p <- table(Q3dat$ped)
+tbl.p.df <- as.data.frame(tbl.p)
+names(tbl.p.df) <- c("Race", "Freq")
+
+xsq <- chisq.test(tbl.p)
+xsq$data.name <- "race2.sav"
+attr(xsq$statistic, "names") <- "$\\chi^{2}$"
+xsq
+```
+
+
+## Question-$3b$
+
+```{r results='asis'}
+Q3dat <- read.spss("data/race2.sav", to.data.frame = TRUE)
+Q3dat <- droplevels(na.omit(Q3dat))
+Q3dat <- within(Q3dat, {
+    ped.n <- as.numeric(ped)
+    ped <- factor(ped.n, labels = c("African American", "White"))
+})
+
+tbl <- ftable(Q3dat$ped, Q3dat$offense)
+tbl
+
+Ea <- (431 * 120)/530
+Eb <- (99 * 120)/530
+Ec <- (431 * 410)/530
+Ed <- (99 * 410)/530
+```
+
+$$ E_{A} = \frac{(431*120)}{530} \Rightarrow \frac{`r 431*120`}{530} \Rightarrow `r (431*120)/530` $$
+$$ E_{B} = \frac{(99*120)}{530} \Rightarrow \frac{`r 99*120`}{530} \Rightarrow `r (99*120)/530` $$
+$$ E_{C} = \frac{(431*410)}{530} \Rightarrow \frac{`r 431*410`}{530} \Rightarrow `r (431*410)/530` $$
+$$ E_{D} = \frac{(99*410)}{530} \Rightarrow \frac{`r 99*410`}{530} \Rightarrow `r (99*410)/530` $$
+
+$$ \chi^{2} = \Sigma\left(\frac{99-`r Ea`}{`r Ea`} + \frac{21-`r Eb`}{`r Eb`} + \frac{332-`r Ec`}{`r Ec`} + \frac{78-`r Ed`}{`r Ed`}\right) $$
+
+$$ \Rightarrow \Sigma\left(\frac{`r 99 - Ea`}{`r Ea`} + \frac{`r 21 - Eb`}{`r Eb`} + \frac{`r 332 - Ec`}{`r Ec`} + \frac{`r 78 - Ed`}{`r Ed`}\right) $$
+
+$$ \Rightarrow \Sigma\left(`r (99 - Ea)/Ea` + (`r (21 - Eb)/Eb`) + (`r (332 - Ec)/Ec`) + (`r (78 - Ed)/Ed`) \right) $$
+
+$$ \chi^{2} = `r ((99 - Ea)/Ea) + ((21 - Eb)/Eb) + ((332 - Ec)/Ec) + ((78 - Ed)/Ed)` $$
+
+
+`r tufte::newthought("Phi statistic")`
+
+$$ \Phi = \frac{(AD-BC)}{(A+B)(C+D)(A+C)(B+D)} \frac{((21*332)-(99*78))}{(21+99)(78+332)(21+78)(99+332)} \Rightarrow \frac{((`r 21*332`)-(`r 99*78`))}{(`r 21+99`)(`r 78+332`)(`r 21+78`)(`r 99+332`)} \Rightarrow \frac{(`r (21*332)-(99*78)`)}{(`r (21+99)*(78+332)`)(`r (21+78)*(99+332)`)} \Rightarrow \frac{(`r (21*332)-(99*78)`)}{(`r ((21+99)*(78+332))*((21+78)*(99+332))`)} $$
+\frac{-750}{2099314800} \Rightarrow -1.093*108
+
+$$ \Phi = \textbf{`r ((21*332)-(99*78))/((21+99)*(78+332))*((21+78)*(99+332))`} $$
+
+`r tufte::newthought("Relative risk ratio")`
+
+$$ Risk = \frac{(\frac{n_{2+}}{n_{++}})}{\frac{(n_{1+}}{n_{++})}} \Rightarrow \frac{p_{2+}}{p_{1+}} \Rightarrow \frac{(410/530)}{(120/530)} = 3.417 $$
+
+
+`r tufte::newthought("Odds ratio")`
+
+$$ OR = \frac{n_{11}n_{22}}{n21n12} \Rightarrow \frac{(21\*332)}{(78\*99)} = 0.903 $$
+
+
+## Question-$3c$
+
+
+`r tufte::newthought("Contingency Table \\& Group Comparisons via Pearson $\\chi^{2}$")`
+
+```{r fig.asp=1, results='asis'}
+Q3dat <- read.spss("data/race2.sav", to.data.frame = TRUE)
+Q3dat <- droplevels(na.omit(Q3dat))
+
+
+tbl <- ftable(Q3dat$ped, Q3dat$offense)
+tbl.df <- as.data.frame(tbl)
+names(tbl.df) <- c("Race", "Offense", "Freq")
+# mosaicplot(formula = Freq ~ Race + Offense, data = tbl.df, main = "Pedestrian Race x Offense", type = "deviance", family = "ETBembo", las = 2, cex.axis = 0.5)
+
+xtbl <- xtabs(Freq ~ Offense + Race, data = tbl.df, sparse = TRUE, subset = NULL, na.action = NULL)
+xtbl.m <- as.matrix(xtbl)
+xsq <- chisq.test(xtbl.m)
+
+library(vcd)
+mosaic(Freq ~ Offense + Race, data = tbl.df)
+
+
+library(descr)
+
+ctab <- CrossTable(tbl.df$Race, tbl.df$Offense,
+                   digits = list(expected = 3, prop = 3, percent = 3, others = 3),
+                   expected = F,
+                   prop.r = F, prop.c = F, prop.t = F, prop.chisq = F, 
+                   chisq = T, fisher = F, mcnemar = F,
+                   dnn = c("Race", "Frequency of Stops"), cell.layout = F,
+                   row.labels = T,
+                   total.r = T, total.c = T,
+                   xlab = expression(italic("Frequency of Stops")),
+                   ylab = expression(italic("Race")))
+
+# ctab$chisq.corr[[3]] <- round(ctab$chisq.corr[[3]], 2)
+assocstats(tbl)
+```
+
+\newpage
+# Question-$4$
+
+```{r}
+Q4dat <- read.spss("data/child.sav", to.data.frame = TRUE)
+summary(Q4dat)
+Q4dat <- na.omit(Q4dat)
+
+tbl <- ftable(Q4dat, row.vars = c("boyfriend","program"), col.vars = "abuse")
+tbl.df <- as.data.frame(tbl)
+
+tbl.a <- array(tbl, dim = c(2,2,2))
+ary <- array(c(98, 6, 
+                 490, 34, 
+                 100, 2, 
+                 471, 46), dim = c(2, 2, 2))
+chisq.test(x = Q4dat[, 2], y = Q4dat[, 1], correct = FALSE) 
+    ## Check if there is a marginally significant difference between boyfriend and abuse variables ##
+        ## p = 0.05159 ##
+
+tbl0 <- ftable(Q4dat[, 1:2], row.vars = "boyfriend", col.vars = "abuse")
+
+xt0 <- xtabs(Freq ~ boyfriend + abuse, data = tbl.df)
+chisq.test(xt0)
+
+library(DescTools)
+xt <- xtabs(Freq ~ abuse + boyfriend + program, data = tbl.df)
+xtbl.f <- ftable(xt)
+# xtbl.p <- prop.table(xt)
+xtbl.fp <- prop.table(ftable(xt))
+# kable(xtbl.fp[,4])
+# xtbl.perc <- apply(xtbl.fp, 2, function(x) {paste0(round(x*100, 2), "%")})
+ftable(xt) %>%
+    prop.table() %>% 
+    apply(2, function(x) {paste0(round(x*100, 2), "%")}) -> ftabs
+
+Desc(xt)
+plot(xt, color = pal_my.a75[c(17, 16)], main = "Abuse-x-Boyfriend-x-Program")
+print(xt)
+BreslowDayTest(xt)
+        ## p = 0.07201 ##
+```
+`r tufte::newthought("Non-Conditional Contingency Table")`. The table below provides frequency counts for the two levels of `boyfriend` (`0 = biological father`; `1 = not biological father`) and `abuse` (`0 = abuse`; `1 = no abuse`).
+
+```{r echo=FALSE, results='asis'}
+tbl0
+```
+
+`r tufte::newthought("Conditional Contingency Tables")`. The tables below provide frequency counts for the two levels of `boyfriend` (`0 = biological father`; `1 = not biological father`) and `abuse` (`0 = no abuse`; `1 = abuse`), conditional upon the two levels of `program` (`0 = no program`; `1 = program`).
+
+```{r echo=FALSE, results='hide'}
+xt.df <- data.frame(xt)
+N <- nrow(Q4dat)
+xt.df$Percent <- sapply(xt.df$Freq, R.perc, n = N)
+
+# xtkab1 <- data.frame(x = c(" ", "abuse", "0", "1"), y = c("boyfriend", rep(" ", 3)), y1 = c(" ", "0", 490, 34), y2 = c(" ", "1", 98, 6))
+# xt.p1 <- as.matrix(xt.df[xt.df$program == 0, c(1:2, 4:5)])
+# xt.p1 <- data.frame(boyfriend = rep(" ", 3), "0" = c(" ", 490, 34), "1" = c(" ", 98, 6), row.names = c("**abuse**", "**0**", "**1**"))
+# kable(xt.p1, caption = "Program Group", col.names = c("Boyfriend", "0", "1"))
+
+# kable(xt.df[xt.df$program == 0, c(1:2, 4:5)], format.args = list(zero.print = "."), caption = "Control Group")
+# kable(xt.df[xt.df$program == 1, c(1:2, 4:5)], format.args = list(zero.print = "."), caption = "Program Group")
+```
+
+_**Control Group (`Program = 0`)**_
+
+```{r echo=FALSE, results='asis'}
+xt.p0 <- xt.df[xt.df$program == 0, c(1:2, 4:5)]
+p0 <- paste0(xt.p0[, 3], "(", xt.p0[, 4], ")")
+m.p0 <- matrix(c(p0[c(1, 3, 2, 4)]), nrow = 2, byrow = T)
+dimnames(m.p0) <- list(Abuse = c(0, 1), Boyfriend = c(0, 1))
+
+xt.p0
+```
+
+_**Program Group (`Program = 1`)**_
+
+```{r}
+xt.p1 <- xt.df[xt.df$program == 1, c(1:2, 4:5)]
+p1 <- paste0(xt.p1[, 3], "(", xt.p1[, 4], ")")
+m.p1 <- matrix(c(p1[c(1, 3, 2, 4)]), nrow = 2, byrow = T)
+dimnames(m.p1) <- list(Abuse = c(0, 1), Boyfriend = c(0, 1))
+
+m.p1
+```
+
+\newpage
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE, error=FALSE, cache=FALSE}
+###################################################################
+### MAP (see 'StatDataAnalyses.Rmd' for full map creation code) ###
+map <- read.csv("../BIPSTUDY/data/usmap.csv")
+states = read.csv("../BIPSTUDY/data/states_new.csv",header = T,row.names = 1)
+#states = read.csv("data/states_new072016_1.csv",header = T,row.names = 1)
+states <- data.frame(state = rownames(states), states)
+####################################
+### STATE CENTROIDS (for adding state abbr. labels) ###
+snames <- aggregate(cbind(long, lat) ~ id, data = map, FUN = function(x)mean(range(x)))
+states <- merge(snames,states, by.x = "id", by.y = "state")
+##########################
+states[10,2] <- 1841536
+states[19,2] <- 706827
+states[2,2] <- -1344021
+states[2,3] <- -1974685
+states[37,2] <- 181757
+states[24,2] <- 400430
+states[23,2] <- 1264168
+states[23,3] <- -92122
+states[13,2] <- -1174084
+states[13,3] <- -0
+states[5,2] <- -1750000
+states[12,2] <- -350000
+states[12,3] <- -2010000
+states[21,3] <- -343925
+states[21,2] <- 1955994
+states[22,2] <- 2230000
+states[7,3] <- -6
+states[31,2] <- 2120364
+states[31,3] <- -255347
+states[30,3] <- 209979
+states[46,3] <- 309355
+states[8,3] <- -362274
+states[47,2] <- 1881512
+states[18,2] <- 1354662
+states[49,2] <- 1657769
+states[49,3] <- -520174
+states[41,2] <- 1770243
+states[41,3] <- -1015010
+states[20,3] <- 497611
+###################################################################
+### BASE MAP PLOT (using ggplot2) ###
+gg <- ggplot()
+gg <- gg + geom_map(data = map, map = map,
+                    aes(x = long, y = lat, map_id = id, group = group),
+                    fill = "transparent", color = pal_my[19], size = 0.15) + thm_cl_tft() ## no state labels in the base plot because i'll need to map the label colors in each map created later to a color scale appropriate for each variable ##
+# gg + geom_text(data = states, aes(long, lat, label = ST, colour = ST,fontface = "bold"), size = rel(2.75)) + scale_colour_manual(values = mpal(states), na.value = pal_my[2],guide = FALSE) ## map with labels (colour mapped to state name) ##
+# gg + geom_map(data = states, map = map, aes(map_id = id, fill = ST)) + geom_text(data = states, aes(long, lat, label = ST, fontface = "bold"), size = rel(2.75)) + scale_fill_manual(values = mpal(states, alpha = 0.35), na.value = pal_my[2],guide = FALSE) ## map with labels (fill mapped to state name) ##
+
+
+##############################################################
+### FACTORS
+
+
+states$Int_f <- factor(states$Interviewed,levels = c(2,1,0),ordered = T,labels = c("Interviewed", "Not Interviewed", "No Standards"))
+states$InterviewDate <- as.Date(states$InterviewDate, origin = "1899-12-30") ## SEE `?as.Date` FOR EXPLAINATION OF DATE ORIGINS ACCROSS DIFFERENT PLATFORMS (IN THIS CASE, THE ORIGINAL DATASET WAS CREATED USING EXCEL ON A WINDOWS PC, WHICH HAS AN ORIGIN DATE OF "1899-12-30"). ##
+
+states <- within(states, {
+    Q3bF <- factor(Q3b, levels = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11), labels = c("(No Standards)", "Never", "As Needed", "Triennially", "Biennially", "Annually", "Quarterly", "Bimonthly", "Monthly", "Daily", "Other"))
+    Q3cF <- factor(Q3c, levels = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11), labels = c("(No Standards)", "Never", "As Needed", "Triennially", "Biennially", "Annually", "Quarterly", "Bimonthly", "Monthly", "Daily", "Other"))
+    Q4aF <- factor(Q4a, levels = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11), labels = c("(No Standards)", "Never", "As Needed", "Triennially", "Biennially", "Annually", "Quarterly", "Bimonthly", "Monthly", "Daily", "Other"))
+    Q9aF <- factor(Q9a, levels = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11), labels = c("(No Standards)", "Never", "As Needed", "Triennially", "Biennially", "Annually", "Quarterly", "Bimonthly", "Monthly", "Daily", "Other"))
+    Q0F <- factor(Q0, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    Q4bF <- factor(Q4b, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    Q4cF <- factor(Q4c, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    Q4dF <- factor(Q4d, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    Q5F <- factor(Q5, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    Q6F <- factor(Q6, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    stF <- factor(Standards, levels = c(2, 1, 0), labels = c("Yes", "In Development", "No Standards"))
+    Q0aF <- factor(Q0a, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    Q7F <- factor(Q7, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    Q8F <- factor(Q8, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    Q9F <- factor(Q9, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    Q9cF <- factor(Q9c, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+    Q9dF <- factor(Q9d, levels = c(2, 1, 0), labels = c("Yes", "No", "(No Standards)"))
+})
+
+states <- droplevels(states)
+attach(states) ## STATES IS NOW A PART OF THE `search()` PATH, SO NO LONGER HAVE TO SPECIFY "states$..." WHEN REFERRING TO SPECIFIC VARIABLES WITHIN THE DATASET ##
+
+## INTERVIWED STATUS ##
+tblI <- data.frame(table(Int_f))
+names(tblI) <- c("Interviewed", "n")
+
+####################################################################
+## STANDARDS Y/N ##
+tblS <- data.frame(table(stF))
+names(tblS) <- c("Current Standards Exist", "n")
+
+### STANDARDS COMMITTEE Y/N ###
+
+tblq0a <- data.frame(table(Q0aF))
+names(tblq0a) <- c("Standards Committee Exists", "n")
+
+### FEEDBACK MECHANISMS Y/N ###
+
+tblq7 <- data.frame(table(Q7F))
+names(tblq7) <- c("Feedback Mechanisms Exist", "n")
+
+### GENDER INCLUSIVE STANDARDS Y/N ###
+
+tblq8 <- data.frame(table(Q8F))
+names(tblq8) <- c("Gender Inclusive Standards", "n")
+
+### REVISIONS PROCESSES IN PLACE Y/N ###
+
+tblq9 <- data.frame(table(Q9F))
+names(tblq9) <- c("Revisions Processes Exist", "n")
+
+### EVALS FOR REVISIONS Y/N ###
+
+tblq9c <- data.frame(table(Q9cF))
+names(tblq9c) <- c("Standards Revisions are Informed by Program Evaluations", "n")
+
+### RESEARCH IN REVISIONS Y/N ###
+
+tblq9d <- data.frame(table(Q9dF))
+names(tblq9d) <- c("Research Information is Used in Standards Revisions", "n")
+
+stdstbls <- cbind(tblq0a, tblq7, tblq8, tblq9, tblq9c, tblq9d)
+names(stdstbls) <- c(" ", "Standards Committee Exists", " ", "Feedback Mechanisms Exist", " ", "Gender Inclusive Standards", " ", "Revisions Processes Exist", " ", "Standards Revisions are Informed by Program Evaluations", " ", "Research Information is Used in Standards Revisions")
+nums <- sapply(stdstbls, is.numeric)
+stdstbls <- stdstbls[, nums]
+row.names(stdstbls) <- c("Yes", "No", "(No Standards)")
+stdstbls <- t(stdstbls)
+####################################################################
+## MONITORING Y/N ##
+tblm <- data.frame(table(Q0F))
+names(tblm) <- c("Monitors BIPs' Compliance with Standards", "n")
+
+### SITE VISITS ###
+tblq4b <- data.frame(table(Q4bF))
+names(tblq4b) <- c("Site Visits Conducted", "n")
+
+### REPRECUSSIONS ###
+tblq4c <- data.frame(table(Q4bF))
+names(tblq4c) <- c("Reprecussions Exist", "n")
+
+### BIP ENDORSEMENT Y/N ###
+tblq4d <- data.frame(table(Q4dF))
+names(tblq4d) <- c("BIP Endorsement", "n")
+
+### BARRIERS Y/N ###
+tblq5 <- data.frame(table(Q5F))
+names(tblq5) <- c("Compliance Barriers have been Identified", "n")
+
+### COMPLIANCE DATA Y/N ###
+tblq6 <- data.frame(table(Q6F))
+names(tblq6) <- c("Compliance Data are Kept", "n")
+
+montbls <- cbind(tblm, tblq4b, tblq4c, tblq4d, tblq5, tblq6)
+names(montbls) <- c(" ", "Monitors BIPs' Compliance with Standards", " ", "Site Visits Conducted", " ", "Reprecussions Exist", " ", "BIP Endorsement", " ", "Compliance Barriers have been Identified", " ", "Compliance Data are Kept")
+nums <- sapply(montbls, is.numeric)
+montbls <- montbls[, nums]
+row.names(montbls) <- c("Yes", "No", "(No Standards)")
+montbls <- t(montbls)
+
+
+####################################################################
+####################################################################
+
+detach(states)
+
+```
+
+The data for the remaing sets of analyses are from a national telephone interview study of batterer intervention program (BIP) standards advisory and compliance monitoring committees. Respondents were asked a series of questions varying in structure from _open-ended_ to simple _yes-or-no_. These analyses will concern concern the discrete data collected in response to the following interview questions:
+
+> Does your organization have methods for assessing programs’ feedback about the standards?
+> Do the standards apply to programs designed for all genders?
+> Are there processes in place to revise the standards?
+> > Is there a process for informing revisions through program evaluations and needs assessments
+> > Is research information utilized in revising the standards?
+
+The primary interest for the below analyses relate to an overarching effort to implement and sustain effective and appropriate anti-violence intervention strategies among female-identified perpetrators of same-sex violence. The above listed questions provide dichotomous (`0 = No`; `1 = Yes`) indicators of responding states' current organizational and ideological capacities for such intervention strategies. 
+
+```{r echo=FALSE, results='hide'}
+n = 49
+ns = 38
+Q8y <- 27
+pt1 <- R.binom_test(p = Q8y, N = ns, pi0 = 0.5)
+```
+```{r opts.label='kab'}
+kable(pt1, caption = paste0("1-sample proportions test without continuity correction: \\textit{", Q8y, " out of ", n, "}"), col.names = c("$H_{1}$", "$\\pi_{0}$", "$df$", "$p$", "$\\chi_{2}$", "_p-value_", "CI"), format.args = list(digits = 2))
+```
+
+# Question-$5$
+
+A Pearson chi-square ($\chi^2$) test was conducted to determine whether there was a significant difference between trafficthe number of states with gender-inclusive BIP standards and those with BIP standards specific only to male-identified perpetrators. Given that no precedent currently exists for gener inclusivity in U.S. states' BIP standards, the binomial test was conducted using $0.5$ as the Null Hypothesis proportion. Of the $`r ns`$ interviewed states with BIP stamdards, `r Q8y` have indicated that their standards are gender-inclusive. The computed difference, $\chi^{2}(1) = `r pt$statistic`$, was larger than the critical value for the two-tailed $1 - df$ test ($3.84$). These findings suggest that a significant difference exists between the number of states with gender-inclusive BIP standards compared with the number of states without gender-inclusive standards.
+
+# Question-$6$
+
+```{r}
+tbl <- ftable(states$Q8F, states$Q9F)
+tbl.df <- as.data.frame(tbl)
+names(tbl.df) <- c("Gender", "Revisions", "Freq")
+# mosaicplot(formula = Freq ~ Race + Offense, data = tbl.df, main = "Pedestrian Race x Offense", type = "deviance", family = "ETBembo", las = 2, cex.axis = 0.5)
+
+xtbl <- xtabs(Freq ~ Gender + Revisions, data = tbl.df, sparse = TRUE, subset = NULL, na.action = NULL)
+xtbl.m <- as.matrix(xtbl)
+xsq <- chisq.test(xtbl.m)
+
+library(vcd)
+mosaic(Freq ~ Gender + Revisions, data = tbl.df)
+
+
+library(descr)
+
+ctab <- CrossTable(tbl.df$Race, tbl.df$Offense,
+                   digits = list(expected = 3, prop = 3, percent = 3, others = 3),
+                   expected = F,
+                   prop.r = F, prop.c = F, prop.t = F, prop.chisq = F, 
+                   chisq = T, fisher = F, mcnemar = F,
+                   dnn = c("Race", "Frequency of Stops"), cell.layout = F,
+                   row.labels = T,
+                   total.r = T, total.c = T,
+                   xlab = expression(italic("Frequency of Stops")),
+                   ylab = expression(italic("Race")))
+
+# ctab$chisq.corr[[3]] <- round(ctab$chisq.corr[[3]], 2)
+assocstats(tbl)
+```
+A Pearson chi-squared test was used to investigate whether states with gender-inclusive standards as compared with states with gender non-inclusive standards were more likely to have revisions processes in place versus not. The difference was significant, $\chi^2(1) = 55.345, p < 0.001$.
+
+
+
+\newpage
+# References`r R.cite_r(file = "~/GitHub/auxDocs/REFs.bib")`

@@ -1,0 +1,140 @@
+```{r setup, echo=TRUE, message=FALSE, warning=FALSE, cache=FALSE}
+source("../SETUP.R")
+options(width = 70)
+knitr::opts_chunk$set(
+    tidy = FALSE,
+    echo = TRUE,
+    cache = FALSE,
+    fig.keep = 'high',
+    fig.show = 'asis',
+    results = 'asis',
+    autodep = T,
+    Rplot = TRUE,
+    dev = 'pdf',
+    fig.path = 'graphics/reuters/rplot_',
+    fig.width = 7,
+    fig.asp = 1,
+    out.width = "\\linewidth"
+    )
+library(foreign) ## read.spss() ##
+```
+
+\newpage
+# Three-Way Contingency Table Analysis
+
+```{r}
+cnt <- array( ## What we want to generate directly from the data ##
+    c(100, 139, 106, 128, 157, 140, 89, 77),
+    dim = c(2, 2, 2),
+    dimnames = list(
+    sex = c("Male", "Female"),
+    ind = c("Affiliate", "Independent"),
+    response = c("Clinton", "Trump")
+))
+library(DescTools)
+## what the results of the BD & MH tests should be: ##
+BreslowDayTest(cnt, correct = FALSE) 
+mantelhaen.test(cnt, correct = TRUE) ## For comparison only, since JTN's handout 
+                                    ## uses the default MH test method, which 
+                                    ## includes Yate's correction ##
+mantelhaen.test(cnt, correct = FALSE) 
+
+dat <- R.rspss("data/cnnpoll.sav", vlabs = T)
+ft <- with(dat, {
+    ftable(dat, row.vars = 1:2, col.vars = 3)
+})
+ft
+
+ftc <- matrix(ft, nrow = 4, byrow = T)
+ftc
+ftc.a <- array(ftc, dim = c(2, 2, 2), dimnames = list(
+    sex = c("Male", "Female"),
+    ind = c("Affiliate", "Independent"),
+    response = c("Clinton", "Trump")))
+ftc.a
+
+mosaicplot(ftc.a, type = "deviance", las = 2, color = mypal.a75[c(5, 16)])
+
+
+library(DescTools)
+BreslowDayTest(ftc.a, correct = FALSE) 
+mantelhaen.test(ftc.a, correct = TRUE) ## For comparison only, since JTN's handout 
+                                    ## uses the default MH test method, which 
+                                    ## includes Yate's correction ##
+mantelhaen.test(ftc.a, correct = FALSE) 
+
+```
+
+\newpage
+# Matched Pairs
+
+```{r}
+cnt <- array( ## What we want to generate directly from the data ## 
+    c(146, 155, 47, 303), 
+    dim = c(2, 2), 
+    dimnames = list(w1dep = c("not", "depressed"), 
+                    w2dep = c("not", "depressed"))
+    )
+cnt
+
+## What the results of the McNemar's Test should be: ##
+mcnemar.test(cnt, correct = FALSE) 
+
+dat <- read.spss("data/dep.sav", to.data.frame = T)
+sapply(dat, R.isna) ## THANK YOU!!!! (no NAs to deal with) ##
+#   ## ... except the factor labels are kind of obnoxious for output... ##
+dat <- within(dat, {
+    levels(w1dep) <- c("not", "depressed")
+    levels(w2dep) <- c("not", "depressed")
+})
+names(dat) <- c("T1", "T2", "T3")
+
+ft <- with(dat, {
+    ftable(dat, row.vars = 1, col.vars = 2)
+})
+ft
+
+ftc <- matrix(ft, nrow = 2, byrow = T)
+ftc
+ftc.a <- array(ftc, dim = c(2, 2), dimnames = list(
+    T1 = c("not", "depressed"), 
+    T2 = c("not", "depressed")))
+ftc.a
+mcnemar.test(ftc.a, correct = FALSE) 
+mosaicplot(ftc.a, type = "deviance", las = 2, color = mypal.a75[c(5, 16)])
+
+```
+
+\newpage
+# Loglinear Model Analysis 
+
+```{r}
+dat <- R.rspss("data/reuters.sav", vlabs = F)
+R.msmm(dat)
+dat <- dat[, -3]
+dat <- subset(dat, response < 2)
+dat <- within(dat, {
+    ind.f <- factor(ind,
+                    levels = unique(ind),
+                    labels = c("Independent",
+                               "Affililate"))
+    response.f <- factor(response,
+                        levels = c(0, 1),
+                        labels = c("Trump",
+                                   "Clinton"))
+})
+summary(dat)
+
+tbl <- table(dat$ind.f, dat$response.f)
+dimnames(tbl) <- list(ind = levels(dat$ind.f), response = levels(dat$response.f))
+mosaicplot(tbl, type = "deviance", las = 2, color = mypal.a75[c(5, 16)])
+
+library(MASS)
+logmodel <- loglm( ~ ind + response, digits = 4, data = tbl)
+
+
+```
+
+
+\newpage
+# References`r R.cite_r(file = "~/GitHub/auxDocs/REFs.bib")`

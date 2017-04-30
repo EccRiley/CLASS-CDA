@@ -1,0 +1,137 @@
+---
+title: "HW1 - Question 3 R Notebook"
+author: "Rachel M. Smith"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+---
+
+-----
+
+# Setting Things Up in `R`
+
+```{r setup, echo=TRUE, message=FALSE, warning=FALSE, cache=FALSE}
+source("../SETUP.R")
+options(width = 60)
+opts_chunk$set(fig.show = "asis", results = "asis", Rplot = TRUE, tidy = TRUE, fig.path = "graphics/reuters/Rplot_", fig.width = 7, out.width = '0.9\\linewidth', Rplot = TRUE)
+library(foreign) ## read.spss() ##
+
+```
+
+
+## Data-Cleaning \& Preparation
+
+```{r}
+dat <- read.spss("data/race2.sav", to.data.frame = TRUE)
+
+sapply(dat, class)
+unique(dat$offense)
+unique(dat$ped)
+
+Risna <- function(x) sum(is.na(x))
+sapply(dat, Risna)
+
+dat2 <- na.omit(dat)
+dat2 <- within(dat2, {
+    ped.n <- as.numeric(ped)
+    ped <- factor(ped.n, levels = c(1, 2, 3, 4, 5), labels = c("African American", "Asian", "Hispanic", "Native American", "White"))
+})
+
+summary(dat2)
+
+R.na <- function(x, v = 0){
+    ## x = object to be manipulated,
+    ## v = value to assign to NAs ##
+    x <- ifelse(is.na(x), v, x)
+    return(x)
+}
+
+unique(dat$offense)
+unique(dat$ped)
+dat <- within(dat, {
+    offense.n <- sapply(offense, R.na, v = 0)
+    offense <- factor(offense.n, levels = c(0, 1, 2), labels = c("Unknown", "Major", "Minor"))
+    ped.n <- as.numeric(ped)
+    ped <- factor(ped.n, levels = c(1, 2, 3, 4, 5), labels = c("African American", "Asian", "Hispanic", "Native American", "White"))
+})
+
+```
+
+
+-----
+
+```{r}
+#par(family = "ETBembo", font.main = 2, font.sub = 3, cex.lab = 0.75)
+
+sort(table(dat$ped)) %>% ## see {dplyr} package ##
+    barplot(main = "Frequency Counts per Pedestrian Race\n(sorted from least-to-most)", col = grad(1:nlevels(dat$ped), p = mag), family = "ETBembo", font.main = 3, cex.lab = 0.75)
+as.data.frame(table(dat$ped)) %>%
+    kable(caption = "Factor Levels and Corresponding Frequency Counts for Pedestrians")
+
+sort(table(dat$offense)) %>% ## see {dplyr} package ##
+    barplot(main = "Frequency Counts per Pedestrian Offense\n(sorted from least-to-most)", col = grad(1:nlevels(dat$offense), p = grblues2), family = "ETBembo", font.main = 3, font.sub = 3, cex.lab = 0.75)
+as.data.frame(table(dat$offense)) %>%
+    kable(caption = "Factor Levels and Corresponding Frequency Counts for Offenses")
+
+```
+
+`r tufte::newthought("Pedestrian Race-by-Offense Tabulation and Visualization")`
+
+```{r}
+tbl <- ftable(dat$ped, dat$offense)
+tbl
+
+# library(vcd)
+# labs.p <- c("AA", "AS", "HI", "NV", "WH")
+# labs.o <- c("NA", "Major", "Minor")
+# dimnames(tbl) <- list(Race = paste(levels(dat$ped)), Offense = paste(labs.o))
+# mosaic(t(tbl))
+```
+
+`r tufte::newthought("Contingency Table \\& Group Comparisons via Pearson $\\chi^{2}$")`
+
+
+\newpage
+# Question-$3a$
+
+```{r results='asis'}
+tbl.p <- table(dat$ped)
+tbl.p.df <- as.data.frame(tbl.p)
+names(tbl.p.df) <- c("Race", "Freq")
+
+chisq.test(tbl.p)
+```
+
+# Question-$3b$
+
+```{r}
+dat <- read.spss("data/race2.sav", to.data.frame = TRUE)
+dat <- droplevels(na.omit(dat))
+
+
+tbl <- ftable(dat$ped, dat$offense)
+tbl.df <- as.data.frame(tbl)
+names(tbl.df) <- c("Race", "Offense", "Freq")
+# mosaicplot(formula = Freq ~ Race + Offense, data = tbl.df, main = "Pedestrian Race x Offense", type = "deviance", family = "ETBembo", las = 2, cex.axis = 0.5)
+
+xtbl <- xtabs(Freq ~ Offense + Race, data = tbl.df, sparse = TRUE, subset = NULL, na.action = NULL)
+xtbl.m <- as.matrix(xtbl)
+xsq <- chisq.test(xtbl.m)
+
+library(vcd)
+mosaic(Freq ~ Offense + Race, data = tbl.df, shade = TRUE)
+
+
+library(descr)
+
+ctab <- CrossTable(tbl.df$Race, tbl.df$Offense,
+                   digits = list(expected = 3, prop = 3, percent = 3, others = 3),
+                   expected = F,
+                   prop.r = F, prop.c = F, prop.t = F, prop.chisq = F, 
+                   chisq = T, fisher = F, mcnemar = F,
+                   dnn = c("_Race_", "Frequency of Stops"), cell.layout = F,
+                   row.labels = T,
+                   total.r = T, total.c = T,
+                   xlab = expression(italic("Frequency of Stops")),
+                   ylab = expression(italic("Race")))
+ctab
+
+```

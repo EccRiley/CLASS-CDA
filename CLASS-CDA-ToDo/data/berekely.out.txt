@@ -1,0 +1,149 @@
+> #############################
+> ### Berkeley admissions data 
+> ### Lessons 4 & 5
+> ### Uses dataset already in R
+> ### See also berkeley1.R in Lesson 4 for a different code 
+> ### See also related berkeleyLoglin.R in Lesson 5
+> #############################
+> 
+> ### Dataset already exist in R library
+> UCBAdmissions 
+, , Dept = A
+
+          Gender
+Admit      Male Female
+  Admitted  512     89
+  Rejected  313     19
+
+, , Dept = B
+
+          Gender
+Admit      Male Female
+  Admitted  353     17
+  Rejected  207      8
+
+, , Dept = C
+
+          Gender
+Admit      Male Female
+  Admitted  120    202
+  Rejected  205    391
+
+, , Dept = D
+
+          Gender
+Admit      Male Female
+  Admitted  138    131
+  Rejected  279    244
+
+, , Dept = E
+
+          Gender
+Admit      Male Female
+  Admitted   53     94
+  Rejected  138    299
+
+, , Dept = F
+
+          Gender
+Admit      Male Female
+  Admitted   22     24
+  Rejected  351    317
+
+> 
+> ### To test the odds-ratios in the marginal table and each of the subtables
+> library(vcd)
+> 
+> ##marginal table Admit x Gender
+> admit.gender=margin.table(UCBAdmissions, c(1,2))
+> admit.gender
+          Gender
+Admit      Male Female
+  Admitted 1198    557
+  Rejected 1493   1278
+> admit.gender/4526
+          Gender
+Admit           Male    Female
+  Admitted 0.2646929 0.1230667
+  Rejected 0.3298719 0.2823685
+> 
+> exp(oddsratio(admit.gender))
+[1] 1.84108
+> chisq.test(admit.gender)
+
+	Pearson's Chi-squared test with Yates' continuity correction
+
+data:  admit.gender 
+X-squared = 91.6096, df = 1, p-value < 2.2e-16
+
+> 
+> ##Tests for partial tables AdmitxGender for each level of Dept.
+> chisq.test(UCBAdmissions[,,1])
+
+	Pearson's Chi-squared test with Yates' continuity correction
+
+data:  UCBAdmissions[, , 1] 
+X-squared = 16.3718, df = 1, p-value = 5.205e-05
+
+> exp(oddsratio(UCBAdmissions[,,1]))
+[1] 0.3492120
+> 
+> chisq.test(UCBAdmissions[,,2])
+
+	Pearson's Chi-squared test with Yates' continuity correction
+
+data:  UCBAdmissions[, , 2] 
+X-squared = 0.0851, df = 1, p-value = 0.7705
+
+> exp(oddsratio(UCBAdmissions[,,2]))
+[1] 0.8025007
+> 
+> chisq.test(UCBAdmissions[,,3])
+
+	Pearson's Chi-squared test with Yates' continuity correction
+
+data:  UCBAdmissions[, , 3] 
+X-squared = 0.6332, df = 1, p-value = 0.4262
+
+> exp(oddsratio(UCBAdmissions[,,3]))
+[1] 1.133060
+> 
+> chisq.test(UCBAdmissions[,,4])
+
+	Pearson's Chi-squared test with Yates' continuity correction
+
+data:  UCBAdmissions[, , 4] 
+X-squared = 0.2216, df = 1, p-value = 0.6378
+
+> exp(oddsratio(UCBAdmissions[,,4]))
+[1] 0.9212838
+> 
+> chisq.test(UCBAdmissions[,,5])
+
+	Pearson's Chi-squared test with Yates' continuity correction
+
+data:  UCBAdmissions[, , 5] 
+X-squared = 0.808, df = 1, p-value = 0.3687
+
+> exp(oddsratio(UCBAdmissions[,,5])
++ 
++ chisq.test(UCBAdmissions[,,6])
+Error: syntax error
+> exp(oddsratio(UCBAdmissions[,,6]))
+[1] 0.8278727
+> 
+> ### To visualize graphically these association explore fourfold() function in the vcd() package!
+> 
+> ### CMH test
+> mantelhaen.test(UCBAdmissions)
+
+	Mantel-Haenszel chi-squared test with continuity correction
+
+data:  UCBAdmissions 
+Mantel-Haenszel X-squared = 1.4269, df = 1, p-value = 0.2323
+alternative hypothesis: true common odds ratio is not equal to 1 
+95 percent confidence interval:
+ 0.7719074 1.0603298 
+sample estimates:
+common odds ratio 
+        0.9046968 

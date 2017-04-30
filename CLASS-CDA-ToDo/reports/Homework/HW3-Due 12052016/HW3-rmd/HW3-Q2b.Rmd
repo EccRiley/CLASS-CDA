@@ -1,0 +1,109 @@
+---
+title: "Homework 3 - Question 2b"
+author: "Riley Smith"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+---
+
+-----
+
+
+
+```{r setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache=FALSE}
+source("../SETUP.R")
+knitr::opts_chunk$set(tidy = FALSE, echo = FALSE, cache = FALSE, fig.keep = 'high', fig.show = 'hold', results = 'asis', autodep = TRUE, Rplot = TRUE, dev = 'pdf', fig.path = 'graphics/HW2/rplot-q2b-', fig.width = 7, fig.height = 7, out.width = "\\linewidth")
+
+dat <- R.rspss("data/widow.sav")
+R.msmm(dat)
+# psych::pairs.panels(na.omit(dat[, -1]), hist.col = pal_my[16], cex.cor = TRUE)
+dat <- na.omit(dat)
+```
+
+
+
+# Question 2.b.
+
+
+```{r clgm}
+library(MASS)
+options(contrasts = c("contr.treatment", "contr.poly"))
+fit <- polr(factor(incadq1) ~ age1 + educ1  + health1, data = dat, Hess = TRUE, method = "logistic")
+## coefficient test
+library("AER")
+print(coeftest(fit))
+```
+
+
+
+```{r echo=FALSE}
+fit.summ <- summary(fit)[[1]] %>% data.frame()
+kable(fit.summ, caption = "Cumulative Logistic Model: $polr(formula = factor(incadq1) ~ age1 + educ1 + health1, data = dat, contrasts = NULL, method = 'logistic')$", col.names = c("_Coefficient_", "_SE_", "_T-Value_"))
+```
+
+
+
+
+```{r lglmFits}
+CI.b <- confint(fit, trace = FALSE)
+
+OR <- exp(coef(fit))
+CI <- confint(fit)
+
+CIb <- cbind(coef(fit), CI.b)
+CIb.labs <- c("**$\\beta$**", dimnames(confint(fit))[[2]])
+CIb <- rbind(CIb.labs, round(CIb, 4))
+dimnames(CIb)[[1]][1] <- " "
+dimnames(CIb)[[2]] <- c(" ", "$CI_{\\beta}$", " ")
+
+## odds ratios and 95% CI ##
+ORCI <- exp(cbind(coef(fit), CI))
+ORCI.labs <- c("**$\\Phi$**", dimnames(confint(fit))[[2]])
+ORCI <- rbind(ORCI.labs, round(ORCI, 4))
+dimnames(ORCI)[[1]][1] <- " "
+dimnames(ORCI)[[2]] <- c(" ", "$CI_{\\Phi}$", " ")
+
+
+library(lmtest) ## "lrtest()" ##
+lrchsq <- lrtest(fit)[2, -3]
+lrchsq <- lrchsq[, c(2, 1, 3, 4)]
+names(lrchsq) <- c("Log Likelihood", "_df_", "$\\chisq$", "_p_")
+
+library(pscl)
+rsq <- pR2(fit)
+```
+
+
+
+`r tufte::newthought("Model Fit Indices")`
+
+
+```{r lrmresults2, results='asis'}
+kable(lrchsq, row.names = FALSE, caption = "Likelihood Ratio $\\chi^{2}$")
+
+
+kable(CIb, align = rep('r', ncol(CIb)),
+      caption = "Logistic Regression Coefficients ($\\beta$) \\&
+      Coresponding Confidence Intervals (_CI_)")
+
+kable(ORCI, align = rep('r', ncol(ORCI)),
+      caption = "Logistic Regression Odds Ratios ($\\Phi$) \\&
+      Coresponding Confidence Intervals (_CI_) [note]") %>%
+    add_footnote("Confidence intervals are based on the logistic regression
+                 model's profiled log-likelihood function,
+                 rather than the standard errors",
+                 threeparttable = TRUE)
+```
+
+
+
+-----
+
+
+`r tufte::newthought("Cumulative Logistic Regression Summary.")` An ordered logistic regression model was tested to investigate whether age, education, and health at baseline predicted baseline reported income adequacy. The predictors collectiely accounted for a significant amount of variance in the outcome, likelihood ratio $\chisq(3) = 9.379, p < .05$. However, only baseline health independently predicted income adequacy at baseline, $b = .3581, SE = .1607, OR = 1.4306, p < .05$; such that point increases in baseline health were each associated with approximately $35\%$ increases in baseline income adequacy. Overall, the model accounted for $1.3\%$ of the variance in reported baseline income adequacy (_McFadden's pseudo_-$R\sq = 0.013$).
+
+
+
+---
+title: "HW3-Q2b.R"
+author: "rachel97"
+date: "Mon Dec  5 14:41:06 2016"
+---

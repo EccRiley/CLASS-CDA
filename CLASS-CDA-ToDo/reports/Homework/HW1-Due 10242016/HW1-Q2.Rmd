@@ -1,0 +1,161 @@
+---
+title: "HW1 - Question 2 R Notebook"
+author: "Rachel M. Smith"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+---
+
+-----
+
+# Setting Things Up in `R`
+
+```{r setup, echo=TRUE, message=FALSE, warning=FALSE, cache=FALSE}
+source("../SETUP.R")
+options(width = 60)
+opts_chunk$set(fig.show = "asis", results = "asis", Rplot = TRUE, tidy = TRUE, fig.path = "graphics/reuters/Rplot_", fig.width = 7, out.width = '0.9\\linewidth', Rplot = TRUE)
+library(foreign) ## read.spss() ##
+
+```
+
+
+## Data-Cleaning \& Preparation
+
+```{r isNA, results='markup'}
+dat <- read.spss("data/race.sav", to.data.frame = TRUE)
+sapply(dat, class)
+    ## Getting description of the type(s) (i.e., "classes") of data we're dealing with ##
+
+Risna <- function(x) sum(is.na(x))
+    ## Getting a count of NA values in the original dataframe ##
+sapply(dat, Risna)
+    ## No NAs, so no more data cleaning :) ##
+```
+
+-----
+
+# Analysis: Proportional Racial Differences among Drivers Involved in Traffic Stops by Portland Police.
+
+
+```{r}
+n <- nrow(dat)
+
+drive.t <- table(dat$driver)
+
+drive.f <- as.data.frame(drive.t)
+
+fr.prop <- function(x, N = n) {x/N}
+
+drive.p <- sapply(drive.t, fr.prop)
+
+drive.df <- data.frame(race = levels(dat$driver), prop = drive.p, freq = drive.f[, 2], row.names = NULL)
+```
+
+```{r echo=FALSE}
+kable(drive.df, caption = "Observed Traffic Stop Frequency per Race {#tbl:driveObs}", col.names = c("Driver's Race", "Proportion", "Frequency"), format.args = list(digits = 2))
+```
+
+```{r Q1Avals}
+EAA <- 0.080389769
+    ## Proportion of African American drivers involved in injury accidents 
+        ## [n_{AA}$ = 23 (out of 285) @stewart2014stops, Table 4, p. 12] ##
+EWH <- 1 - EAA
+    ## Proportion of White American drivers involved in injury accidents ##
+        ## [n_{AA}$ = 262 (out of 285) @stewart2014stops, Table 4, p. 12] ##
+drive.exp <- data.frame(race = c("African American", "White"), prop = c(EAA, EWH), freq = c(EAA*n, EWH*n))
+```
+
+```{r echo=FALSE}
+kable(drive.exp, caption = "Benchmark Proportions per Race with Corresponding Expected Frequencies for Traffic Stops Data {#tbl:driveExp}", col.names = c("Drivers' Race", "Benchmark Proportion", "Expected Frequency"), format.args = list(digits = 2))
+```
+
+```{r echo=FALSE}
+R.binom_test <- function(p, N, pi0 = 0.5, exact = FALSE, correct = FALSE, digits = 2, ...){
+    if (exact) { ## Hypothesis Testing
+        BT <- stats::binom.test(x = p, n = N, p = pi0, ...)
+        }
+        else {
+            BT <- stats::prop.test(x = p, n = N, p = pi0, correct = correct, ...)
+        }
+    ## The rest deals with formatting the output ##
+        BT$data.name <- paste0(p, " out of ", N, " null probability ", BT$null.value)
+        ## Above, I modified the default output value for *.test$data.name
+            ## to print the actual data values, rather than the object names the
+            ## values are stored under (see output below) ##
+        BTCI <- paste0(round(BT$conf.int[[1]], digits = digits), ", ", round(BT$conf.int[[2]], digits = digits))
+        BT$p.value <- round(BT$p.value, digits = 7)
+        BT.df <- data.frame(c(BT[c("alternative", "null.value", "parameter", "estimate", "statistic", "p.value")], BTCI))
+        row.names(BT.df) <- NULL
+        return(BT.df)
+}
+
+
+pt <- R.binom_test(p = drive.t["African American"], N = nrow(dat), pi0 = EAA, alternative = "greater")
+```
+
+```{r echo=FALSE}
+kable(pt, caption = paste0("1-sample proportions test without continuity correction: \\textit{", drive.t['African American'], " out of ", nrow(dat), "} {#tbl:pt}"), col.names = c("$H_{1}$", "$\\pi_{0}$", "$df$", "$p$", "$\\chi_{2}$", "_p-value_", "CI"), format.args = list(digits = 2))
+```
+
+
+```{r fig.fullwidth = TRUE, echo=FALSE}
+exp.AA <- t(drive.exp[1, 2:3])
+obs.AA <- t(drive.df[2, 2:3])
+drive.AA <- data.frame(Y = c("Expected", "Observed"), prop = c(exp.AA[1], obs.AA[1]), freq = c(exp.AA[2], obs.AA[2]))
+drive.AA$freq <- sapply(drive.AA$freq, as.integer)
+
+exp.WH <- t(drive.exp[2, 2:3])
+obs.WH <- t(drive.df[1, 2:3])
+drive.WH <- data.frame(Y = c("Expected", "Observed"), prop = c(exp.WH[1], obs.WH[1]), freq = c(exp.WH[2], obs.WH[2]))
+drive.WH$freq <- sapply(drive.WH$freq, as.integer)
+
+# gAA1 <- ggplot(drive.AA, aes(x = prop, y = Y)) + geom_segment(aes(yend = Y), xend = 0, colour = pal_my[20]) + geom_point(size = 5, aes(colour = Y), alpha = 0.85) + scale_colour_manual(values = pal_my[c(18, 5)], guide = FALSE) + labs(y = "", x = "", title = "Proportion of African American Drivers") + thm_tft(xline = TRUE, yline = TRUE, ptitle = TRUE)
+
+gAA2 <- ggplot(drive.AA, aes(x = freq, y = Y)) + geom_segment(aes(yend = Y), xend = 0, colour = pal_my[20]) + geom_point(size = 5, aes(colour = Y), alpha = 0.85) + scale_colour_manual(values = pal_my[c(18, 5)], guide = FALSE) + labs(y = "", x = "", title = "Frequency of African American Drivers") + thm_tft(xline = TRUE, yline = TRUE, ptitle = TRUE)
+
+plabs <- function(x) {paste0(round(x * 100, digits = 1), "%")}
+plab.AA <- sapply(drive.AA$prop, plabs)
+
+gAA2 <- gAA2 + scale_x_continuous(breaks = c(0, drive.AA$freq), limits = c(0, max(drive.AA$freq))) + geom_text(vjust = -1, hjust = 1, stat = 'identity', position = 'identity', colour = pal_my[19], size = rel(4), aes(family = "ETBembo", fontface = "italic", label = paste("p  = ", plab.AA)))
+
+pt.lab <- as.character(as.expression("chi^2 ==, pt$statistic, \n, 'p == ', pt$p.value"))
+
+eqn <- as.character(as.expression(substitute(
+    italic(chi^2) == a ~~ italic(p) == b, 
+    list(a = format(pt$statistic, digits = 3), 
+         b = format(pt$p.value, digits = 3)
+    ))))
+# eqn
+
+gAA3 <- gAA2 + geom_text(aes(x = max(drive.AA$freq)/2, y = 1.5, family = "serif", label = eqn), parse = TRUE)
+gAA3
+```
+
+\newpage
+
+```{r}
+pt.w <- R.binom_test(p = drive.t["White"], N = nrow(dat), pi0 = EWH, alternative = "greater")
+```
+
+```{r echo=FALSE}
+kable(pt, caption = paste0("1-sample proportions test without continuity correction: \\textit{", drive.t['African American'], " out of ", nrow(dat), "} {#tbl:pt}"), col.names = c("$H_{1}$", "$\\pi_{0}$", "$df$", "$p$", "$\\chi_{2}$", "_p-value_", "CI"), format.args = list(digits = 2))
+```
+
+```{r fig.fullwidth = TRUE, echo=FALSE}
+gWH <- ggplot(drive.WH, aes(x = freq, y = Y)) + geom_segment(aes(yend = Y), xend = 0, colour = pal_my[20]) + geom_point(size = 5, aes(colour = Y), alpha = 0.85) + scale_colour_manual(values = pal_my[c(18, 16)], guide = FALSE) + labs(y = "", x = "", title = "Frequency of White American Drivers") + thm_tft(xline = TRUE, yline = TRUE, ptitle = TRUE)
+
+plabs <- function(x) {paste0(round(x * 100, digits = 1), "%")}
+plab.WH <- sapply(drive.WH$prop, plabs)
+
+gWH2 <- gWH + scale_x_continuous(breaks = c(0, drive.WH$freq), limits = c(0, max(drive.WH$freq))) + geom_text(vjust = -1, hjust = 1, stat = 'identity', position = 'identity', colour = pal_my[19], size = rel(4), aes(family = "ETBembo", fontface = "italic", label = paste("p  = ", plab.WH)))
+
+pt.lab <- as.character(as.expression("chi^2 ==, pt$statistic, \n, 'p == ', pt$p.value"))
+
+eqn <- as.character(as.expression(substitute(
+    italic(chi^2) == a ~~ italic(p) == b, 
+    list(a = format(pt.w$statistic, digits = 3), 
+         b = format(pt.w$p.value, digits = 3)
+    ))))
+# eqn
+
+gWH3 <- gWH2 + geom_text(aes(x = max(drive.WH$freq)/2, y = 1.5, family = "serif", label = eqn), parse = TRUE)
+gWH3
+```

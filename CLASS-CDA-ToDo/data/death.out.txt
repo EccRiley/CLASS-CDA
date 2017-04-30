@@ -1,0 +1,455 @@
+> #################################
+> #### Death Penalty Example: a 2x2x2 table
+> #### let A=defendant, B=vicitim, C=penalty 
+> #### A simple line by line analysis
+> #### Nice R code that corresponds to SAS output
+> ###############################################
+> install.packages("vcd")
+trying URL 'http://lib.stat.cmu.edu/R/CRAN/bin/macosx/leopard/contrib/2.14/vcd_1.2-13.tgz'
+Content type 'application/x-gzip' length 1349845 bytes (1.3 Mb)
+opened URL
+==================================================
+downloaded 1.3 Mb
+
+
+The downloaded packages are in
+	/var/folders/rl/g9pzw2wj2ql6mwznzb_z6h680000gn/T//Rtmpd8EDBP/downloaded_packages
+
+> library(vcd)
+> 
+> #### reading the data into  a table
+> #### first step is just a vector of values
+> deathp <- c(19,132, 11,52,0,9, 6,97)
+> deathp
+[1]  19 132  11  52   0   9   6  97
+> 
+> #### we can represent this table also in 3 dimensions
+> deathp <- array(deathp, dim=c(2,2,2))
+> deathp
+, , 1
+
+     [,1] [,2]
+[1,]   19   11
+[2,]  132   52
+
+, , 2
+
+     [,1] [,2]
+[1,]    0    6
+[2,]    9   97
+
+> dimnames(deathp) <- list(DeathPen=c("yes","no"),
++                      Defendant=c("white","black"),
++                      Victim=c("white","black"))
+> deathp
+, , Victim = white
+
+        Defendant
+DeathPen white black
+     yes    19    11
+     no    132    52
+
+, , Victim = black
+
+        Defendant
+DeathPen white black
+     yes     0     6
+     no      9    97
+
+> #### create a flat contingency table
+> ftable(deathp, row.vars=c("Defendant","Victim"),
++ col.vars="DeathPen")
+                 DeathPen yes  no
+Defendant Victim                 
+white     white            19 132
+          black             0   9
+black     white            11  52
+          black             6  97
+> 
+> ### you can get a same as above
+> ftable(deathp, row.vars=c(1,3), col.vars=2)
+                Defendant white black
+DeathPen Victim                      
+yes      white               19    11
+         black                0     6
+no       white              132    52
+         black                9    97
+> 
+> 
+> ##### test of mutual independence 
+> 
+> ### these are the marginal counts
+> penalty<-margin.table(deathp,1)
+> defand<-margin.table(deathp, 2)
+> victim<-margin.table(deathp,3)
+> 
+> ### expected value under the mutual independence model
+> deathexp<-(defand%o%victim%o%penalty)/(sum(deathp)^2)
+> deathexp
+, , DeathPen = yes
+
+         Victim
+Defendant    white    black
+    white 11.59848 6.070232
+    black 12.03342 6.297866
+
+, , DeathPen = no
+
+         Victim
+Defendant   white    black
+    white 93.4322 48.89909
+    black 96.9359 50.73281
+
+> 
+> ### chi-squared statistic
+> chisqr<-sum(((deathexp-deathp)^2)/deathexp)
+> 1-pchisq(chisqr,4)
+[1] 0
+> 
+> 
+> ####### test of mutual independence via marginal tables
+> ### recall that this means that we need to test that ALL odds ratios are equal to 1
+> ### since this is a 2x2x2 table and all marginal tables are 2x2, then we can just 
+> ### do the chi-square test of independence 
+> ### let A=defendant, B=vicitim, C=penalty 
+> 
+> AB<-margin.table(deathp, 2:3)
+> AC<-margin.table(deathp, c(2,1))
+> BC<-margin.table(deathp, c(3,1))
+> 
+> chisq.test(AB)
+
+	Pearson's Chi-squared test with Yates' continuity correction
+
+data:  AB 
+X-squared = 112.5201, df = 1, p-value < 2.2e-16
+
+> chisq.test(AC)
+
+	Pearson's Chi-squared test with Yates' continuity correction
+
+data:  AC 
+X-squared = 0.0863, df = 1, p-value = 0.7689
+
+> chisq.test(BC)
+
+	Pearson's Chi-squared test with Yates' continuity correction
+
+data:  BC 
+X-squared = 4.7678, df = 1, p-value = 0.029
+
+> 
+> ### compute the odds ratios for AC table for example
+> ## you can use any functions we have seen previously for two-way tables
+> assocstats(AC)
+                     X^2 df P(> X^2)
+Likelihood Ratio 0.22145  1  0.63794
+Pearson          0.22145  1  0.63794
+
+Phi-Coefficient   : 0.026 
+Contingency Coeff.: 0.026 
+Cramer's V        : 0.026 
+> oddsratio(AC, log=FALSE)
+[1] 1.18106
+> exp(confint(oddsratio(AC)))
+           lwr      upr
+[1,] 0.5953049 2.343172
+> 
+> ### test of conditional independence
+> ### Cochran-Mantel-Haenszel test)
+> mantelhaen.test(deathp)
+
+	Mantel-Haenszel chi-squared test with continuity correction
+
+data:  deathp 
+Mantel-Haenszel X-squared = 0.7963, df = 1, p-value = 0.3722
+alternative hypothesis: true common odds ratio is not equal to 1 
+95 percent confidence interval:
+ 0.2864136 1.4091583 
+sample estimates:
+common odds ratio 
+        0.6352968 
+
+> mantelhaen.test(deathp,correct=FALSE)
+
+	Mantel-Haenszel chi-squared test without continuity correction
+
+data:  deathp 
+Mantel-Haenszel X-squared = 1.2097, df = 1, p-value = 0.2714
+alternative hypothesis: true common odds ratio is not equal to 1 
+95 percent confidence interval:
+ 0.2864136 1.4091583 
+sample estimates:
+common odds ratio 
+        0.6352968 
+
+> 
+> ### via odds-ratios
+> oddsratio(deathp, 3, log=FALSE)
+    white     black 
+0.6804408 0.7894737 
+> ##log odds ratio for a 2x2 table given the levels of the 3rd variable
+> lor=oddsratio(deathp,3) 
+> exp(confint(lor)) ## CI 
+             lwr      upr
+white 0.30704729  1.50791
+black 0.04121472 15.12248
+> summary(lor)
+      Log Odds Ratio Std. Error z value Pr(>|z|)
+white       -0.38501    0.40600 -0.9483   0.1715
+black       -0.23639    1.50644 -0.1569   0.4377
+> plot(lor, xlab="Victim")
+> 
+> 
+> ## getting the the AC table for B=Victim=white
+> deathp[,,1]  ## getting the the AC table for B=Victim=white
+        Defendant
+DeathPen white black
+     yes    19    11
+     no    132    52
+> oddsratio(deathp[,,1], log=FALSE)  ## estimate of a conditional OR
+[1] 0.6804408
+> exp(confint(oddsratio(deathp[,,1]))) ## CI of a conditional OR
+           lwr     upr
+[1,] 0.3070473 1.50791
+> chisq.test(deathp[,,1], correct=FALSE)
+
+	Pearson's Chi-squared test
+
+data:  deathp[, , 1] 
+X-squared = 0.8774, df = 1, p-value = 0.3489
+
+> 
+>   
+> deathp[,,2] ## getting the the AC table for B=Victim=black
+        Defendant
+DeathPen white black
+     yes     0     6
+     no      9    97
+> ##In case of zero entries, 0.5 will be added to the table.
+> oddsratio(deathp[,,2], log=FALSE) ## estimate of a conditional OR
+[1] 0.7894737
+> exp(confint(oddsratio(deathp[,,2]))) ## CI of a conditional OR
+            lwr      upr
+[1,] 0.04121472 15.12248
+> chisq.test(deathp[,,2])
+
+	Pearson's Chi-squared test with Yates' continuity correction
+
+data:  deathp[, , 2] 
+X-squared = 8e-04, df = 1, p-value = 0.978
+
+Warning message:
+In chisq.test(deathp[, , 2]) : Chi-squared approximation may be incorrect
+> 
+> #########################################
+> ### Here as another way to handle this same data
+> defendant=rep(c("white","black"),c(4,4))
+> victim=rep(rep(c("white","black"),c(2,2)),2)
+> penalty=rep(c("yes","no"),4)
+> count=c(19,132,0,9,11,52,6,97)
+> 
+> ### Table of defendant by penalty
+> data=xtabs(count~defendant+penalty)
+> table=list(Frequency=data,RowPct=prop.table(data,1))
+> table
+$Frequency
+         penalty
+defendant  no yes
+    black 149  17
+    white 141  19
+
+$RowPct
+         penalty
+defendant        no       yes
+    black 0.8975904 0.1024096
+    white 0.8812500 0.1187500
+
+> result=chisq.test(data)
+> result
+
+	Pearson's Chi-squared test with Yates' continuity correction
+
+data:  data 
+X-squared = 0.0863, df = 1, p-value = 0.7689
+
+> 
+> ### Table of defendant by victim
+> data=xtabs(count~defendant+victim)
+> table=list(Frequency=data,Percent=prop.table(data),RowPct=prop.table(data,1),ColPct=prop.table(data,2))
+> table
+$Frequency
+         victim
+defendant black white
+    black   103    63
+    white     9   151
+
+$Percent
+         victim
+defendant      black      white
+    black 0.31595092 0.19325153
+    white 0.02760736 0.46319018
+
+$RowPct
+         victim
+defendant     black     white
+    black 0.6204819 0.3795181
+    white 0.0562500 0.9437500
+
+$ColPct
+         victim
+defendant      black      white
+    black 0.91964286 0.29439252
+    white 0.08035714 0.70560748
+
+> result=chisq.test(data)
+> summary(result)
+          Length Class  Mode     
+statistic 1      -none- numeric  
+parameter 1      -none- numeric  
+p.value   1      -none- numeric  
+method    1      -none- character
+data.name 1      -none- character
+observed  4      xtabs  numeric  
+expected  4      -none- numeric  
+residuals 4      xtabs  numeric  
+stdres    4      xtabs  numeric  
+> result
+
+	Pearson's Chi-squared test with Yates' continuity correction
+
+data:  data 
+X-squared = 112.5201, df = 1, p-value < 2.2e-16
+
+> 
+> ### Table of victim by penalty
+> data=xtabs(count~victim+penalty)
+> table=list(Frequency=data,Percent=prop.table(data),RowPct=prop.table(data,1),ColPct=prop.table(data,2))
+> table
+$Frequency
+       penalty
+victim   no yes
+  black 106   6
+  white 184  30
+
+$Percent
+       penalty
+victim          no        yes
+  black 0.32515337 0.01840491
+  white 0.56441718 0.09202454
+
+$RowPct
+       penalty
+victim          no        yes
+  black 0.94642857 0.05357143
+  white 0.85981308 0.14018692
+
+$ColPct
+       penalty
+victim         no       yes
+  black 0.3655172 0.1666667
+  white 0.6344828 0.8333333
+
+> result=chisq.test(data)
+> summary(result)
+          Length Class  Mode     
+statistic 1      -none- numeric  
+parameter 1      -none- numeric  
+p.value   1      -none- numeric  
+method    1      -none- character
+data.name 1      -none- character
+observed  4      xtabs  numeric  
+expected  4      -none- numeric  
+residuals 4      xtabs  numeric  
+stdres    4      xtabs  numeric  
+> result
+
+	Pearson's Chi-squared test with Yates' continuity correction
+
+data:  data 
+X-squared = 4.7678, df = 1, p-value = 0.029
+
+> 
+> ### Table1 of defendant by penalty given victim
+> data=xtabs(count~penalty+defendant+victim)
+> data=addmargins(data,3)[,,1]
+> table=list(Frequency=data,RowPct=prop.table(data,1))
+> table
+$Frequency
+       defendant
+penalty black white
+    no     97     9
+    yes     6     0
+
+$RowPct
+       defendant
+penalty     black      white
+    no  0.9150943 0.08490566
+    yes 1.0000000 0.00000000
+
+> result=chisq.test(data)
+Warning message:
+In chisq.test(data) : Chi-squared approximation may be incorrect
+> result
+
+	Pearson's Chi-squared test with Yates' continuity correction
+
+data:  data 
+X-squared = 8e-04, df = 1, p-value = 0.978
+
+> 
+> oddsratio(table)
+Error in lor(x) : (list) object cannot be coerced to type 'double'
+> 
+> 
+> ### Table1 of defendant by penalty
+> data3=xtabs(count~penalty+defendant+victim)
+> data=addmargins(data3,3)[,,2]
+> table=list(Frequency=data,,RowPct=prop.table(data,1))
+Error in list(Frequency = data, , RowPct = prop.table(data, 1)) : 
+  argument 2 is empty
+> table
+$Frequency
+       defendant
+penalty black white
+    no     97     9
+    yes     6     0
+
+$RowPct
+       defendant
+penalty     black      white
+    no  0.9150943 0.08490566
+    yes 1.0000000 0.00000000
+
+> result=chisq.test(data)
+> result
+
+	Pearson's Chi-squared test with Yates' continuity correction
+
+data:  data 
+X-squared = 0.5194, df = 1, p-value = 0.4711
+
+> 
+> ### Mantel-Haenszel Test on victim*defendant*penalty
+> mantelhaen.test(data3)
+
+	Mantel-Haenszel chi-squared test with continuity correction
+
+data:  data3 
+Mantel-Haenszel X-squared = 0.7963, df = 1, p-value = 0.3722
+alternative hypothesis: true common odds ratio is not equal to 1 
+95 percent confidence interval:
+ 0.2864136 1.4091583 
+sample estimates:
+common odds ratio 
+        0.6352968 
+
+> 
+> ### Test for homogenous associations:
+> ### This is not a built in R function. Make sure you compile this function (i.e., breslowday.test(), copy it into R) from the course site first 
+> breslowday.test(deathp)
+Breslow and Day test (with Tarone correction):
+Breslow-Day X-squared         = 0.3805608 
+Breslow-Day-Tarone X-squared  = 0.3566714 
+
+Test for test of a common OR: p-value =  0.5503607 

@@ -1,0 +1,97 @@
+---
+title: "HW-2: Question-3 R Notebook"
+author: "Rachel M. Smith"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+---
+
+```{r setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache=FALSE}
+source("../SETUP.R")
+knitr::opts_chunk$set(
+    tidy = TRUE,
+    echo = TRUE,
+    cache = FALSE,
+    fig.keep = 'high',
+    fig.show = 'asis',
+    results = 'asis',
+    autodep = T,
+    Rplot = TRUE,
+    dev = 'pdf',
+    fig.path = 'graphics/HW2/rplot_',
+    fig.width = 7,
+    fig.height = 7,
+    out.width = "\\linewidth"
+    )
+```
+
+# Question-3 Instructions
+
+
+The data for the remaing sets of analyses are from a national telephone interview study of batterer intervention program (BIP) standards advisory and compliance monitoring committees. Respondents were asked a series of questions varying in structure from _open-ended_ to simple _yes-or-no_. These analyses will concern the discrete data collected in response to the following interview questions:
+
+> How many members currently serve on your standards committee?
+> Does your organization have methods for assessing programs’ feedback about the standards?
+> Do the standards apply to programs designed for all genders?
+
+The primary interest for the below analyses relate to an overarching effort to implement and sustain effective and appropriate anti-violence intervention strategies among female-identified perpetrators of same-sex violence. The above listed questions provide a mix of continuous numeric and dichotomous (`0 = No`; `1 = Yes`) indicators of responding states' current organizational and ideological capacities for such intervention strategies.
+
+-----
+
+```{r q3Dat}
+dat <- read.csv("data/states_new.csv")
+# datmap <- read.csv("data/usmap.csv")
+
+dat <- dat[, c("Q3", "Q7", "Q8")]
+dat <- na.omit(dat)
+```
+
+```{r results='asis', fig.margin=TRUE}
+dat <- subset(dat, Q7 < 2)
+dat <- subset(dat, Q8 < 2)
+dat.f <- within(dat, {## could also do this with an "apply()" function ##
+    Assessments <- factor(Q7, levels = c(0, 1), labels = c("No", "Yes"))
+    Gender.Inclusive <- factor(Q8, levels = c(0, 1), labels = c("No", "Yes"))
+})
+
+# dat.c <- within(dat, {## could also do this with an "apply()" function ##
+#     Q7 <- Q7 - mean(Q7)
+#     Q3 <- Q3 - mean(Q3)
+# })
+
+library(mediation) ## "mediations()" & "plot.mediations()" ##
+
+set.seed(42) ## i'll explain later ##
+treatment <- c("Q3")
+mediators <- c("Q7")
+outcome <- c("Q8")
+datasets <- list(dat = dat)
+m.model <- mediations(datasets, treatment, mediators, outcome,
+                      families = c("gaussian", "binomial"),
+                      interaction = TRUE,
+                      conf.level = .95, sims = 50)
+
+mod.y <- m.model$Q3.Q7.Q8[["model.y"]]
+mod.m <- m.model$Q3.Q7.Q8[["model.m"]]
+
+mod.y
+mod.m
+
+plot(m.model, labels = c("Indirect", "Direct", "Total"))
+```
+
+
+```{r intEffects, echo=TRUE, results='asis'}
+## "interaction.plot()" from the {stats} package ##
+with(dat.f, {
+    interaction.plot(
+    Gender.Inclusive,
+    Assessments,
+    Q7,
+    # col = c("darkgray", "#cd0000"),
+    lwd = 2,
+    main = "Interaction Effects",
+    # ylab = expression(mu[welfare]),
+    # xlab = "Abuse",
+    # trace.label = "Program"
+    )
+})
+```

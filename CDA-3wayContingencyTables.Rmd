@@ -5,7 +5,7 @@ date: "`r format(Sys.Date(), '%d %B %Y')`"
 ---
 
 ```{r setup, echo=FALSE, message=FALSE, warning=FALSE, cache=FALSE}
-source("SETUP.R")
+source("../SETUP.R")
 options(width = 70)
 knitr::opts_chunk$set(
     tidy = FALSE,
@@ -61,7 +61,7 @@ ftc.a[,,"Clinton"]
 format(ftc.a[,,"Trump"])
 
 mosaicplot(ftc.a, type = "deviance", las = 2, 
-           color = mypal.a75[c(5, 16)], 
+           color = pal_my.a75[c(5, 16)], 
            main = "Visual 2-x-2-x-2 Cross-Tabulation:\n
            Party Affiliate-x-Gender-x-Response")
 

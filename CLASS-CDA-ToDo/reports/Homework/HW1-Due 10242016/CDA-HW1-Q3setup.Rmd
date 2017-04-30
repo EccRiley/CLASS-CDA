@@ -1,0 +1,86 @@
+---
+title: "HW1 - Question 3 R Setup"
+author: "Rachel M. Smith"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+---
+
+-----
+
+
+# Change the file path only:
+
+```{r echo=TRUE, results='markup'}
+library(foreign)
+mydata <- read.spss("data/race2.sav", to.data.frame = TRUE)
+```
+
+## The run this exactly:
+
+```{r}
+R.isna <- function(x) sum(is.na(x))
+sapply(mydata, R.isna)
+
+R.na <- function(x, v = 0){
+    x <- ifelse(is.na(x), v, x)
+    return(x)
+}
+
+unique(mydata$offense)
+mydata <- within(mydata, {
+    offense.n <- sapply(offense, R.na, v = 0)
+    offense <- factor(offense.n, levels = c(0, 1, 2), labels = c("unknown", "major", "minor"), ordered = FALSE)
+})
+unique(mydata$offense)
+sapply(mydata, R.isna)
+
+summary(mydata)
+```
+
+-----
+
+# Here is a breakdown of the above `R-code`:
+
+1. Load the "`foreign`" package to read and write `spss` (among others) datafiles.
+2. Load the dataset, "`race2.sav`" into `R` and save it as a `data.frame` `R`-object named "`mydata`".
+
+
+```{r echo=TRUE, results='markup'}
+library(foreign)
+mydata <- read.spss("data/race2.sav", to.data.frame = TRUE)
+```
+
+3. Define a new function, "`R.isna()`", for getting a count of `NAs` in a given set of values (`x`).
+4. Use the `sapply()` function (from the `base` package) to "simply apply" the `R.isna()` function to each column in `mydata` (i.e., this will return a table containing the sum of `NAs` in each column).
+
+
+```{r echo=TRUE, results='markup'}
+R.isna <- function(x) sum(is.na(x))
+sapply(mydata, R.isna)
+```
+
+5. Define another new function, `R.na()`, for replacing `NAs` in a given set of values (`x`) with a specified non-`NA` value (`v`).
+
+
+```{r echo=TRUE, results='markup'}
+R.na <- function(x, v = 0){
+    x <- ifelse(is.na(x), v, x)
+    return(x)
+}
+```
+
+6. Use the `unique()` function (from the `base` package) to get a list of the values currently in use for the variable being manipulated (in this case, `mydata$offense`).
+
+
+```{r echo=TRUE, results='markup'}
+unique(mydata$offense)
+mydata <- within(mydata, {
+    offense.n <- sapply(offense, R.na, v = 0)
+    offense <- factor(offense.n, levels = c(0, 1, 2), labels = c("unknown", "major", "minor"), ordered = FALSE)
+})
+unique(mydata$offense)
+sapply(mydata, R.isna)
+
+summary(mydata)
+```
+
+-----

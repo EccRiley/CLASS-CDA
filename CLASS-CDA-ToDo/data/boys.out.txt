@@ -1,0 +1,653 @@
+> ### Test of conditional independence Lesson 5:
+> ### Use of oddsratio(), confit() from {vcd}
+> ### Cochran-Mantel-Haenszel test
+> ### Also testing via Log-linear models: related Lesson 10
+> #########################################################
+> 
+> ### Input the table
+> deliquent=c("no","yes")
+> scout=c("no", "yes")
+> SES=c("low", "med","high")
+> table=expand.grid(deliquent=deliquent,scout=scout,SES=SES)
+> count=c(169,42,43,11,132,20,104,14,59,2,196,8)
+> table=cbind(table,count=count)
+> table
+   deliquent scout  SES count
+1         no    no  low   169
+2        yes    no  low    42
+3         no   yes  low    43
+4        yes   yes  low    11
+5         no    no  med   132
+6        yes    no  med    20
+7         no   yes  med   104
+8        yes   yes  med    14
+9         no    no high    59
+10       yes    no high     2
+11        no   yes high   196
+12       yes   yes high     8
+> temp=xtabs(count~deliquent+scout+SES,table)
+> temp
+, , SES = low
+
+         scout
+deliquent  no yes
+      no  169  43
+      yes  42  11
+
+, , SES = med
+
+         scout
+deliquent  no yes
+      no  132 104
+      yes  20  14
+
+, , SES = high
+
+         scout
+deliquent  no yes
+      no   59 196
+      yes   2   8
+
+> 
+> ### Create "flat" contigency tables
+> ftable(temp)
+                SES low med high
+deliquent scout                 
+no        no        169 132   59
+          yes        43 104  196
+yes       no         42  20    2
+          yes        11  14    8
+> 
+> ##Let's see how we can create various subtables
+> ### One-way Table SES
+> Frequency=as.vector(margin.table(temp,3))
+> CumFrequency=cumsum(Frequency)
+> cbind(SES,Frequency=Frequency,Percentage=Frequency/sum(Frequency),CumFrequency=CumFrequency,CumPercentage=CumFrequency/sum(Frequency))
+     SES    Frequency Percentage CumFrequency CumPercentage
+[1,] "low"  "265"     "0.33125"  "265"        "0.33125"    
+[2,] "med"  "270"     "0.3375"   "535"        "0.66875"    
+[3,] "high" "265"     "0.33125"  "800"        "1"          
+> 
+> ### One-way Table scout
+> Frequency=as.vector(margin.table(temp,2))
+> CumFrequency=cumsum(Frequency)
+> cbind(scout,Frequency=Frequency,Percentage=Frequency/sum(Frequency),CumFrequency=CumFrequency,CumPercentage=CumFrequency/sum(Frequency))
+     scout Frequency Percentage CumFrequency CumPercentage
+[1,] "no"  "424"     "0.53"     "424"        "0.53"       
+[2,] "yes" "376"     "0.47"     "800"        "1"          
+> 
+> ### One-way Table deliquent
+> Frequency=as.vector(margin.table(temp,1))
+> CumFrequency=cumsum(Frequency)
+> cbind(deliquent,Frequency=Frequency,Percentage=Frequency/sum(Frequency),CumFrequency=CumFrequency,CumPercentage=CumFrequency/sum(Frequency))
+     deliquent Frequency Percentage CumFrequency CumPercentage
+[1,] "no"      "703"     "0.87875"  "703"        "0.87875"    
+[2,] "yes"     "97"      "0.12125"  "800"        "1"          
+> 
+> ### Test the Mutual Independence, step by step 
+> ### compute the expected frequences
+> E=array(NA,dim(temp))
+> for (i in 1:dim(temp)[1]) {
++ for (j in 1:dim(temp)[2]) {
++ for (k in 1:dim(temp)[3]) {
++ E[i,j,k]=(margin.table(temp,3)[k]*margin.table(temp,2)[j]*margin.table(temp,1))[i]/(sum(temp))^2
++ }}}
+> E
+, , 1
+
+          [,1]      [,2]
+[1,] 123.42044 109.44831
+[2,]  17.02956  15.10169
+
+, , 2
+
+          [,1]      [,2]
+[1,] 125.74913 111.51337
+[2,]  17.35087  15.38663
+
+, , 3
+
+          [,1]      [,2]
+[1,] 123.42044 109.44831
+[2,]  17.02956  15.10169
+
+> 
+> ### compute the X^2, and G^2
+> df=(length(temp)-1)-(sum(dim(temp))-3)
+> X2=sum((temp-E)^2/E)
+> X2
+[1] 214.9233
+> 1-pchisq(X2,df)
+[1] 0
+> G2=2*sum(temp*log(temp/E))
+> G2
+[1] 218.6622
+> 1-pchisq(G2,df)
+[1] 0
+> 
+> 
+> ### Test for Mutual indpendence (and other models) by considering anlaysis of all two-way tables
+> ### Two-way Table SES*scout
+> ### This is a test of Marginal Independence for SES and Scout
+> SES_Scout=margin.table(temp,c(3,2))
+> result=chisq.test(SES_Scout)
+> result
+
+	Pearson's Chi-squared test
+
+data:  SES_Scout 
+X-squared = 172.2025, df = 2, p-value < 2.2e-16
+
+> result$expected
+      scout
+SES        no    yes
+  low  140.45 124.55
+  med  143.10 126.90
+  high 140.45 124.55
+> result=chisq.test(SES_Scout,correct = FALSE)
+> result
+
+	Pearson's Chi-squared test
+
+data:  SES_Scout 
+X-squared = 172.2025, df = 2, p-value < 2.2e-16
+
+> SES_Scout=list(Frequency=SES_Scout,RowPercentage=prop.table(SES_Scout,2))
+> 
+> 
+> ### Two-way Table SES*deliquent
+> ### temp=xtabs(count~scout+SES+deliquent,table)
+> ### SES_deliquent=addmargins(temp)[1:2,1:3,3]
+> ### This is a test of Marginal Independence for SES and deliquent status
+> SES_deliquent=margin.table(temp,c(3,1))
+> result=chisq.test(SES_deliquent)
+> result
+
+	Pearson's Chi-squared test
+
+data:  SES_deliquent 
+X-squared = 32.8263, df = 2, p-value = 7.445e-08
+
+> result$expected
+      deliquent
+SES          no      yes
+  low  232.8688 32.13125
+  med  237.2625 32.73750
+  high 232.8688 32.13125
+> result=chisq.test(SES_deliquent,correct = FALSE)
+> result
+
+	Pearson's Chi-squared test
+
+data:  SES_deliquent 
+X-squared = 32.8263, df = 2, p-value = 7.445e-08
+
+> SES_deliquent=list(Frequency=SES_deliquent,RowPercentage=prop.table(SES_deliquent,2))
+> 
+> ### Two-way Table deliquent*scout
+> ### This is a test of Marginal Independence for Deliquent status and the Scout status
+> deliquent_scout=margin.table(temp,c(1,2))
+> result=chisq.test(deliquent_scout)
+> result$expected
+         scout
+deliquent     no    yes
+      no  372.59 330.41
+      yes  51.41  45.59
+> result=chisq.test(deliquent_scout,correct = FALSE)
+> result
+
+	Pearson's Chi-squared test
+
+data:  deliquent_scout 
+X-squared = 7.4652, df = 1, p-value = 0.00629
+
+> deliquent_scout1=list(Frequency=deliquent_scout,RowPercentage=prop.table(deliquent_scout,1))
+> 
+> ## compute the log(oddsraio), oddsratio and its 95% CI using {vcd} package
+> lor=oddsratio(deliquent_scout)
+> lor
+[1] -0.6140019
+> OR=exp(lor)
+> OR
+[1] 0.5411808
+> OR=oddsratio(deliquent_scout, log=FALSE)
+> OR
+[1] 0.5411808
+> CI=exp(confint(lor))
+> CI
+           lwr       upr
+[1,] 0.3475674 0.8426469
+> CI=confint(OR)
+> CI
+           lwr       upr
+[1,] 0.3475674 0.8426469
+> 
+> 
+> ### Table of deliquent*scout at different level of SES
+> temp
+, , SES = low
+
+         scout
+deliquent  no yes
+      no  169  43
+      yes  42  11
+
+, , SES = med
+
+         scout
+deliquent  no yes
+      no  132 104
+      yes  20  14
+
+, , SES = high
+
+         scout
+deliquent  no yes
+      no   59 196
+      yes   2   8
+
+> 
+> ### Test for Joint Independence of (D,BS)
+> ## creating 6x2 table, BS x D
+> SESscout_deliquent=ftable(temp, row.vars=c(3,2))
+> result=chisq.test(SESscout_deliquent)
+> result
+
+	Pearson's Chi-squared test
+
+data:  SESscout_deliquent 
+X-squared = 32.9576, df = 5, p-value = 3.837e-06
+
+> 
+> ### Test for Marginal Independence (see above analysis of two-way tables)
+> 
+> #### Test for conditional independence
+> ### To get partial tables of DB for each level of S
+> temp[,,1]
+         scout
+deliquent  no yes
+      no  169  43
+      yes  42  11
+> chisq.test(temp[,,1], correct=FALSE)
+
+	Pearson's Chi-squared test
+
+data:  temp[, , 1] 
+X-squared = 0.0058, df = 1, p-value = 0.9392
+
+> temp[,,2]
+         scout
+deliquent  no yes
+      no  132 104
+      yes  20  14
+> chisq.test(temp[,,2], correct=FALSE)
+
+	Pearson's Chi-squared test
+
+data:  temp[, , 2] 
+X-squared = 0.101, df = 1, p-value = 0.7507
+
+> temp[,,3]
+         scout
+deliquent no yes
+      no  59 196
+      yes  2   8
+> chisq.test(temp[,,3], correct=FALSE)
+
+	Pearson's Chi-squared test
+
+data:  temp[, , 3] 
+X-squared = 0.0534, df = 1, p-value = 0.8172
+
+Warning message:
+In chisq.test(temp[, , 3], correct = FALSE) :
+  Chi-squared approximation may be incorrect
+> X2=sum(chisq.test(temp[,,1], correct=FALSE)$statistic+chisq.test(temp[,,2], correct=FALSE)$statistic+chisq.test(temp[,,3], correct=FALSE)$statistic)
+Warning message:
+In chisq.test(temp[, , 3], correct = FALSE) :
+  Chi-squared approximation may be incorrect
+> 1-pchisq(X2,df=3)
+[1] 0.9837374
+> 
+> ### Cochran-Mantel-Haenszel test
+> mantelhaen.test(temp)
+
+	Mantel-Haenszel chi-squared test without continuity correction
+
+data:  temp 
+Mantel-Haenszel X-squared = 0.008, df = 1, p-value = 0.9287
+alternative hypothesis: true common odds ratio is not equal to 1 
+95 percent confidence interval:
+ 0.5970214 1.6009845 
+sample estimates:
+common odds ratio 
+        0.9776615 
+
+> mantelhaen.test(temp,correct=FALSE) 
+
+	Mantel-Haenszel chi-squared test without continuity correction
+
+data:  temp 
+Mantel-Haenszel X-squared = 0.008, df = 1, p-value = 0.9287
+alternative hypothesis: true common odds ratio is not equal to 1 
+95 percent confidence interval:
+ 0.5970214 1.6009845 
+sample estimates:
+common odds ratio 
+        0.9776615 
+
+> 
+> ### Breslow-Day test
+> ### make sure to first source/run breslowday.test.R
+> breslowday.test(temp)
+Breslow and Day test (with Tarone correction):
+Breslow-Day X-squared         = 0.1517992 
+Breslow-Day-Tarone X-squared  = 0.1517984 
+
+Test for test of a common OR: p-value =  0.9269096 
+
+> 
+> ################################################################
+> #################### Log-linear Models: Lesson 10 ##############
+> #### Let's see how we would this via Log_linear models 
+> #### We will look at the details later in the course
+> ### test of conditional independence
+> ### via loglinear model, but the object has to be a table!
+> 
+> is.table(temp)  ### to check if table
+[1] TRUE
+> temp<-as.table(temp) ### to save as table
+> temp.condind<-loglin(temp, list(c(1,3), c(2,3)), fit=TRUE, param=TRUE) ### fit the cond.indep. model
+2 iterations: deviation 5.684342e-14 
+> temp.condind
+$lrt
+[1] 0.1623331
+
+$pearson
+[1] 0.1602389
+
+$df
+[1] 3
+
+$margin
+$margin[[1]]
+[1] "deliquent" "SES"      
+
+$margin[[2]]
+[1] "scout" "SES"  
+
+
+$fit
+, , SES = low
+
+         scout
+deliquent         no        yes
+      no  168.800000  43.200000
+      yes  42.200000  10.800000
+
+, , SES = med
+
+         scout
+deliquent         no        yes
+      no  132.859259 103.140741
+      yes  19.140741  14.859259
+
+, , SES = high
+
+         scout
+deliquent         no        yes
+      no   58.698113 196.301887
+      yes   2.301887   7.698113
+
+
+$param
+$param$`(Intercept)`
+[1] 3.534926
+
+$param$deliquent
+       no       yes 
+ 1.093741 -1.093741 
+
+$param$scout
+         no         yes 
+ 0.06813731 -0.06813731 
+
+$param$SES
+       low        med       high 
+ 0.2192042  0.2590306 -0.4782348 
+
+$param$deliquent.SES
+         SES
+deliquent        low       med       high
+      no  -0.4005935 -0.125005  0.5255985
+      yes  0.4005935  0.125005 -0.5255985
+
+$param$scout.SES
+     SES
+scout        low         med       high
+  no   0.6132997  0.05846064 -0.6717604
+  yes -0.6132997 -0.05846064  0.6717604
+
+
+> 1-pchisq(temp.condind$lrt, temp.condind$df)
+[1] 0.9834279
+> 
+> #### There is no way to do Breslow-Day stats in R; you need to write your own function or fit the homogeneous association model to test for identity of odds-ratios
+> 
+> ### test of homogenous association model
+> temp.hom<-loglin(temp, list(c(1,3), c(2,3), c(1,2)), fit=TRUE, param=TRUE)
+3 iterations: deviation 0.0266118 
+> temp.hom
+$lrt
+[1] 0.1542917
+
+$pearson
+[1] 0.1518237
+
+$df
+[1] 2
+
+$margin
+$margin[[1]]
+[1] "deliquent" "SES"      
+
+$margin[[2]]
+[1] "scout" "SES"  
+
+$margin[[3]]
+[1] "deliquent" "scout"    
+
+
+$fit
+, , SES = low
+
+         scout
+deliquent         no        yes
+      no  168.645281  43.350696
+      yes  42.357015  10.646982
+
+, , SES = med
+
+         scout
+deliquent         no        yes
+      no  132.695867 103.303327
+      yes  19.303337  14.694967
+
+, , SES = high
+
+         scout
+deliquent         no        yes
+      no   58.658852 196.345977
+      yes   2.339648   7.658050
+
+
+$param
+$param$`(Intercept)`
+[1] 3.534951
+
+$param$deliquent
+       no       yes 
+ 1.094126 -1.094126 
+
+$param$scout
+         no         yes 
+ 0.07238322 -0.07238322 
+
+$param$SES
+       low        med       high 
+ 0.2171812  0.2584266 -0.4756079 
+
+$param$deliquent.scout
+         scout
+deliquent           no          yes
+      no  -0.005595678  0.005595678
+      yes  0.005595678 -0.005595678
+
+$param$deliquent.SES
+         SES
+deliquent        low        med       high
+      no  -0.3976988 -0.1246397  0.5223385
+      yes  0.3976988  0.1246397 -0.5223385
+
+$param$scout.SES
+     SES
+scout        low         med       high
+  no   0.6124499  0.05840757 -0.6708574
+  yes -0.6124499 -0.05840757  0.6708574
+
+
+> 1-pchisq(temp.hom$lrt, temp.hom$df)
+[1] 0.9257548
+> 
+> 
+> ### Here is how to do the same but with the glm() function in R
+> ### test of conditional independence
+> ### via loglinear mode, but using glm() funcion
+> ### the object now needs to be dataframe
+> temp.data<-as.data.frame(temp)
+> temp.data
+   deliquent scout  SES Freq
+1         no    no  low  169
+2        yes    no  low   42
+3         no   yes  low   43
+4        yes   yes  low   11
+5         no    no  med  132
+6        yes    no  med   20
+7         no   yes  med  104
+8        yes   yes  med   14
+9         no    no high   59
+10       yes    no high    2
+11        no   yes high  196
+12       yes   yes high    8
+> temp.condind<-glm(temp.data$Freq~temp.data$scout*temp.data$SES+temp.data$deliquent*temp.data$SES, family=poisson())
+> summary(temp.condind)
+
+Call:
+glm(formula = temp.data$Freq ~ temp.data$scout * temp.data$SES + 
+    temp.data$deliquent * temp.data$SES, family = poisson())
+
+Deviance Residuals: 
+       1         2         3         4         5         6         7         8         9        10        11  
+ 0.01539  -0.03081  -0.03045   0.06067  -0.07463   0.19496   0.08449  -0.22511   0.03937  -0.20358  -0.02155  
+      12  
+ 0.10811  
+
+Coefficients:
+                                         Estimate Std. Error z value Pr(>|z|)    
+(Intercept)                               5.12871    0.07538  68.035  < 2e-16 ***
+temp.data$scoutyes                       -1.36287    0.15251  -8.937  < 2e-16 ***
+temp.data$SESmed                         -0.23942    0.11312  -2.117   0.0343 *  
+temp.data$SEShigh                        -1.05631    0.14908  -7.086 1.38e-12 ***
+temp.data$deliquentyes                   -1.38629    0.15357  -9.027  < 2e-16 ***
+temp.data$scoutyes:temp.data$SESmed       1.10968    0.19573   5.669 1.43e-08 ***
+temp.data$scoutyes:temp.data$SEShigh      2.57012    0.21108  12.176  < 2e-16 ***
+temp.data$SESmed:temp.data$deliquentyes  -0.55118    0.23924  -2.304   0.0212 *  
+temp.data$SEShigh:temp.data$deliquentyes -1.85238    0.35708  -5.188 2.13e-07 ***
+---
+Signif. codes:  0 Ô***Õ 0.001 Ô**Õ 0.01 Ô*Õ 0.05 Ô.Õ 0.1 Ô Õ 1 
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 739.58872  on 11  degrees of freedom
+Residual deviance:   0.16233  on  3  degrees of freedom
+AIC: 82.688
+
+Number of Fisher Scoring iterations: 3
+
+> fitted(temp.condind)
+         1          2          3          4          5          6          7          8          9         10 
+168.800000  42.200000  43.200000  10.800000 132.859259  19.140741 103.140741  14.859259  58.698113   2.301887 
+        11         12 
+196.301887   7.698113 
+> 
+> ### test of homogenous association model
+> temp.hom<-glm(temp.data$Freq~temp.data$scout*temp.data$SES+temp.data$deliquent*temp.data$SES+temp.data$scout*temp.data$deliquent, family=poisson())
+> summary(temp.hom)
+
+Call:
+glm(formula = temp.data$Freq ~ temp.data$scout * temp.data$SES + 
+    temp.data$deliquent * temp.data$SES + temp.data$scout * temp.data$deliquent, 
+    family = poisson())
+
+Deviance Residuals: 
+       1         2         3         4         5         6         7         8         9        10        11  
+ 0.02727  -0.05452  -0.05388   0.10799  -0.06037   0.15720   0.06828  -0.18270   0.04442  -0.22832  -0.02431  
+      12  
+ 0.12214  
+
+Coefficients:
+                                          Estimate Std. Error z value Pr(>|z|)    
+(Intercept)                                5.12780    0.07611  67.372  < 2e-16 ***
+temp.data$scoutyes                        -1.35839    0.16040  -8.469  < 2e-16 ***
+temp.data$SESmed                          -0.23975    0.11325  -2.117   0.0343 *  
+temp.data$SEShigh                         -1.05605    0.14914  -7.081 1.43e-12 ***
+temp.data$deliquentyes                    -1.38173    0.16171  -8.545  < 2e-16 ***
+temp.data$scoutyes:temp.data$SESmed        1.10803    0.19657   5.637 1.73e-08 ***
+temp.data$scoutyes:temp.data$SEShigh       2.56650    0.21486  11.945  < 2e-16 ***
+temp.data$SESmed:temp.data$deliquentyes   -0.54595    0.24619  -2.218   0.0266 *  
+temp.data$SEShigh:temp.data$deliquentyes  -1.83965    0.38421  -4.788 1.68e-06 ***
+temp.data$scoutyes:temp.data$deliquentyes -0.02252    0.25123  -0.090   0.9286    
+---
+Signif. codes:  0 Ô***Õ 0.001 Ô**Õ 0.01 Ô*Õ 0.05 Ô.Õ 0.1 Ô Õ 1 
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 739.58872  on 11  degrees of freedom
+Residual deviance:   0.15429  on  2  degrees of freedom
+AIC: 84.68
+
+Number of Fisher Scoring iterations: 3
+
+> fitted(temp.hom)
+         1          2          3          4          5          6          7          8          9         10 
+168.645710  42.354290  43.354290  10.645710 132.694789  19.305211 103.305211  14.694789  58.659501   2.340499 
+        11         12 
+196.340499   7.659501 
+> 
+> ### Here is a way to fit a logistic regression
+> ### for a 2x2 table scout vs. delinquent
+> ### with the glm() function in R
+> ### the object now needs to be dataframe
+> is.table(temp) ##check that the object is a table
+[1] TRUE
+> tempBD<-margin.table(temp, c(2,1))## create a two way table of interest
+> counts<-cbind(tempBD[,2],tempBD[,1])
+> counts
+    [,1] [,2]
+no    64  360
+yes   33  343
+> scout
+[1] "no"  "yes"
+> scout<-as.factor(scout)
+> temp.logit<-glm(counts~scout,family=binomial("logit"))
+> temp.logit
+
+Call:  glm(formula = counts ~ scout, family = binomial("logit"))
+
+Coefficients:
+(Intercept)     scoutyes  
+     -1.727       -0.614  
+
+Degrees of Freedom: 1 Total (i.e. Null);  0 Residual
+Null Deviance:	    7.613 
+Residual Deviance: 2.842e-14 	AIC: 15.08 

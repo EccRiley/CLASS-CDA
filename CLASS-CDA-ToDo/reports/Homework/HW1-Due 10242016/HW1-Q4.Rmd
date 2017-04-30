@@ -1,0 +1,65 @@
+---
+title: "HW1 - Question 4 R Notebook"
+author: "Rachel M. Smith"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+---
+
+-----
+
+# Setting Things Up in `R`
+
+```{r setup, echo=TRUE, message=FALSE, warning=FALSE, cache=FALSE}
+source("../SETUP.R")
+options(width = 60)
+opts_chunk$set(fig.show = "asis", results = "asis", Rplot = TRUE, tidy = TRUE, fig.path = "graphics/reuters/Rplot_", fig.width = 7, out.width = '0.9\\linewidth', Rplot = TRUE)
+library(foreign) ## read.spss() ##
+
+```
+
+
+## Data-Cleaning \& Preparation
+
+```{r}
+dat <- read.spss("data/child.sav", to.data.frame = TRUE)
+summary(dat)
+dat <- na.omit(dat)
+```
+
+# 3-Way Contingency Table Analysis
+
+```{r}
+
+
+#dimnames(tbl.a) <- list(PROGRAM = c("Yes PRG", "No PRG"), BOYFRIEND = c("Yes BF", "No BF"), ABUSE = c("No AB", "Yes AB"))
+
+# mantelhaen.test(x = dat.f[, 2], y = dat.f[, 3], z = dat.f[, 1], correct = T)
+    ## including program removed the marginal significance 
+        ## p = 0.9892 ##
+# mantelhaen.test(tbl.a, correct = FALSE, exact = F)
+    ## including program did not remove the marginal significance 
+        ## p = 0.0518 ##
+
+# dat.f <- within(dat, {
+#     program <- factor(program, levels = c(1, 0), labels = c("Yes PRG", "No PRG"))
+#     boyfriend <- factor(boyfriend, levels = c(1, 0), labels = c("Yes BF", "No BF"))
+#     abuse <- factor(abuse, levels = c(0, 1), labels = c("No AB", "Yes AB"))
+# })
+
+tbl <- ftable(dat, row.vars = c("program","boyfriend"), col.vars = "abuse")
+tbl.df <- as.data.frame(tbl)
+tbl.a <- array(c(98, 6, 
+                 490, 34, 
+                 100, 2, 
+                 471, 46), dim = c(2, 2, 2))
+chisq.test(x = dat.f[, 2], y = dat.f[, 1], correct = FALSE) 
+    ## Check if there is a marginally significant difference between boyfriend and abuse variables ##
+        ## p = 0.05159 ##
+
+library(DescTools)
+xt <- xtabs(Freq ~ abuse + boyfriend + program, data = tbl.df)
+Desc(xt)
+BreslowDayTest(xt)
+        ## p = 0.07201 ##
+
+
+```

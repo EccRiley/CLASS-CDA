@@ -1,0 +1,116 @@
+> ### Example: Smoking Behaviors Lesson 3 ##
+> ### Simple line by line R code
+> ### Needs LRStats.R and Gamma.f.R functions too
+> ### Uses {VCD} package to plot the expected counts and residuals
+> ### Nice R code that corresponds to SAS code and output
+> #######################################################
+> 
+> smoke=matrix(c(400,416,188,1380,1823,1168), ncol=2, dimnames=list(parent=c("both", "one","neither"), child=c("yes", "no")))
+> smoke
+         child
+parent    yes   no
+  both    400 1380
+  one     416 1823
+  neither 188 1168
+> 
+> #### Chi-Square Independence Test
+> 
+> result=chisq.test(smoke)
+> result
+
+	Pearson's Chi-squared test
+
+data:  smoke 
+X-squared = 37.5663, df = 2, p-value = 6.959e-09
+
+> 
+> #### Let us look at the Percentage, Row Percentage and Column Percentage 
+> #### of the total observations contained in each cell.
+> 
+> Contingency_Table=list(Frequency=smoke,Expected=result$expected,Percentage=prop.table(smoke),RowPercentage=prop.table(smoke,1),ColPercentage=prop.table(smoke,2))
+> Contingency_Table
+$Frequency
+         child
+parent    yes   no
+  both    400 1380
+  one     416 1823
+  neither 188 1168
+
+$Expected
+         child
+parent         yes       no
+  both    332.4874 1447.513
+  one     418.2244 1820.776
+  neither 253.2882 1102.712
+
+$Percentage
+         child
+parent           yes        no
+  both    0.07441860 0.2567442
+  one     0.07739535 0.3391628
+  neither 0.03497674 0.2173023
+
+$RowPercentage
+         child
+parent          yes        no
+  both    0.2247191 0.7752809
+  one     0.1857972 0.8142028
+  neither 0.1386431 0.8613569
+
+$ColPercentage
+         child
+parent          yes        no
+  both    0.3984064 0.3157172
+  one     0.4143426 0.4170670
+  neither 0.1872510 0.2672157
+
+> 
+> #### Likelihood Ratio Test
+> LRstats(smoke)
+[1] 3.836582e+01 4.666255e-09
+> 
+> #### a function assocstats in package vcd that computes these association measures 
+> #### along with the Pearson and LR chi-square tests. If this doesn't run then you 
+> #### need to install package 'colorspace' too. 
+> library(vcd)
+> 
+> ## produces independence statistics 
+> assocstats(smoke)
+                    X^2 df   P(> X^2)
+Likelihood Ratio 38.366  2 4.6663e-09
+Pearson          37.566  2 6.9594e-09
+
+Phi-Coefficient   : 0.084 
+Contingency Coeff.: 0.083 
+Cramer's V        : 0.084 
+> 
+> result$expected ## expected counts; compare with the plot below
+         child
+parent         yes       no
+  both    332.4874 1447.513
+  one     418.2244 1820.776
+  neither 253.2882 1102.712
+> 
+> ##plot an area proportional visualization of a (possibly higher-dimensional) table of expected frequencies.
+> mosaic(smoke)
+> #produce Pearson residuals then compare to the plot below
+> result$residuals
+         child
+parent           yes          no
+  both     3.7025160 -1.77448934
+  one     -0.1087684  0.05212898
+  neither -4.1022973  1.96609088
+> 
+> ##produce an association plot indicating deviations in terms of Pearson residuals from a specified independence model in possibly high-dimensional contingency table.
+> assoc(smoke) 
+> #### A function for computing Goodman and Kruskal's gamma adapted 
+> #### from S-Plus Manual to Accompany Agresti's Categorical Data Analysis(Laura A. Thompson 2001).
+> Gamma.f(smoke)
+$gamma
+[1] 0.1770293
+
+$C
+[1] 1682288
+
+$D
+[1] 1176244

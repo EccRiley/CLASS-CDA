@@ -1,0 +1,29 @@
+---
+title: "Longitudinal Modeling with Logistic Regression"
+author: "Riley Smith"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+url: "web.pdx.edu/~newsomj/cdaclass"
+---
+
+```{r setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache=FALSE}
+source("../SETUP.R")
+knitr::opts_chunk$set(
+    tidy = TRUE,
+    echo = TRUE,
+    cache = FALSE,
+    fig.keep = 'high',
+    fig.show = 'asis',
+    results = 'asis',
+    autodep = T,
+    Rplot = TRUE,
+    dev = 'pdf',
+    fig.path = 'graphics/logistic-long/rplot-',
+    fig.width = 7,
+    fig.height = 7,
+    out.width = "\\linewidth"
+    )
+```
+
+```{r dat}
+dat <- R.rspss("data/dep.sav")
+```

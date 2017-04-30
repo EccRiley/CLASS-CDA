@@ -1,0 +1,411 @@
+---
+title: "Binomial Tests"
+author: "Riley Smith"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+---
+
+```{r echo=FALSE}
+# knitr::opts_knit$set(out.format = "latex")
+knitr::knit_theme$set("bclear")
+```
+
+# Setting Things Up in `R`
+
+
+```{r setup, echo=TRUE, message=FALSE, warning=FALSE, cache=FALSE}
+source("../SETUP.R")
+options(width = 70)
+knitr::opts_chunk$set(
+    tidy = FALSE,
+    echo = TRUE,
+    cache = FALSE,
+    fig.keep = 'high',
+    fig.show = 'asis',
+    results = 'asis',
+    # autodep = T,
+    Rplot = TRUE,
+    dev = 'pdf',
+    fig.path = 'graphics/reuters/rplot_',
+    fig.width = 7,
+    fig.asp = 1,
+    out.width = "\\linewidth",
+    collapse = TRUE
+    )
+library(foreign) ## read.spss() ##
+library(car) ## recode() ##
+dat <- read.spss("data/reuters.sav", to.data.frame = TRUE)
+dat <- within(dat, {recode(response, c("1=0", "2=1", "3=2"))})
+
+```
+
+
+
+`r tufte::newthought("Notes on the \\texttt{R-code} above")`: `SETUP.R` is the default `R-script` I source in the `"setup" code-chunk`^[see \texttt{help(package = knitr)}] at the beginning of all `R markdown` documents. It contains global arguments for loading commonly used packages, setting options, and defining various R-object utilities and functions. I also use this script as a record of functions I create while working in `R`. The script is heavily commented throughout for explanatory purposes, as well as for giving credit where it is due (I've tried to keep up with all of the `R-code`, `LaTex`, and `R markdown` sources, but may have missed some along the way).
+
+`r tufte::newthought("After sourcing \\texttt{SETUP.R}")` and setting a few output options (`options()` \& `opts_chunk$set()`), I load the `{foreign}` and `{car}` packages for the `read.spss()` and `recode()` functions, respectively. Then I read in (`read.spss()`) the Reuters polling dataset, "`reuters.sav`" and store it in `R` as a `dataframe` named "`dat`". Finally, I re-code the values for the "`dat$response`" variable, using the `{car}` package's `recode()` function to undo default numeric values 1,2,3 and label values.
+
+```{marginfigure, echoRule=NULL}
+_**Note:** This last recoding step seems unneccessary to me. I included it here based on Jason Newsom's code and in-class explanation, but when I run the rest of the analysis below without recoding, the results are the same. Is there a specific situation in which setting a discrete variable's values to '`0, 1, 2, ...`', versus '`1, 2, 3, ...`' is consequential to the analysis? Or is this a matter of personal preference for coding discrete variables? I think it would make more logical sense to me if, in this case, '`0`' strictly reflected '`No Response`', but that is not the case here, as '`0`' reflects both '`Other`' and '`No Response`'. Further, should '`Other`' responses not be coded as separate from '`No Response`', given that an '`Other`' response is absolutely qualitatively distinct from '`No Response`'?_
+```
+
+`r tufte::margin_note("See \\rhref{http://web.pdx.edu/~newsomj/cdaclass}{Newsom 2016-CDA Handout-4}")`
+
+## Data-Cleaning \& Preparation
+
+```{marginfigure, echoRule=NULL}
+Note that the common method for binomial tests in `R` is to use `exact.test = TRUE`, which is actually the most conservative approach and also no ideal for binomial tests. Use `prop.test()` for _approximate_ tests. _(source: Jason Newsom)_
+```
+
+A few things need to happen to help optimize the information we put into and get out of the binomial hypothesis testing for the polling data. Specifically, I want set all values of "`other`" to "`NA`" in `dat$response`, then drop all "`NA`" values since the analysis is only interested in responses for the two major candidates (i.e., _Clinton and Trump_).
+
+`r newthought("However")`, there are also some existing "`NAs`" in "`dat$party`", which need to be re-coded as well to avoid excluding rows with acceptable data values in `dat$response`.
+
+```{marginfigure, echoRule=NULL}
+`sapply()`, `apply()`, and `vapply()` are great function to get to know if you find yourself doing a ton of data cleaning/mining.
+```
+
+
+
+```{r isNA, results='asis'}
+Risna <- function(x) sum(is.na(x))
+#   ## Getting a count of NA values in the original dataframe ##
+sapply(dat, Risna)
+
+R.na <- function(x, v = 0){
+    ## x = object to be manipulated,
+    ## v = value to assign to NAs ##
+    x <- ifelse(is.na(x), v, x)
+    return(x)
+    }
+```
+
+```{marginfigure, echoRule=NULL}
+**`R.na():`** _"If `x` = NA (`is.na()`), replace `x` with `v`, otherwise leave `x` alone."_
+```
+
+```{r echo=FALSE}
+kable(R.msmm(dat$party), caption = "Summary information for '**party**'
+        data column _before_ recoding \\texttt{NA}s")
+```
+
+
+```{r}
+unique(dat$party)
+dat$party <- sapply(dat$party, R.na, v = 99)
+unique(dat$party)
+
+```
+
+
+```{r echo=FALSE}
+kable(R.msmm(dat$party), caption = "Summary information for '**party**'
+        data column _after_ recoding \\texttt{NA}s")
+```
+
+
+```{r}
+
+dat$response <- recode_factor(dat$response, 
+                              "other/no opinion" = NA_character_)
+## see "recode_factor()" in the {dplyr} package ##
+dat <- na.omit(dat)
+sapply(dat, R.isna) ## bye-bye NAs! ... again ##
+    ## but this time we only lost data for rows with NA
+    ## in dat$response (but we did lose ALL of the data
+    ## for those rows, as these were removed from the
+    ## dataframe entirely, though the original datafile remains untouched).
+```
+
+
+
+Now the data are, in my opinion, ready for analysis.
+
+\newpage
+# Single-Sample Binomial Tests: Differences in proportions of (non-"other") polling responses.
+
+
+```{r}
+levels(dat$response)
+poll.t <- table(dat$response)
+## Why not make a table of the poll response counts for each candidate? ... ##
+```
+
+
+```{r echo=FALSE}
+kable(as.data.frame(poll.t), caption = "Frequency Table of Polling Data", 
+      col.names = c("Response", "Frequency"))
+```
+
+`r newthought("Definition of a convenience function for the binomial test.")` I'm combining the `prop.test()` & `binom.test()` functions (`{pkg:stats}`) because I think it's kind of ridiculous that there is not already a combined function for these. I also don't particularly enjoy the default output format for either of these functions, so I'm breaking the [function writing rule of simplicity (AKA: _"Curly's Law"_)](https://blog.codinghorror.com/curlys-law-do-one-thing/) and implementing some formatting tasks within the function as well.
+
+_**Arguments (`R.binom_test()`):**_
+
+`p`.
+:   The target proportion to be tested against the null hypothesis ($H_{0}$; $\pi_{0}$; see `pi0` below). _Synonymous Arguments:_ `x` in `prop.test()` \& `binom.test()`.
+
+`N`.
+:   The size of the sample from which $`p`$ is taken. _Synonymous Arguments:_ `n` in `prop.test()` \& `binom.test()`. _Synonymous Arguments:_ `n` in `prop.test()` \& `binom.test()`.
+
+`pi0`.
+:   [Default = `0.5`]. A vector of probabilities of success corresponding to the value(s) in `p`. These probabilities represent the null hypothesis value ($H_{0}$; $\pi_{0}$) against which `p` is to be tested. _Synonymous Arguments:_ `p` \& `conf.level` (inverse) in `prop.test()` \& `binom.test()`.
+
+`exact`.
+:   Logical [Default = `FALSE`]. Should the the hypothesis be tested using an [exact binomial test (i.e., `binom.test()`)](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/binom.test.html). If `FALSE` (the default), a test of equal or given proportions, depending on the lengths of `p` and `pi0` is conducted using [`prop.test()`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/prop.test.html)
+
+`correct`.
+:   Logical Default = `FALSE`]. Synonymous with the `correct` argument in `prop.test()`.
+
+`digits`.
+:   [Default = `2`]. Number of digits to use when rounding (`round()`) the final output values (does not influence the test calculation).
+
+`...`.
+:   Additional arguments to be passed to either `prop.test()` or `binom.test()`, depending on the value set for `exact` (e.g., `alternative`).
+
+_Value (`R.binomTest()`):_ Returns a `data.frame` object containing the values returned by either `prop.test()` or `binom.test()`, depending on the value set for `exact`.
+
+
+```{r}
+R.binom_test <- function(p, N, pi0 = 0.5, exact = FALSE, correct = FALSE, 
+                         digits = 2, ...){
+    if (exact) { ## Hypothesis Testing
+        BT <- stats::binom.test(x = p, n = N, p = pi0, ...)
+        }
+        else {
+            BT <- stats::prop.test(x = p, n = N, p = pi0, 
+                                   correct = correct, ...)
+        }
+    ## The rest deals with formatting the output ##
+        BT$data.name <- paste0(p, " out of ", N, " null probability ", 
+                               BT$null.value)
+        ## Above, I modified the default output value for *.test$data.name
+            ## to print the actual data values, rather than the object 
+            ## names the values are stored under (see output below) ##
+        BTCI <- paste0(round(BT$conf.int[[1]], digits = digits), ", ", 
+                       round(BT$conf.int[[2]], digits = digits))
+        BT$p.value <- round(BT$p.value, digits = 7)
+        BT.df <- data.frame(c(BT[c("alternative", 
+                                   "null.value", 
+                                   "parameter", 
+                                   "estimate", 
+                                   "statistic", 
+                                   "p.value")], 
+                              BTCI))
+        row.names(BT.df) <- NULL
+        return(BT.df)
+}
+```
+
+
+
+## Approximate Test (`prop.test()`)
+
+
+```{r}
+pt <- R.binom_test(p = poll.t["Clinton"], N = nrow(dat), pi0 = 0.5)
+    ## ... Now we know where values for prop.test() came from :) ##
+        ## There's more than one way to do that, by the way, but
+        ## creating the table will come in handy later on too. ##
+```
+
+
+```{r echo=FALSE}
+kable(pt, caption = "1-sample proportions test without continuity 
+      correction: \\textit{677 out of 1231}", 
+      col.names = c("$H_{1}$", "$\\pi_{0}$", "$df$", "$p$", 
+                    "$\\chi_{2}$", "_p-value_", "CI"), 
+      format.args = list(digits = 2))
+```
+
+## Exact Test (`binom.test()`)
+
+
+```{r}
+et <- R.binom_test(p = poll.t["Clinton"], 
+                   N = nrow(dat), pi0 = 0.5, 
+                   exact = TRUE)
+```
+
+
+```{r echo=F}
+kable(et, caption = "1-sample _exact_ binomial test with continuity 
+      correction: \\textit{677 out of 1231}", 
+      col.names = c("$H_{1}$", "$\\pi_{0}$", "$n_{trials}$", "$p$", 
+                    "$n_{successes}$", "_p-value_", "CI"), format.args = list(digits = 2))
+```
+
+
+```{r}
+poll.df <- as.data.frame(poll.t)
+names( poll.df) <- c("Response", "Frequency")
+ poll.df$N <- rep(x = nrow(dat), times = nrow( poll.df))
+n <-  poll.df[, 2]
+
+electpal <- c("red", "blue")
+electpal <- sapply(electpal, adjustcolor, alpha = 0.75, USE.NAMES = FALSE)
+
+bpoll <- ggplot( poll.df, aes(x = Frequency, y = Response)) +
+    geom_segment(aes(yend = Response), xend = 0, colour = pal_my[20]) +
+    geom_point(size = 5, aes(colour = Response)) +
+    scale_colour_manual(values = electpal, guide = FALSE) +
+    labs(y = "", x = "") + thm_tft(xline = TRUE, yline = TRUE)
+
+bpoll2 <- bpoll + scale_x_continuous(breaks = c(0, n),
+                                     limits = c(0, max(n)))
+
+bpoll2 + geom_text(vjust = -1.5, hjust = 0.5, stat = 'identity',
+                   position = 'identity', colour = pal_my[19],
+                   size = rel(4), aes(family = "ETBembo",
+                                      fontface = "italic",
+                                      label = paste("p  = ",
+                                                    round(n/ poll.df$N,
+                                                          digits = 2))))
+```
+
+
+
+\newpage
+`r tufte::margin_note("See \\rhref{http://web.pdx.edu/~newsomj/cdaclass}{Newsom 2016-CDA Handout-3}")`
+
+# $z$-$Score$ Test
+
+Here we are taking one of the favorability proportions (i.e. "sucess proportions") and comparing it to the _Null Hypothesis_ ($H_{0}$) represented by $\pi_{0}$ (i.e., 0.50) [@agresti2013categorical; @agresti1998approx].
+
+`r tufte::margin_note("Data: \\rhref{http://projects.fivethirtyeight.com/2016-election-forecast/?ex_cid=rrpromo}{2016 Polling data}")`
+
+```{r echo=FALSE}
+n <- 1231
+
+zp <- .55 ## 55% Clinton favorability ("p") ##
+zpi <- .50 ## Null Hypothesis difference between samples in the population "\pi_{0}" ##
+
+z1 <- zp - zpi ## numerator: p-\pi_{0} ##
+
+z2a <- 1 - zpi ## "1-\pi_{0}" ##
+z2b <- zpi*z2a ## "\pi(1-\pi_{0})" ##
+z2c <- z2b/n ## "\pi(1-\pi_{0}) / n" ##
+z2 <- sqrt(z2c) ## denominator: "\sqrt{\pi(1-\pi_{0}) / n}" ##
+
+zscore <- z1/z2 ##
+##      p-\pi_{0}        ##
+## \Rrule\Rrule\Rrule\Rrule  ##
+## (\sqrt{\pi(1-\pi_{0}) / n})  ##
+
+# zscore
+```
+
+$$ z = \frac{`r zp` - `r zpi`}{\sqrt{\frac{`r zpi`(1-`r zpi`)}{`r n`}}} \Rightarrow \frac{`r z1`}{\sqrt{\frac{`r zpi`(`r z2a`)}{`r n`}}} \Rightarrow \frac{`r z1`}{\sqrt{\frac{`r z2b`}{`r n`}}} \Rightarrow \frac{`r z1`}{\sqrt{`r round(as.integer(z2c), 2)`}} \Rightarrow \frac{`r z1`}{`r z2`} $$
+
+`r margin_note("$$ z = \\frac{p - \\pi_{0}}{SE_{\\pi}} $$")` `r margin_note("$$ SE_{\\pi} = \\sqrt{\\frac{\\pi_{0}(1-\\pi_{0})}{n}} $$")`
+
+$$ z = \textbf{`r zscore`} $$
+
+## $z$-$Score$ Test: Lower and Upper Confidence Limits
+
+Confidence limits are calculated by the favorability proportion ($p$) $\pm$ the $z_{critical}$ value multiplied by the standard error of the estimate ($SE_{\pi}$).
+
+`r tufte::margin_note("$CI = p \\pm (z_{critical})(SE_{\\pi})$")`
+
+
+```{r echo=FALSE}
+zcr <- 1.96
+SEa <- 1 - zp
+SEb <- zp*SEa
+SEc <- SEb/n
+SE <- sqrt(SEc)
+
+LCL <- .55 - (zcr)*(SE)
+UCL <- .55 + (zcr)*(SE)
+CI <- paste0(round(LCL, digits = 2), " < ", "$\\pi_{0}$", " < ", round(UCL, digits = 2))
+ME <- ((LCL - UCL)/2)*100
+ME.prnt <- paste0(round(abs(ME), digits = 2), "\\%")
+
+```
+
+`r margin_note("$$ CI_{z} = p \\pm (z_{critical})(SE_{\\pi}) $$")`
+
+`r margin_note("$$ z_{critical} = 1.96 $$")`
+
+`r margin_note("$$ p = 0.55 $$")`
+
+$$ LCL_{z} = p - (`r zcr`)(`r SE`) \Rightarrow p - `r zcr*SE` \Longrightarrow \textbf{`r zp - (zcr*SE)`} $$
+
+$$ UCL_{z} = p + (`r zcr`)(`r SE`) \Rightarrow p + `r zcr*SE` \Longrightarrow \textbf{`r zp + (zcr*SE)`} $$
+
+$$ CI_{z} = \textbf{`r round(LCL, digits = 2)`} < p < \textbf{`r round(UCL, digits = 2)`} $$
+
+## $z$-$Score$ Test Margin of Error ($ME_{z}$)
+
+`r margin_note("$$ ME_{z} = \\left(\\frac{CI_{z}^{+} - CI_{z}^{-}}{2}\\right)(100) $$")`
+
+$$ ME_{z} = \frac{(`r LCL` - `r UCL`)}{2}(100) \Rightarrow \frac{(`r LCL - UCL`)}{2}(100) \Rightarrow (`r (LCL - UCL)/2`)(100) $$
+
+$$ ME_{z} = \textbf{`r (LCL - UCL)/2*100`} $$
+
+# Goodness-of-Fit Tests ($\chi^{2}$)
+
+
+```{r Q1Bvals, echo=FALSE}
+Oc <- 677
+Ot <- 554
+n <- Oc+Ot
+pi0 <- 0.5
+zCr <- 3.84
+```
+
+```{r Q1Bkab1, echo=FALSE}
+data.frame(n, Oc, Ot, paste(zCr)) %>%
+    kable(col.names = c("N", "$n_{Clinton}$^$\\dag$^", "$n_{Trump}$^$\\ddag$^", "$z_{critical}$ ($df = 1$)"), caption = "Summary of Known Values and Parameters for Pearson's $\\chi^{2}$ Goodness-of-Fit Test")
+```
+
+Evaluate the observed $\chi^{2}$ value to the $\chi^{2}$ distribution ($f_{k}(x)$).
+
+`r tufte::margin_note("$\\chi^{2} = \\Sigma \\frac{(O_{i}-E{i})^{2}}{E_{i}}$")`
+
+`r margin_note("$$ O_{1} = 677 $$")`
+
+`r margin_note("$$ O_{2} = 554 $$")`
+
+$$ E_{i} = \frac{(O_{1} + O_{2})}{2} $$
+
+The $\chi^{2}$ test's flexibility allows for additional comparison analyses. The Likelihood Ratio $\chi^{2}$ is similar to the pearson $\chi^{2}$.
+
+
+```{r echo=FALSE}
+Ei1 <- Oc + Ot
+Ei2 <- Ei1/2
+
+EI <- (Oc + Ot)/2
+
+csq1a <- Oc - EI
+csq1b <- (csq1a)^2
+csq1c <- csq1b/EI
+
+csq1 <- ((Oc - EI)^2)/EI
+
+csq2a <- Ot - EI
+csq2b <- csq2a^2
+csq2c <- csq2b/EI
+
+csq2 <- ((Ot - EI)^2)/EI
+
+chisq <- csq1 + csq2
+
+# prop.test(x = Oc, n = n-2, p = 0.5, correct = FALSE)
+```
+
+$$ E_{i} = \frac{(`r Oc` + `r Ot`)}{2} \Rightarrow \frac{(`r Ei1`)}{2} $$
+
+$$ E_{i} = \textbf{`r EI`} $$
+
+$$ \chi^{2} = \frac{(`r Oc` - `r EI`)^{2}}{`r EI`} + \frac{(`r Ot` - `r EI`)^{2}}{`r EI`} $$
+
+$$ \Longrightarrow \frac{(`r csq1a`)^{2}}{`r EI`} + \frac{(`r csq2a`)^{2}}{`r EI`} $$
+
+$$ \Longrightarrow \frac{(`r csq1b`)}{`r EI`} + \frac{(`r csq2b`)}{`r EI`} $$
+
+$$ \Longrightarrow `r csq1c` + `r csq2c` $$
+
+$$ \chi^{2} = \textbf{`r chisq`} $$
+
+\newpage
+# References`r R.cite_r(file = "~/GitHub/auxDocs/REFs.bib")`

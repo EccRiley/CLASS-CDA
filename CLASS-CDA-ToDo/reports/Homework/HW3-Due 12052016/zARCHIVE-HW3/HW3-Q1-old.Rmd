@@ -1,0 +1,445 @@
+---
+title: "Homework 3 - Question 1: Early Head Start Program"
+author: "Riley Smith"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+---
+
+```{r setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache=FALSE}
+source("../SETUP.R")
+knitr::opts_chunk$set(tidy = FALSE, echo = TRUE, cache = FALSE, fig.keep = 'high', fig.show = 'hold', results = 'asis', autodep = TRUE, Rplot = TRUE, dev = 'pdf', fig.path = 'graphics/HW3/rplot-q1-', fig.width = 7, fig.height = 7, out.width = "\\linewidth", echo = FALSE)
+```
+
+# Question-$1$ Data Summary
+
+```{r dat1}
+dat <- R.rspss("data/child2.sav")
+R.msmm(dat)
+# na.omit(dat$white)
+
+l.abuse <- c("no", "yes")
+l.boyfriend <- c("no", "yes")
+l.program <- c("control", "program")
+l.white <- c("nonwhite", "white")
+
+dat <- within(dat, {
+	abuse.f <- factor(abuse, labels = l.abuse)
+	boyfriend.f <- factor(boyfriend, labels = l.boyfriend)
+	program.f <- factor(program, labels = l.program)
+	white.f <- factor(white, labels = l.white)
+})
+```
+
+# Question-$1.a.$
+
+```{r dat1kab, echo=FALSE}
+kable(as.matrix(summary(dat[, 7:10])))
+```
+
+# Mediation Model Data Descriptive Statistics
+
+```{r medDat}
+med.n <- dat[, c(1, 6, 5)] ## Mediation variables as numeric ##
+med.n <- na.omit(med.n)
+names(med.n) <- c("Y", "M", "X")
+```
+
+```{r dat1Hists, fig.margin=TRUE, echo=FALSE}
+palette(pal_my)
+
+hist(med.n$X, xlab = " ", col = c(16, 13),
+     main = "Mother's Race",
+     axes = FALSE); axis(2); axis(1, at = c(0.05, 0.95),
+                                  labels = c("\n0\n(Non-White)",
+                                             "\n1\n(White)"),
+                                  tick = FALSE)
+
+hist(med.n$M, xlab = " ", col = mpal(seq(1:9), a = 0.95),
+     main = "Number of child neglect reports")
+
+hist(med.n$Y, xlab = " ", col = c(16, 13),
+     main = "Any Abuse Reported",
+     axes = FALSE); axis(2); axis(1, at = c(0.05, 0.95),
+                                  labels = c("\n0\n(No)",
+                                             "\n1\n(Yes)"),
+                                  tick = FALSE)
+```
+
+```{r interactionPlot, echo=FALSE, eval=FALSE}
+with(med.n, {
+    interaction.plot(Y, M, X, ## {pkg:stats} ##
+    col = mpal(seq(1:9), p = cols3), lwd = 2,
+    main = "Interaction Effects Implied by Variable Correlations",
+    ylab = expression(mu[White]), xlab = "Abuse",
+    trace.label = "Neglect")
+    })
+```
+
+```{r medCor, fig.margin=TRUE}
+X <- med.n[, "X"]
+M <- med.n[, "M"]
+Y <- med.n[, "Y"]
+
+ab <- cor(X, M) ## X <-> M ##
+ac <- cor(X, Y) ## X <-> Y ##
+bc <- cor(M, Y) ## M <-> Y ##
+
+medCor <- cor(med.n)
+```
+
+```{r medCorKab, echo=FALSE}
+library(lattice)
+palette(pal_sci)
+grays <- colorRampPalette(pal_my[c(1, 16, 18)], alpha = T)
+levelplot(abs(medCor),
+		  col.regions = grad(seq(length(medCor)), p = grays),
+		  xlab = "", ylab = "",
+		  scales = list(alternating = 3, cex = 1.25),
+		  cuts = length(medCor),
+		  at = seq(range(medCor)[1], range(medCor)[2],
+		           length.out = length(medCor)),
+		  colorkey = list(axis.text = list(cex = 1),
+		                  tick.number = 9, width = 1.25))
+
+medCor <- round(medCor, 2)
+medCor[upper.tri(medCor, diag = TRUE)] <- " "
+diag(medCor) <- rep("1", 3)
+kable(medCor, caption = "Correlation Matrix for Mediation Model Variables",
+      digits = 2, format.args = list(zero.print = " "))
+```
+
+## Mediation Analysis using the `{lavaan}` `R`-Package
+
+$$ E(P(y = 1 | x_{1} \ldots x_{p})) = \frac{1}{1 + e^{a + \Sigma_{k}b_{k}x{k}}} $$
+
+$$ y = [exp(b0 + b1x)] / [1 + exp(b0 + b1x)] $$
+
+$$ logit(y) = \beta_{0} + \beta{1_{X}} + \beta_{1_{M}} $$
+
+
+```{r m1, echo=TRUE}
+library(lavaan) ## "lavaan()", "sem()" ##
+
+m1 <- '## Direct Effect on Y ##
+       Y ~ c*X'
+
+fit1 <- sem(m1, data = med.n,
+        estimator = "ML", ## Maximum likelihood ("ML") estimator
+                            ## yeilds the same results as SAS ##
+        link = "probit", ## ML only works with the probit link ##
+        information = "observed",
+        mimic = "Mplus",
+        meanstructure = TRUE,
+        fixed.x = TRUE,
+        se = "standard",
+        likelihood = "wishart")
+```
+
+```{r fit1}
+fit1.est <- parameterEstimates(fit1) ## Y ~ 1 == model intercept ##
+fit1.fitted <- fitted(fit1)
+fit1.cov <- fitted(fit1)$cov
+fit1.mus <- fitted(fit1)$mean
+fit1.llr <- logLik(fit1)
+fit1.fits <-
+    fitMeasures(fit1)[c('ntotal',
+                        'chisq',
+                        'df',
+                        'aic',
+                        'bic',
+                        'cfi',
+                        'tli',
+                        'rmsea',
+                        'srmr')]
+fit1.rsq <- inspect(fit1, 'r2')
+fit1.mod <- modificationindices(fit1)
+
+```
+
+```{r fit1kab, echo=FALSE}
+fit1.est2 <-
+    matrix(paste0(fit1.est[, 1], " ", fit1.est[, 2], " ", fit1.est[, 3]))
+fit1.est <- cbind(fit1.est2, fit1.est[, c(-1, -2, -3, -4)])
+colnames(fit1.est) <-
+    c("Parameter",
+      "Estimate",
+      "SE",
+      "Z",
+      "P-Value",
+      "$CI_{lower}$",
+      "$CI_{upper}$")
+fit1.est[, -1] <- apply(fit1.est[, -1], 2, round, digits = 2)
+fit1.est <- apply(fit1.est, 2, R.na, v = " ")
+
+kable(fit1.est, caption = "Model 1 (Direct Effect Model) Summary Statistics", align = c("c", rep("r", ncol(fit1.est))))
+```
+
+```{r fit1pathMod, echo=FALSE, fit.margin=TRUE, fig.cap="Observed Direct Effect. '***': p < 0.001"}
+
+library(pathdiagram)
+palette(pal_my)
+
+iv <- list(X <- manifest("White\n(X)", x = 0, y = 0.5,
+                         width = 0.2, height = 0.1, cex = .75,
+                         fill = NA, col = 16, lwd = 1, border = 16))
+dv <- list(Y <- manifest("Abuse\n(Y)", x = 1, y = 0.5,
+                         width = 0.2, height = 0.1, cex = .75,
+                         fill = NA, col = 5, lwd = 1, border = 5))
+XY <- paste0("c = ", fit1.est[1, 2], "***")
+txt.x = 0.5
+txt.y <- 0.45
+
+R.pathDia(manifest = iv, latent = dv, arrcol = 19, lty = 1); text(x = txt.x, y = txt.y, labels = XY)
+```
+
+```{r fit2hypMod, echo=FALSE, fit.margin=TRUE, fig.cap="Hypothesized Mediation Model."}
+library(pathdiagram)
+palette(pal_my)
+
+iv <- list(X <- manifest("White\n(X)", x = 0, y = 0.25,
+                         width = 0.2, height = 0.1, cex = .75,
+                         fill = NA, col = 16, lwd = 1, border = 16))
+mv <- list(M <- manifest("Neglect\n(M)", x = 0.5, y = 0.75,
+                         width = 0.25, height = 0.1, cex = .75,
+                         fill = NA, col = 13, lwd = 1, border = 13))
+dv <- list(Y <- manifest("Abuse\n(Y)", x = 1, y = 0.25,
+                         width = 0.2, height = 0.1, cex = .75,
+                         fill = NA, col = 5, lwd = 1, border = 5))
+aPath <- "a*"
+bPath <- "b*"
+ab <- "[a X b]*"
+cPath <- "c' (n.s.)"
+txt.x = list(aPath = 0.23, bPath = 0.82, ab = 0.51, cPath = 0.5)
+txt.y <- list(aPath = 0.5, bPath = 0.5, ab = 0.4, cPath = 0.2)
+R.mpathDia(iv, mv, dv, arrcol = 19); text(x = txt.x, y = txt.y,
+                                                     labels = c(aPath,
+                                                                bPath,
+                                                                ab,
+                                                                cPath),
+                                                     font = 3)
+
+```
+
+```{r m2, echo=TRUE}
+m2 <- 'Y ~ c*X
+       M ~ a*X
+       Y ~ b*M
+       ab := a*b
+       total := c + (a*b)'
+fit2 <- sem(m2, data = med.n,
+        estimator = "ML", ## Maximum likelihood estimator
+                            ## yeilds the same results as SAS ##
+        link = "probit", ## ML only works with the probit link ##
+        # information = "observed",
+        mimic = "Mplus",
+        # meanstructure = FALSE,
+        fixed.x = TRUE,
+        se = "bootstrap",
+        likelihood = "wishart")
+## "If you prefer to use an unbiased covariance, and n - 1 as the
+    ## multiplier to compute the chi-square statistic"
+    ## --- Roseel (2012), p. 27 ##
+```
+
+```{r fit2}
+fit2.est <- parameterEstimates(fit2) ## Y ~ 1 == model intercept ##
+fit2.mus <- fitted(fit1)$mean
+fit2.cov <- fitted(fit2)$cov
+fit2.fits <- fitMeasures(fit2)[c('aic', 'bic')]
+fit2.llr <- logLik(fit2)
+fit2.rsq <- inspect(fit2, 'r2')
+```
+
+## Mediation Model Summary Statistics and Model Fit Indices
+
+```{r fit2Kabs, echo=FALSE}
+## Below is for formatting purposes ##
+fit2.est2 <- matrix(paste0(fit2.est[, 1], " ",
+                           fit2.est[, 2], " ",
+                           fit2.est[, 3]))
+
+fit2.est <- cbind(fit2.est2, fit2.est[, c(-1, -2, -3, -4)])
+
+colnames(fit2.est) <- c("Parameter",
+                        "Estimate",
+                        "SE",
+                        "Z",
+                        "P-Value",
+                        "$CI_{lower}$",
+                        "$CI_{upper}$")
+
+fit2.est[, -1] <- apply(fit2.est[, -1], 2, round, digits = 5)
+fit2.est <- apply(fit2.est, 2, R.na, v = " ")
+## End formatting of estimates table ##
+fit2.intercept <- fit2.est[7, 2]
+fit2.X <- fit2.est[1, 2]
+fit2.M <- fit2.est[3, 2]
+kable(
+    fit2.est,
+    digits = 2,
+    caption = "Model 2 (Mediation Model) Summary Statistics",
+    align = c("c", rep("r", ncol(fit2.est)))
+)
+
+kable(fit2.rsq, caption = "Model 2 $R\\sq$")
+
+fit2.cov[upper.tri(fit2.cov)] <- 0
+kable(fit2.cov, caption = "Model 2 Covariance Matrix",
+      format.args = list(zero.print = " "))
+kable(fit2.mus, caption = "Model 2 Coefficients' Means")
+
+# fit2.llr
+names(fit2.fits) <- c("AIC", "BIC")
+kable(fit2.fits, caption = "Absolute Fit Indices")
+
+anova(fit2)
+```
+
+$$ logit(\hat{Y}) = `r fit2.intercept`\beta_{0} + `r fit2.X`\beta_{1_{X}} + `r fit2.M`\beta_{2_{M}} $$
+
+```{r fit2pathMod, echo=FALSE, fig.cap="Fitted Model - Partial Mediation Effect Observed. '*': p < 0.05, '**': p < 0.01, '***': p < 0.001"}
+# library(semPlot) ## "semPaths()" (& "semCors()") ##
+# semPaths(fit2, "est", "par",
+#          edge.color = pal_my[19],
+#          border.color = pal_my[19],
+#          edge.label.cex = 1,
+#          normalize = F,
+#          rotation = 1,
+#          fade = F,
+#          intercepts = FALSE,
+#          threshAtSide = F,
+#          edge.width = 0.25,
+#          centerLevels = F,
+#          springLevels = T)
+
+library(pathdiagram)
+palette(pal_my)
+iv <- list(X <- manifest("White\n(X)", x = 0, y = 0.25,
+                         width = 0.2, height = 0.1, cex = .75,
+                         fill = NA, col = 16, lwd = 1, border = 16))
+mv <- list(M <- manifest("Neglect\n(M)", x = 0.5, y = 0.75,
+                         width = 0.25, height = 0.1, cex = .75,
+                         fill = NA, col = 13, lwd = 1, border = 13))
+dv <- list(Y <- manifest("Abuse\n(Y)", x = 1, y = 0.25,
+                         width = 0.2, height = 0.1, cex = .75,
+                         fill = NA, col = 5, lwd = 1, border = 5))
+aPath <- paste0("a = ", fit2.est[2, 2], "***")
+bPath <- paste0("b = ", fit2.est[3, 2], "*")
+ab <- paste0("[a X b] =", fit2.est , "*")
+cPath <- paste0("c' = ", fit2.est[1, 2], "***")
+txt.x = list(aPath = 0.17, bPath = 0.82, ab = 0.5, cPath = 0.5)
+txt.y <- list(aPath = 0.5, bPath = 0.5, ab = 0.4, cPath = 0.19)
+R.mpathDia(iv, mv, dv, arrcol = 19, lty.c = 1); text(x = txt.x, y = txt.y,
+                                                     labels = c(aPath,
+                                                                bPath,
+                                                                ab,
+                                                                cPath),
+                                                     font = 3)
+
+```
+
+## Mediation Analysis Summary \todo
+
+<!-- SAMPLE WRITE-UP: Two regression models were tested to investigate whether the association between negative social exchanges and heart disease is mediated by depression symptomatology. In the first ordinary least squares regression model, negative social exchanges were significantly related to higher depression scores, b = 2.844, SE = .299, p <.001, 95% CI = 2.257, 3.431. In the second logistic regression model, which included negative social exchanges and depression as predictors of heart disease, neither negative exchanges, b = .028, SE =.185, ns, OR = 1.03, 95% CI -.335, .391, nor depression, b = .028, SE = .022, ns, OR = 1.028, 95% CI = -.014, .070, was significantly independently associated with heart disease. [I would interpret the ORs here if they had been significant]. The bootstrap confidence intervals derived from 500 samples indicated that the indirect effect coefficient was not significant, b = .079, SE = .058, 95% CI = -.026,.203, which did not support the hypothesis that the relation between negative social exchanges and heart disease is mediated by depression -->
+
+
+\newpage
+
+# Q1.b. \inprogress
+
+
+```{r Q1b, echo=FALSE, fig.fullwidth=TRUE}
+# source("../SETUP.R")
+dat1b <- R.rspss("data/child2.sav", vlabs = TRUE)
+dat1b.n <- R.rspss("data/child2.sav", vlabs = FALSE)
+dat1b <- na.omit(dat1b)
+dat1b.n <- na.omit(dat1b.n)
+# sapply(dat1b[, -4], table)
+
+lgm <- glm(abuse ~ program + boyfriend + white + welfare,
+           data = dat1b.n,
+           family = binomial(link = "logit"))
+lgm
+anova(lgm, test = "LRT")
+# par(mfrow = c(2, 2)); plot(lgm); par(mfrow = c(1, 1))
+plot(lgm, which = 3)
+```
+
+```{r lgmCooksD, fig.height=4}
+cutoff <- 4/((nrow(dat1b.n) - length(lgm$coefficients) - 2))
+plot(lgm, which = 4, cook.levels = cutoff)
+lgm.outliers <- dat1b.n[c(324, 592, 607, 1046), ]
+```
+
+**Studentized Residual Outliers**
+
+```{r lgmInfl, fig.height=4}
+library(car)
+influencePlot(lgm, id.method = "noteworthy",
+              id.col = "red",
+              id.cex = 1.25,
+              main = "Influence Plot\n
+              Circle size is proportial to Cook's Distance",
+              xlab = "Fitted Values",
+              sub = "Points with extreme Studentized residuals are indicated in Red", font.sub = 3)
+```
+
+```{r echo=FALSE}
+# outlierTest(lgm)
+
+# lgm.res <- resid(lgm)
+# lgm.fitted <- fitted.values(lgm)
+# lgm.effects <- effects(lgm)
+
+# plot(lgm.res, lgm.effects, ylab = "Model Effects", xlab = "Model Residuals"); #abline(h = 0,lty = 2, col = "red", main = "Comparison of Residual versus Fitted Values for Multiple Logistic Regression Model")
+#
+# plot(lgm.effects, lgm.res, xlab = "Model Effects", ylab = "Model Residuals"); #abline(h = 0,lty = 2, col = "red", main = "Comparison of Residual versus Fitted Values for Multiple Logistic Regression Model")
+
+# plot(lgm.fitted, lgm.res, xlab = "Fitted Values", ylab = "Model Residuals", main = "Comparison of Residual versus Fitted Values for Multiple Logistic Regression Model"); abline(h = 0,lty = 2, col = "red")
+
+```
+
+
+```{r lgmDX_plots, Rplot=NULL, echo=FALSE, fig.height=4}
+# library(LogisticDx)
+# lgm.dx <- dx(lgm)
+# lgm.dx2 <- lgm.dx$dChisq
+# lgm.gof <- gof(lgm)
+# kable(lgm.gof)
+# plot(lgm, palette = "Accent", alpha = 0.6, cex.main = 1.25, devNew = FALSE)
+
+knitr::include_graphics("graphics/HW3/rplot-q1-lgmDX-3.pdf") ## Delta X2 ##
+knitr::include_graphics("graphics/HW3/rplot-q1-lgmDX-5.pdf") ## Delta B ##
+knitr::include_graphics("graphics/HW3/rplot-q1-lgmDX-10.pdf") ## Correlation between delta X2, delta D, & delta B ##
+```
+
+\newpage
+
+```{r echo=TRUE, fig.fullwidth=TRUE}
+d <- dat1b.n
+fit <- lgm
+d$predicted <- predict(fit)
+d$residuals <- residuals(fit)
+d$fitted <- fitted.values(fit)
+d %>% gather(key = "iv",
+             value = "x",
+             -abuse,
+             -predicted,
+             -residuals,
+             -fitted) %>%
+    ggplot(aes(x = x, y = abuse)) +
+    geom_segment(aes(xend = x, yend = predicted),
+                 alpha = .2,
+                 colour = pal_my[17]) +
+    geom_point(aes(colour = residuals)) +
+    scale_colour_gradient2(low = pal_my[15],
+                           mid = pal_my[2],
+                           high = pal_my[3]) +
+    guides(color = FALSE) +
+    geom_point(aes(y = predicted), shape = 1) +
+    facet_wrap(~ iv, scales = "free") +
+    thm_tft()
+#+ theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
+
+```
+
+## Multiple Logistic Regression Diagnostics Summary \todo

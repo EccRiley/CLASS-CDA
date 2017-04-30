@@ -1,0 +1,88 @@
+setwd("CDA")
+RtftH("HW3-rs.R")
+source("HW3-rs.R")
+source("HW3-Q3b.R")
+RtftH("HW3-Q3b.R")
+coeftest(fit)
+coeftest(fit) %>% kable()
+str(coeftest(fit))
+dimnames(coeftest(fit))
+fit.summ <- data.frame()
+dimnames(coeftest(fit))[[1]]
+dimnames(coeftest(fit))[[2]]
+fit.ctest <- coeftest(fit)
+rownames(fit.summ) <- dimnames(fit.ctest)[[1]]
+names(fit.summ) <- dimnames(fit.ctest)[[2]]
+?data.frame()
+fit.ct.c <- dimnames(fit.ctest)[[2]] ## colnames
+length(fit.ct.r)
+length(fit.ct.c)
+fit.ctest
+str(fit.ctest)
+attributes(fit.ctest)
+?arg
+?args
+unlisgt(fit.ctest)
+unlist(fit.ctest)
+unlist(fit.ctest) %>% kable()
+unlist(fit.ctest) %>% str()
+vcov(fit)
+vcov(fit) %>% plot()
+?matrix
+matrix(fit.ctest, nrow = 5)
+fit.summ <- matrix(fit.ctest, nrow = 5)
+dimnames(fit.ctest)[[1]]
+dimnames(fit.ctest)[[2]]
+fit.ct.r <- dimnames(fit.ctest)[[1]] ## rownames
+fit.ct.c <- c("Estimate", "_SE_", "_z-value_", "p") ## colnames
+fit.summ <- matrix(fit.ctest, nrow = 5, dimnames = list(fit.ct.r, fit.ct.c))
+dimnames(fit.summ)
+fit.summ <- matrix(fit.ctest, nrow = 5, dimnames = list(fit.ct.r, fit.ct.c)) %>% as.data.frame
+names(fit.summ)
+rownames(fit.summ)
+fit.summ %>% kable()
+sig <- list(s1 = "$*p < 0.05$.", s2 = "$**p < 0.01$.", s3 = "$***p < 0.001$.")
+R.sig <- function(p) {#
+	p <- ifelse(p > 0.05, sig$ns, ## else...#
+			    ifelse(p < 0.05 & p > 0.01, sig$s1, ## else...#
+				       ifelse(p < 0.01 & p > 0.001, sig$s2, sig$s3)#
+			          )#
+			   )#
+}
+R.sig <- function(p) {#
+	p <- ifelse(p > 0.05, sig$ns, ## else...#
+			    ifelse(p < 0.05 & p > 0.01, sig$s1, ## else...#
+				       ifelse(p < 0.01 & p > 0.001, sig$s2, sig$s3)#
+			          )#
+			   )#
+    return(p)#
+}
+sig <- list(s1 = "$*p < 0.05$.", s2 = "$**p < 0.01$.", s3 = "$***p < 0.001$.", ns = "n.s.")
+R.sig <- function(p) {#
+	sig <- list(s1 = "$*p < 0.05$.", s2 = "$**p < 0.01$.", s3 = "$***p < 0.001$.", ns = "n.s.")#
+	p <- ifelse(p > 0.05, sig$ns, ## else...#
+			    ifelse(p < 0.05 & p > 0.01, sig$s1, ## else...#
+				       ifelse(p < 0.01 & p > 0.001, sig$s2, sig$s3)#
+			          )#
+			   )#
+    return(p)#
+}
+sig <- list(s1 = "$*p < 0.05$.", s2 = "$**p < 0.01$.", s3 = "$***p < 0.001$.", ns = "' ' = n.s.")
+R.sig <- function(p) {#
+	stars <- list(s1 = "$*$", s2 = "$**$", s3 = "$***$", ns = " ")#
+	p <- ifelse(p > 0.05, stars$ns, ## else...#
+			    ifelse(p < 0.05 & p > 0.01, stars$s1, ## else...#
+				       ifelse(p < 0.01 & p > 0.001, stars$s2, stars$s3)#
+			          )#
+			   )#
+    return(p)#
+}
+p <- c(0.1, 0.04, 0.002, 0.0001)
+sapply(p, R.sig)
+R.sig(p)
+fit.summ$s <- sapply(fit.summ$p, R.sig)
+fit.summ
+dim(fit.ctest)
+dim(fit.ctest)[1]
+?coeftest
+coeftest

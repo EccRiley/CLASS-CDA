@@ -1,0 +1,375 @@
+> ### job satisfaction example
+> collar=read.table("collar.txt")
+> manager=factor(collar[,1])
+> super=factor(collar[,2])
+> worker=factor(collar[,3])
+> count=collar[,4]
+> 
+> ### Saturated Model (MSW)
+> 
+> modelSat=glm(count~manager+super+worker+manager*super+manager*worker+super*worker+manager*super*worker,family=poisson(link=log))
+> summary(modelSat)
+
+Call:
+glm(formula = count ~ manager + super + worker + manager * super + 
+    manager * worker + super * worker + manager * super * worker, 
+    family = poisson(link = log))
+
+Deviance Residuals: 
+[1]  0  0  0  0  0  0  0  0
+
+Coefficients:
+                               Estimate Std. Error z value Pr(>|z|)    
+(Intercept)                     3.73767    0.15430  24.223  < 2e-16 ***
+managergood                     1.58534    0.16937   9.360  < 2e-16 ***
+superlow                        0.72824    0.18789   3.876 0.000106 ***
+workerlow                      -0.27193    0.23465  -1.159 0.246496    
+managergood:superlow           -1.35990    0.22216  -6.121 9.29e-10 ***
+managergood:workerlow          -0.69437    0.26974  -2.574 0.010046 *  
+superlow:workerlow              0.44075    0.27616   1.596 0.110482    
+managergood:superlow:workerlow -0.08826    0.34653  -0.255 0.798950    
+---
+Signif. codes:  0 Ô***Õ 0.001 Ô**Õ 0.01 Ô*Õ 0.05 Ô.Õ 0.1 Ô Õ 1 
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance:  2.0877e+02  on 7  degrees of freedom
+Residual deviance: -3.5527e-15  on 0  degrees of freedom
+AIC: 65.476
+
+Number of Fisher Scoring iterations: 3
+
+> ##get AIC and BIC for the saturated model
+> AIC(modelSat)
+[1] 65.47568
+> AIC(modelSat, k=log(sum(count)))
+[1] 102.0539
+> ## you can run the above two commands 
+> ## for each of the models below, and 
+> ## look for the one with the smallest AIC and the smallest BIC
+> 
+> ### Complete independence model (M,S,W)
+> 
+> model=glm(count~manager+super+worker,family=poisson(link=log))
+> summary(model)
+
+Call:
+glm(formula = count ~ manager + super + worker, family = poisson(link = log))
+
+Deviance Residuals: 
+     1       2       3       4       5       6       7       8  
+ 6.502   0.558  -2.746  -4.845  -3.078  -2.720  -0.841   5.178  
+
+Coefficients:
+             Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  4.402690   0.077775  56.608  < 2e-16 ***
+managergood  0.535518   0.077492   6.911 4.82e-12 ***
+superlow     0.002797   0.074795   0.037     0.97    
+workerlow   -0.487768   0.077030  -6.332 2.42e-10 ***
+---
+Signif. codes:  0 Ô***Õ 0.001 Ô**Õ 0.01 Ô*Õ 0.05 Ô.Õ 0.1 Ô Õ 1 
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 208.77  on 7  degrees of freedom
+Residual deviance: 118.00  on 4  degrees of freedom
+AIC: 175.47
+
+Number of Fisher Scoring iterations: 4
+
+> 
+> ### Joint independence of (MS,W)
+> 
+> model=glm(count~manager+super+worker+manager*super,family=poisson(link=log))
+> summary(model)
+
+Call:
+glm(formula = count ~ manager + super + worker + manager * super, 
+    family = poisson(link = log))
+
+Deviance Residuals: 
+      1        2        3        4        5        6        7        8  
+ 3.3944  -2.9703   0.7098  -0.5767  -0.6224   0.4776  -3.0075   2.1807  
+
+Coefficients:
+                     Estimate Std. Error z value Pr(>|z|)    
+(Intercept)           3.82535    0.11988  31.909  < 2e-16 ***
+managergood           1.34138    0.13056  10.274  < 2e-16 ***
+superlow              0.94296    0.13703   6.882 5.92e-12 ***
+workerlow            -0.48777    0.07703  -6.332 2.42e-10 ***
+managergood:superlow -1.46444    0.16811  -8.711  < 2e-16 ***
+---
+Signif. codes:  0 Ô***Õ 0.001 Ô**Õ 0.01 Ô*Õ 0.05 Ô.Õ 0.1 Ô Õ 1 
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 208.775  on 7  degrees of freedom
+Residual deviance:  35.597  on 3  degrees of freedom
+AIC: 95.072
+
+Number of Fisher Scoring iterations: 4
+
+> 
+> ### Joint independence of (MW,S)
+> 
+> model=glm(count~manager+super+worker+manager*worker,family=poisson(link=log))
+> summary(model)
+
+Call:
+glm(formula = count ~ manager + super + worker + manager * worker, 
+    family = poisson(link = log))
+
+Deviance Residuals: 
+     1       2       3       4       5       6       7       8  
+ 3.995   2.647  -4.810  -2.984  -1.187  -4.073   1.135   3.675  
+
+Coefficients:
+                       Estimate Std. Error z value Pr(>|z|)    
+(Intercept)            4.165266   0.095679  43.534  < 2e-16 ***
+managergood            0.889581   0.104578   8.506  < 2e-16 ***
+superlow               0.002797   0.074795   0.037    0.970    
+workerlow              0.045462   0.123121   0.369    0.712    
+managergood:workerlow -0.874874   0.160134  -5.463 4.67e-08 ***
+---
+Signif. codes:  0 Ô***Õ 0.001 Ô**Õ 0.01 Ô*Õ 0.05 Ô.Õ 0.1 Ô Õ 1 
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 208.775  on 7  degrees of freedom
+Residual deviance:  87.787  on 3  degrees of freedom
+AIC: 147.26
+
+Number of Fisher Scoring iterations: 4
+
+> 
+> ### Joint indepence of (SW,M)
+> model=glm(count~manager+super+worker+super*worker,family=poisson(link=log))
+> summary(model)
+
+Call:
+glm(formula = count ~ manager + super + worker + super * worker, 
+    family = poisson(link = log))
+
+Deviance Residuals: 
+     1       2       3       4       5       6       7       8  
+ 5.058   1.666  -1.404  -5.768  -4.643  -1.343   1.014   3.758  
+
+Coefficients:
+                   Estimate Std. Error z value Pr(>|z|)    
+(Intercept)         4.51305    0.08023  56.248  < 2e-16 ***
+managergood         0.53552    0.07749   6.911 4.83e-12 ***
+superlow           -0.23127    0.09566  -2.418   0.0156 *  
+workerlow          -0.80891    0.11463  -7.057 1.70e-12 ***
+superlow:workerlow  0.61839    0.15625   3.958 7.57e-05 ***
+---
+Signif. codes:  0 Ô***Õ 0.001 Ô**Õ 0.01 Ô*Õ 0.05 Ô.Õ 0.1 Ô Õ 1 
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 208.77  on 7  degrees of freedom
+Residual deviance: 102.11  on 3  degrees of freedom
+AIC: 161.59
+
+Number of Fisher Scoring iterations: 4
+
+> 
+> ### Conditional independence (MS,MW)
+> 
+> modelCI=glm(count~manager+super+worker+manager*super+manager*worker,family=poisson(link=log))
+> summary(modelCI)
+
+Call:
+glm(formula = count ~ manager + super + worker + manager * super + 
+    manager * worker, family = poisson(link = log))
+
+Deviance Residuals: 
+      1        2        3        4        5        6        7        8  
+ 0.5868  -0.6127  -0.9757   0.9468   1.0879  -0.7452  -0.8731   0.5638  
+
+Coefficients:
+                      Estimate Std. Error z value Pr(>|z|)    
+(Intercept)            3.58793    0.13220  27.140  < 2e-16 ***
+managergood            1.69544    0.14825  11.436  < 2e-16 ***
+superlow               0.94296    0.13703   6.882 5.92e-12 ***
+workerlow              0.04546    0.12312   0.369    0.712    
+managergood:superlow  -1.46444    0.16811  -8.711  < 2e-16 ***
+managergood:workerlow -0.87487    0.16014  -5.463 4.67e-08 ***
+---
+Signif. codes:  0 Ô***Õ 0.001 Ô**Õ 0.01 Ô*Õ 0.05 Ô.Õ 0.1 Ô Õ 1 
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 208.7748  on 7  degrees of freedom
+Residual deviance:   5.3871  on 2  degrees of freedom
+AIC: 66.863
+
+Number of Fisher Scoring iterations: 4
+
+> predCI=fitted(modelCI)
+> 
+> ## To produce linear regression like residual diagnostics
+> influence.measures(modelCI)
+Influence measures of
+	 glm(formula = count ~ manager + super + worker + manager * super +      manager * worker, family = poisson(link = log)) :
+
+     dfb.1_ dfb.mngr  dfb.sprl  dfb.wrkr dfb.mngrgd.s dfb.mngrgd.w dffit cov.r cook.d   hat inf
+1 -7.14e-01    0.637  9.57e-01  1.50e+00       -0.780       -1.152  2.35 10.76  0.980 0.863   *
+2 -7.42e-01    0.662 -9.51e-01  1.56e+00        0.775       -1.198 -2.38  8.22  0.969 0.857   *
+3 -7.67e-01    0.684  1.03e+00 -6.27e-01       -0.838        0.482 -1.36  2.76  0.309 0.648   *
+4  1.19e+00   -1.062 -8.88e-01 -5.67e-01        0.724        0.436  1.19  4.70  0.259 0.632   *
+5 -1.92e-17   -0.163  7.86e-17 -1.67e-16        0.385        0.496  1.14  2.21  0.216 0.563    
+6 -7.99e-17   -0.175  1.64e-16  2.71e-16       -0.952        0.535 -2.24  3.15  0.766 0.809    
+7 -8.03e-17   -0.177  4.11e-17 -1.31e-16        0.419       -0.909 -1.85  2.17  0.519 0.741    
+8 -3.13e-16    1.322  3.20e-16 -1.01e-18       -0.916       -0.866  2.92  6.79  1.362 0.887   *
+> ## to get standardized devaiance residuals
+> rstandard(modelCI)
+        1         2         3         4         5         6         7         8 
+ 1.585496 -1.618395 -1.645241  1.560709  1.645956 -1.706941 -1.714344  1.676040 
+> ## to get likelihood residuals 
+> rstudent(modelCI)
+        1         2         3         4         5         6         7         8 
+ 1.599015 -1.603633 -1.616792  1.586386  1.669320 -1.690999 -1.694299  1.685961 
+> 
+> #### To get BIC and AIC in the table in the notes
+> ##BIC for comparison to the saturated model
+> bicCISat=AIC(modelCI, k=log(sum(count)))-AIC(modelSat,k=log(sum(count)))
+> 
+> ## AIC for comparison to the saturated model
+> ## Formula AIC=-2*LogL+2*#Parm=G2-2*#Parm
+> ## #Parm=number of parameters in the CI model
+> G2=2*(logLik(modelSat)-logLik(modelCI))
+> aicCISat=G2[1]-2*6
+> 
+> 
+> ### Conditional independence (MS,SW)
+> 
+> model=glm(count~manager+super+worker+manager*super+super*worker,family=poisson(link=log))
+> summary(model)
+
+Call:
+glm(formula = count ~ manager + super + worker + manager * super + 
+    super * worker, family = poisson(link = log))
+
+Deviance Residuals: 
+      1        2        3        4        5        6        7        8  
+ 1.7797  -1.7179   1.8148  -1.3273  -2.0330   1.7240  -1.0032   0.6523  
+
+Coefficients:
+                     Estimate Std. Error z value Pr(>|z|)    
+(Intercept)            3.9357     0.1215  32.394  < 2e-16 ***
+managergood            1.3414     0.1306  10.274  < 2e-16 ***
+superlow               0.7089     0.1494   4.744 2.10e-06 ***
+workerlow             -0.8089     0.1146  -7.057 1.70e-12 ***
+managergood:superlow  -1.4644     0.1681  -8.711  < 2e-16 ***
+superlow:workerlow     0.6184     0.1563   3.958 7.57e-05 ***
+---
+Signif. codes:  0 Ô***Õ 0.001 Ô**Õ 0.01 Ô*Õ 0.05 Ô.Õ 0.1 Ô Õ 1 
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 208.775  on 7  degrees of freedom
+Residual deviance:  19.711  on 2  degrees of freedom
+AIC: 81.187
+
+Number of Fisher Scoring iterations: 4
+
+> 
+> ### Conditional independence (MW,SW)
+> 
+> model=glm(count~manager+super+worker+manager*worker+super*worker,family=poisson(link=log))
+> summary(model)
+
+Call:
+glm(formula = count ~ manager + super + worker + manager * worker + 
+    super * worker, family = poisson(link = log))
+
+Deviance Residuals: 
+     1       2       3       4       5       6       7       8  
+ 2.414   3.674  -3.317  -3.829  -2.633  -2.639   2.858   2.201  
+
+Coefficients:
+                      Estimate Std. Error z value Pr(>|z|)    
+(Intercept)            4.27563    0.09769  43.768  < 2e-16 ***
+managergood            0.88958    0.10458   8.506  < 2e-16 ***
+superlow              -0.23127    0.09566  -2.418   0.0156 *  
+workerlow             -0.27568    0.14955  -1.843   0.0653 .  
+managergood:workerlow -0.87487    0.16013  -5.463 4.67e-08 ***
+superlow:workerlow     0.61839    0.15625   3.958 7.57e-05 ***
+---
+Signif. codes:  0 Ô***Õ 0.001 Ô**Õ 0.01 Ô*Õ 0.05 Ô.Õ 0.1 Ô Õ 1 
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 208.775  on 7  degrees of freedom
+Residual deviance:  71.902  on 2  degrees of freedom
+AIC: 133.38
+
+Number of Fisher Scoring iterations: 4
+
+> 
+> 
+> 
+> ### Homogeneous associations (MS,MW,SW)
+> 
+> model=glm(count~manager+super+worker+manager*super+manager*worker+worker*super,family=poisson(link=log))
+> summary(model)
+
+Call:
+glm(formula = count ~ manager + super + worker + manager * super + 
+    manager * worker + worker * super, family = poisson(link = log))
+
+Deviance Residuals: 
+       1         2         3         4         5         6         7         8  
+ 0.07270  -0.07870  -0.12914   0.11425  -0.09544   0.07067   0.08361  -0.05135  
+
+Coefficients:
+                      Estimate Std. Error z value Pr(>|z|)    
+(Intercept)             3.7200     0.1390  26.757  < 2e-16 ***
+managergood             1.6066     0.1484  10.826  < 2e-16 ***
+superlow                0.7543     0.1582   4.768 1.86e-06 ***
+workerlow              -0.2315     0.1724  -1.343   0.1793    
+managergood:superlow   -1.3964     0.1705  -8.189 2.63e-16 ***
+managergood:workerlow  -0.7479     0.1691  -4.423 9.72e-06 ***
+superlow:workerlow      0.3847     0.1667   2.309   0.0210 *  
+---
+Signif. codes:  0 Ô***Õ 0.001 Ô**Õ 0.01 Ô*Õ 0.05 Ô.Õ 0.1 Ô Õ 1 
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 208.77482  on 7  degrees of freedom
+Residual deviance:   0.06494  on 1  degrees of freedom
+AIC: 63.54
+
+Number of Fisher Scoring iterations: 3
+
+> predHA=fitted(model)
+> 
+> ### Dataset "ALL"
+> 
+> # Note that 715 is the sample size
+> dCI=as.vector(abs(count-predCI)/(2*715))
+> dHA=as.vector(abs(count-predHA)/(2*715))
+> cbind(count,predCI,predHA,dCI,dHA)
+  count    predCI    predHA         dCI          dHA
+1   103  97.15909 102.26389 0.004084552 0.0005147591
+2    87  92.84091  87.73611 0.004084552 0.0005147591
+3    32  37.84091  32.73611 0.004084552 0.0005147591
+4    42  36.15909  41.26389 0.004084552 0.0005147591
+5    59  51.03326  59.73611 0.005571147 0.0005147591
+6   109 116.96674 108.26389 0.005571147 0.0005147591
+7    78  85.96674  77.26389 0.005571147 0.0005147591
+8   205 197.03326 205.73611 0.005571147 0.0005147591
+> simplestatistics=rbind(summary(count),summary(predCI),summary(predHA))
+> 
+> ### Pearson Correlations
+> 
+> cor(count,predCI)
+[1] 0.9906278
+> cor(count,predHA)
+[1] 0.9998965
+> 
+> ### The dissimilarity indices for Blue Collar Worker Example
+>                        
+> Sums=colSums(cbind(count,dCI,dHA))
+       count          dCI          dHA 
+7.150000e+02 3.862280e-02 4.118073e-03 

@@ -1,0 +1,19 @@
+```{mplus}
+
+Title: Homework 3 - Question 1a
+Data:
+  file is med.csv ;
+Variable:
+  Names are Y M X;
+Model:
+    M on X;
+    Y on X M;
+Model indirect:
+    Y ind X;
+    Y via M X
+Output:
+    stdyx;
+Plot: 
+    Type is PLOT1 PLOT2 PLOT3;
+```
+

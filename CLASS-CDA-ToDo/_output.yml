@@ -1,0 +1,366 @@
+# ================================================ #
+# Rmarkdown YAML Output Specifications             #
+#     Created and maintained by Riley Smith        #
+#     Saved with string encoding Unicode (UTF-8)   #
+#     ~/Dropbox/rstudio/CDA                        #
+# ================================================ #
+
+# PDF Tufte Handout {tufte} #
+tufte::tufte_handout:
+  fig_caption: yes
+  latex_engine: pdflatex
+  # highlight: null
+  # theme: null
+  highlight: monochrome # kate # monochrome # espresso # zenburn # haddock # pygments # tango
+  toc: no
+  # toc_depth: 1
+  keep_tex: yes
+  md_extensions: +footnotes+autolink_bare_uris+blank_before_blockquote+implicit_figures+hard_line_breaks+escaped_line_breaks+header_attributes+inline_notes+table_captions+multiline_tables+pipe_tables
+  pandoc_args: [
+    # "--filter", "pandoc-tablenos",
+    # "--filter", "pandoc-fignos",
+    "--filter", "pandoc-citeproc",
+    "--csl", "~/GitHub/auxDocs/chicago.csl", #chicago-ad.csl
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
+  ]
+  includes:
+    in_header: auxDocs/header.tex
+
+# ========================================== #
+
+# HTML Notebook {Rmarkdown
+#   some features require [RStudio >= v1.0.40 Preview](https://www.rstudio.com/products/rstudio/download/preview/))} #
+html_notebook:
+  highlight: monochrome
+  css: auxDocs/tufte-rs.css
+  fig_caption: yes
+  md_extensions: +footnotes+autolink_bare_uris+blank_before_blockquote+implicit_figures+hard_line_breaks+escaped_line_breaks+header_attributes+inline_notes+table_captions+multiline_tables+pipe_tables
+  toc: yes
+  pandoc_args: [
+    "--filter", "pandoc-tablenos",
+    "--filter", "pandoc-fignos",
+    "--filter", "pandoc-citeproc",
+    "--csl", "~/GitHub/auxDocs/chicago.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
+  ]
+
+# MS Word (Tufte-like Styling) #
+word_TUFTE:
+# word_document:
+  fig_caption: yes
+  fig_height: 6
+  fig_width: 6
+  keep_md: no
+  md_extensions: +footnotes+autolink_bare_uris+blank_before_blockquote+implicit_figures+hard_line_breaks+escaped_line_breaks+header_attributes+inline_notes+table_captions+multiline_tables+pipe_tables
+  reference_docx: auxDocs/tft.docx
+  toc: yes
+  toc_depth: 2
+  pandoc_args: [
+    "--filter", "pandoc-tablenos",
+    "--filter", "pandoc-fignos",
+    "--filter", "pandoc-citeproc",
+    "--csl", "~/GitHub/auxDocs/chicago.csl", #chicago-ad.csl,
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
+  ]
+
+# MS Word (APA Compliant) #
+# word_APA:
+word_document:
+  fig_caption: yes
+  fig_height: 6
+  fig_width: 6
+  keep_md: no
+  md_extensions: +footnotes+autolink_bare_uris+blank_before_blockquote+implicit_figures+hard_line_breaks+escaped_line_breaks+header_attributes+inline_notes+table_captions+multiline_tables+pipe_tables
+  reference_docx: auxDocs/APA.docx
+  toc: yes
+  toc_depth: 1
+  pandoc_args: [
+    "--filter", "pandoc-tablenos",
+    "--filter", "pandoc-fignos",
+    "--filter", "pandoc-citeproc",
+    "--csl", "~/GitHub/auxDocs/apa.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
+  ]
+
+# PDF Standard #
+pdf_document:
+  number_sections: no
+  latex_engine: pdflatex
+  toc: yes
+  toc_depth: 2
+  includes:
+    in_header: auxDocs/header3.tex
+  pandoc_args: [
+    "--variable", "mainfont=ETBembo",
+    "--variable", "sansfont=GillSansMT",
+    "--variable", "monofont=Menlo",
+    "--filter", "pandoc-citeproc",
+    "--csl", "~/GitHub/auxDocs/chicago.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
+  ]
+
+# PDF Syllabus #
+pdf_syllabus:
+# pdf_document:
+  keep_tex: true
+  fig_caption: yes
+  latex_engine: pdflatex
+  template: ../auxdocs/tex/svm-syllabus.tex
+  number_sections: no
+  toc: yes
+  toc_depth: 2
+  includes:
+    in_header: auxDocs/header3.tex
+  pandoc_args: [
+    "--variable", "mainfont=ETBembo",
+    "--variable", "sansfont=GillSansMT",
+    "--variable", "monofont=Menlo",
+    "--filter", "pandoc-citeproc",
+    "--csl", "~/GitHub/auxDocs/chicago.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
+  ]
+
+
+###############################################################
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~ TUFTE ~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+###############################################################
+
+# PDF Tufte Handout {tufte} #
+# tufte::tufte_handout:
+#   fig_caption: yes
+#   latex_engine: pdflatex
+#   highlight: kate
+#   toc: yes
+#   keep_tex: no
+#   pandoc_args: [
+#     # "--filter", "pandoc-tablenos",
+#     # "--filter", "pandoc-fignos",
+#     "--filter", "pandoc-citeproc",
+#     "--csl", "~/GitHub/auxDocs/chicago.csl", #chicago-ad.csl
+#     "--bibliography", "~/GitHub/auxDocs/REFs.bib"
+#   ]
+#   includes:
+#     in_header: auxDocs/header.tex
+
+# PDF Tufte Book {tufte} #
+tufte::tufte_book:
+  number_sections: yes
+  fig_caption: yes
+  latex_engine: pdflatex
+  toc: yes
+  toc_depth: 1
+  keep_tex: no
+  pandoc_args: [
+    "--filter", "pandoc-fignos",
+    "--filter", "pandoc-tablenos",
+    "--filter", "pandoc-citeproc",
+    "--csl", "~/GitHub/auxDocs/chicago.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
+  ]
+  includes:
+    in_header: auxDocs/header.tex
+
+# PDF Tufte Book2 {bookdown} #
+bookdown::tufte_book2:
+  number_sections: yes
+  latex_engine: pdflatex
+  fig_caption: yes
+  keep_tex: no
+  toc: yes
+  toc_depth: 2
+  pandoc_args: [
+    "--filter", "pandoc-tablenos",
+    "--filter", "pandoc-fignos",
+    "--filter", "pandoc-citeproc",
+    "--csl", "~/GitHub/auxDocs/chicago.csl"
+  ]
+  includes:
+    in_header: auxDocs/header.tex
+
+# HTML Tufte Handout {tufte} #
+tufte::tufte_html:
+  keep_md: yes
+  pandoc_args: [
+    "--filter", "pandoc-tablenos",
+    "--filter", "pandoc-fignos",
+    "--filter", "pandoc-citeproc",
+#    "--csl", "~/GitHub/auxDocs/apa.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib",
+  ]
+
+# HTML Tufte Book {tufte} #
+bookdown::tufte_html_book:
+  highlight: textmate
+  fig_caption: yes
+  md_extensions: +footnotes+autolink_bare_uris+blank_before_blockquote+implicit_figures+hard_line_breaks+escaped_line_breaks+header_attributes+inline_notes+table_captions+multiline_tables+pipe_tables
+  toc: yes
+  pandoc_args: [
+    "--filter", "pandoc-tablenos",
+    "--filter", "pandoc-fignos",
+    "--filter", "pandoc-citeproc",
+    "--csl", "~/GitHub/auxDocs/chicago.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
+  ]
+
+# PDF Tufte Book2 {bookdown} #
+bookdown::tufte_html2:
+  highlight: textmate
+  fig_caption: yes
+  md_extensions: +footnotes+autolink_bare_uris+blank_before_blockquote+implicit_figures+hard_line_breaks+escaped_line_breaks+header_attributes+inline_notes+table_captions+multiline_tables+pipe_tables
+  toc: yes
+  toc_depth: 2
+  pandoc_args: [
+    "--filter", "pandoc-tablenos",
+    "--filter", "pandoc-fignos",
+    "--filter", "pandoc-citeproc",
+    "--csl", "~/GitHub/auxDocs/chicago.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
+  ]
+
+
+#######################################################
+# ------------------  PRESENTATIONS ------------------ #
+#######################################################
+
+# PDF beamer {LaTeX} (with Tufte-Like Styling) #
+beamer_presentation:
+  keep_tex: no
+  slide_level: 2
+  fig_caption: yes
+  template: ../auxDocs/tex/svmLatexBeamer.tex
+  includes:
+    in_header: auxDocs/PSUbeamerStyle.tex
+  pandoc_args: [
+    "--variable", "mainfont=ETBembo",
+    "--variable", "sansfont=GillSansMT",
+    "--variable", "monofont=Menlo",
+    "--variable", "fontsize=9pt",
+    "--filter", "pandoc-citeproc",
+    "--csl", "~/GitHub/auxDocs/apa.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
+  ]
+
+# HTML ioslides #
+ioslides_presentation:
+  css: auxDocs/tufte-rs.css
+  fig_caption: yes
+  fig_height: 4.05
+  fig_width: 6.75
+  fig_retina: 4
+  keep_md: no
+  pandoc_args: [
+    "--filter", "pandoc-tablenos",
+    "--filter", "pandoc-fignos",
+    "--filter", "pandoc-citeproc",
+    "--csl", "~/GitHub/auxDocs/apa.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib",
+  ]
+
+# HTML slidy #
+slidy_presentation:
+  css: auxDocs/tufte-rs.css
+  fig_caption: yes
+  fig_height: 4.05
+  fig_width: 6.75
+  fig_retina: 4
+  keep_md: no
+  pandoc_args: [
+    "--filter", "pandoc-tablenos",
+    "--filter", "pandoc-fignos",
+    "--filter", "pandoc-citeproc",
+    "--csl", "~/GitHub/auxDocs/apa.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib",
+  ]
+
+########################################################
+# -------------- HTML - More Templates --------------- #
+########################################################
+
+# HTML {Rmarkdown} #
+html_document:
+  highlight: monochrome
+  fig_caption: yes
+  keep_md: yes
+  md_extensions: +footnotes+autolink_bare_uris+blank_before_blockquote+implicit_figures+hard_line_breaks+escaped_line_breaks+header_attributes+inline_notes+table_captions+multiline_tables+pipe_tables
+  toc: yes
+  pandoc_args: [
+    "--filter", "pandoc-tablenos",
+    "--filter", "pandoc-fignos",
+    "--filter", "pandoc-citeproc",
+    "--csl", "~/GitHub/auxDocs/chicago.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
+  ]
+
+
+# HTML2 {bookdown}#
+bookdown::html_document2:
+  highlight: monochrome
+  fig_caption: yes
+  md_extensions: +footnotes+autolink_bare_uris+blank_before_blockquote+implicit_figures+hard_line_breaks+escaped_line_breaks+header_attributes+inline_notes+table_captions+multiline_tables+pipe_tables
+  toc: yes
+  pandoc_args: [
+    "--filter", "pandoc-tablenos",
+    "--filter", "pandoc-fignos",
+    "--filter", "pandoc-citeproc",
+    "--csl", "~/GitHub/auxDocs/chicago.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
+  ]
+
+
+# HTML kube {markdowntemplates} #
+markdowntemplates::kube:
+  highlight: textmate
+  css: auxDocs/tufte-rs.css
+  keep_md: no
+  md_extensions: +footnotes+autolink_bare_uris+blank_before_blockquote+implicit_figures+hard_line_breaks+escaped_line_breaks+header_attributes+inline_notes+table_captions+multiline_tables+pipe_tables
+  pandoc_args: [
+    "--filter", "pandoc-tablenos",
+    "--filter", "pandoc-fignos",
+    "--filter", "pandoc-citeproc",
+    "--csl", "~/GitHub/auxDocs/apa.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib",
+  ]
+
+
+#######################################################
+# ----------------- EPUB {bookdown} ----------------- #
+#######################################################
+# rmarkdown::render("THDef_A_epub.Rmd", "bookdown::epub_book")
+# bookdown::kindlegen("THDef_A_epub.epub")
+bookdown::epub_book:
+  stylesheet: auxDocs/tufte_Kindle.css
+  fig_caption: yes
+  md_extensions: +footnotes+autolink_bare_uris+blank_before_blockquote+implicit_figures+hard_line_breaks+escaped_line_breaks+header_attributes+inline_notes+table_captions+multiline_tables+pipe_tables
+  toc: yes
+  toc_depth: 2
+  cover_image: "graphics/inputs/EBook_Title_Page2.png"
+  pandoc_args: [
+    "--filter", "pandoc-tablenos",
+    "--filter", "pandoc-fignos",
+    "--filter", "pandoc-citeproc",
+    "--csl", "~/GitHub/auxDocs/chicago.csl",
+    "--bibliography", "~/GitHub/auxDocs/REFs.bib"
+  ]
+
+
+#################################################################################
+# ================== Rendering Functions (see `zrenderR.R`) ================== #
+#################################################################################
+
+# RtftB <- function(x, ...) {rmarkdown::render(x, output_format = "tufte::tufte_book", ...); print(format(Sys.time(), '%n[%d %b. %I:%M%p]'))}
+# RtftH <- function(x, ...) {rmarkdown::render(x, output_format = "tufte::tufte_handout", ...); print(format(Sys.time(), '%n[%d %b. %I:%M%p]'))}
+# RtftHt <- function(x, ...) {rmarkdown::render(x, output_format = "tufte::tufte_html", ...); print(format(Sys.time(), '%n[%d %b. %I:%M%p]'))}
+# RtftHt2 <- function(x, ...) {rmarkdown::render(x, output_format = "bookdown::tufte_html2", ...); print(format(Sys.time(), '%n[%d %b. %I:%M%p]'))}
+# Rbeam <- function(x, ...) {rmarkdown::render(x, output_format = "beamer_presentation", ...); print(format(Sys.time(), '%n[%d %b. %I:%M%p]'))}
+# Rword <- function(x, ...) {rmarkdown::render(x, output_format = "word_document", ...); print(format(Sys.time(), '%n[%d %b. %I:%M%p]'))}
+# Rpdf <- function(x, ...) {rmarkdown::render(x, output_format = "pdf_document", ...); print(format(Sys.time(), '%n[%d %b. %I:%M%p]'))}
+# Rnb <- function(x, ...) {rmarkdown::render(x, output_format = "html_notebook", ...); print(format(Sys.time(), '%n[%d %b. %I:%M%p]'))}
+# Rhtml <- function(x, ...) {rmarkdown::render(x, output_format = "html_document", ...); print(format(Sys.time(), '%n[%d %b. %I:%M%p]'))}
+# Rhtml2 <- function(x, ...) {rmarkdown::render(x, output_format = "bookdown::html_document2", ...); print(format(Sys.time(), '%n[%d %b. %I:%M%p]'))}
+# RhMat <- function(x, ...) {rmarkdown::render(x, output_format = "rmdformats::material", ...); print(format(Sys.time(), '%n[%d %b. %I:%M%p]'))}
+# Repub <- function(x, ...) { ## Rendering epubs requires a second step with the .epub output to generate the kindle .mobi format which can be achieved in this shortcut by uncommenting the kindlegen args in this function ##
+# 	rmarkdown::render(x, output_format = "bookdown::epub_book", ...)
+# #  p <- gsub("\\.Rmd", "\\.epub", x)
+# #  bookdown::kindlegen(p)
+# #  print(format(Sys.time(), '%n[%d %b. %I:%M%p]'))
+# 	}

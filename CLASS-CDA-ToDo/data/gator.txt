@@ -1,0 +1,18 @@
+"profile" "Gender" "Size" "Lake" "Fish" "Invertebrate" "Reptile" "Bird" "Other"
+"1" "f" "<2.3" "george"  3  9 1 0 1
+"2" "m" "<2.3" "george" 13 10 0 2 2
+"3" "f" ">2.3" "george"  8  1 0 0 1
+"4" "m" ">2.3" "george"  9  0 0 1 2
+"5" "f" "<2.3" "hancock" 16  3 2 2 3
+"6" "m" "<2.3" "hancock"  7  1 0 0 5
+"7" "f" ">2.3" "hancock"  3  0 1 2 3
+"8" "m" ">2.3" "hancock"  4  0 0 1 2
+"9" "f" "<2.3" "oklawaha"  3  9 1 0 2
+"10" "m" "<2.3" "oklawaha"  2  2 0 0 1
+"11" "f" ">2.3" "oklawaha"  0  1 0 1 0
+"12" "m" ">2.3" "oklawaha" 13  7 6 0 0
+"13" "f" "<2.3" "trafford"  2  4 1 1 4
+"14" "m" "<2.3" "trafford"  3  7 1 0 1
+"15" "f" ">2.3" "trafford"  0  1 0 0 0
+"16" "m" ">2.3" "trafford"  8  6 6 3 5
+

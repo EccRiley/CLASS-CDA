@@ -1,0 +1,204 @@
+---
+title: "Homework 3, Question 3a"
+author: "Rachel M. Smith"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+---
+
+
+```{r setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache=FALSE}
+source("../SETUP.R") ## still need all of my setup tools though ##
+knitr::opts_chunk$set(tidy = FALSE, echo = TRUE, cache = FALSE, results = 'asis', Rplot = NULL, dev = 'pdf', fig.path = "graphics/HW3/q1b-", fig.width = 7, fig.height = 7, out.width = "\\linewidth")
+```
+
+
+-----
+
+The data for the remaing sets of analyses are from a national telephone interview study of batterer intervention program (BIP) standards advisory and compliance monitoring committees. Respondents were asked a series of questions varying in structure from _open-ended_ to simple _yes-or-no_. These analyses will concern the discrete data collected in response to the following interview questions:
+
+> How many members currently serve on your standards committee?
+> Does your organization have methods for assessing programs’ feedback about the standards?
+> Do the standards apply to programs designed for all genders?
+
+The primary interest for the below analyses relate to an overarching effort to implement and sustain effective and appropriate anti-violence intervention strategies among female-identified perpetrators of same-sex violence. The above listed questions provide a mix of continuous numeric and dichotomous (`0 = No`; `1 = Yes`) indicators of responding states' current organizational and ideological capacities for such intervention strategies. 
+
+# Data Descriptives
+
+
+
+```{r q3Dat}
+dat <- read.csv("data/states_new.csv")
+# datmap <- read.csv("data/usmap.csv")
+
+dat <- dat[, c("Q3", "Q7", "Q8")]
+dat <- na.omit(dat)
+id <- seq(1:nrow(dat))
+dat <- cbind(id, dat)
+```
+
+
+
+
+```{r results='asis', fig.margin=TRUE}
+dat$Q8 <- ifelse(dat$Q8 == 2, 1, 0)
+dat$Q7 <- ifelse(dat$Q7 == 2, 1, 0)
+dat <- within(dat, {## could also do this with an "apply()" function ##
+    Assessments <- factor(Q7, levels = c(0, 1), labels = c("No", "Yes"))
+    Gender.Inclusive <- factor(Q8, levels = c(0, 1), labels = c("No", "Yes"))
+})
+
+# dat <- within(dat, {## could also do this with an "apply()" function ##
+    # Q7 <- Q7 - mean(Q7)
+    # Q3 <- Q3 - mean(Q3)
+# })
+```
+
+# Multiple Logistic Regression Model
+
+
+
+```{r }
+fit <- glm(Q8 ~ Q3 + Q7 + Q3*Q7, 
+           data = dat, 
+           family = binomial(link = "logit")) 
+# lgm.dx <- LogisticDx::dx(fit, byCov = FALSE)
+# x <- seq(1:nrow(lgm.dx))
+# lgm.dx <- cbind(x, lgm.dx)
+# dx1 <- lgm.dx[order(lgm.dx$n), c("x", "sPr","P", "dChisq", "dDev", "dBhat")] %>% round(5)
+# kable(dx1)
+# write.csv(dx1, "data/hw3-q3a.csv", row.names = FALSE)
+```
+
+
+
+\newpage
+
+## Model Fit Diagnostics
+
+
+
+```{r outTest, results='asis', echo=TRUE}
+car::outlierTest(fit)
+```
+
+
+
+
+```{r glmDX1, fig.height = 6, echo=FALSE}
+# When no observations are found with a bonferroni p-value exceeding the cutoff, the *one* with the largest Studentized residual is reported. ##
+library(car)
+dx1 <- read.csv("data/hw3-q3a.csv") ## Saved output from "LogisticDX::dx()" ##
+car::residualPlot(fit, type = "pearson",
+             col.smooth = pal_my[5], id.n = 1, linear = FALSE)
+```
+
+
+
+
+```{r }
+library(car)
+cutoff <- 4/((nrow(dat) - length(fit$coefficients) - 2))
+plot(fit, which = 4, cook.levels = cutoff)
+```
+
+
+
+```{r glmdx1, echo=FALSE, fig.height = 4.5}
+
+dx1$col <- mpal(1:nrow(dx1), p = sci, a = 0.55)
+plot(
+    dx1$P,
+    dx1$dChisq,
+    type = 'n',
+    xlab = "Predicted Probabilities",
+    ylab = expression(Delta ~  ~ Chi ^ 2)
+)
+points(
+    dx1$P,
+    dx1$dChisq,
+    cex = 2,
+    bg = dx1$col,
+    col = pal_my[2],
+    pch = 21,
+    lwd = 0.5
+)
+lines(lowess(dx1$P, dx1$dChisq), lwd = 3, col = pal_my[18])
+```
+
+
+
+`r tufte::newthought(" ")`
+
+
+```{r glmdx13, echo=FALSE, fig.height = 4.25}
+plot(dx1$P,
+     dx1$dBhat,
+     type = 'n',
+     xlab = "Predicted Probabilities",
+     ylab = " ")
+points(
+    dx1$P,
+    dx1$dBhat,
+    cex = 2,
+    bg = dx1$col,
+    col = pal_my[2],
+    pch = 21,
+    lwd = 0.5
+)
+mtext(text = expression(Delta ~  ~ hat(beta)), 
+     						 side = 2, line = 2)
+lines(lowess(dx1$P, dx1$dBhat), lwd = 3, col = pal_my[18])
+```
+
+
+
+`r tufte::newthought(" ")`
+
+
+```{r glmdx14, echo=FALSE, fig.height = 4.5}
+plot(
+    dx1$P,
+    dx1$dD,
+    type = 'n',
+    xlab = "Predicted Probabilities",
+    ylab = expression(Delta ~  ~ "Deviance")
+)
+points(
+    dx1$P,
+    dx1$dD,
+    cex = 2,
+    bg = dx1$col,
+    col = pal_my[2],
+    pch = 21,
+    lwd = 0.5
+)
+lines(lowess(dx1$P, dx1$dD), lwd = 3, col = pal_my[18])
+```
+
+
+
+
+```{r echo=FALSE}
+# kable(dx1[dx1$x2 == 1213, c(-1, -2, -3, -9)], caption = "Residual Diagnostic Statistics for Case No. 1046", col.names = c("Standardized Pearson Residual", "Predicted Probability", "$\\Delta\\chisq$", "$\\Delta Deviance$", "$\\Delta\\hat{\\beta}$"))
+```
+
+
+
+
+`r tufte::newthought("Multiple Logistic Regression Diagnostics Summary")`. The Cook's distance outlier tests above did not seem to provide reliable information regarding potential outliers, when compared against the plotted diagnostics data. In particular, while cases `31` and `35` are identified as potential outliers according to cook's distance, neighter of these cases are associated with any remarkable deviance statistics. Rather, the visably outlying case in the $\Delta\beta$ plot above, which I identified as Case number `49`, did concern me as a potential outlier; however, I found no other remarkable data for this in terms of the data used in testing the model as well as the deviance statistics obtained for the tested model. This overall suggests to me that no significant outliers exist in the data used in testing the above multiple logistic regression model.
+
+-----
+
+
+```{r echo=FALSE}
+dxmsmm <- R.msmm(dx1[, c(-1, -2, -3, -9)])[, -5]
+rownames(dxmsmm) <- c("$\\Delta\\chisq$", "$\\Delta Deviance$", "$\\Delta\\hat{\\beta}$")
+kable(dxmsmm, caption = "Descriptive Statistics for Residual Diagnostics")
+```
+
+
+
+---
+title: "HW3-Q3a.R"
+author: "rachel97"
+date: "Mon Dec  5 15:36:09 2016"
+---

@@ -1,0 +1,37 @@
+critique=matrix(c(24,8,10,8,13,9,13,11,64),nr=3,dimnames=list("siskel"=c("con","mixed","pro"),"ebert"=c("con","mixed","pro")))
+> critique
+       ebert
+siskel  con mixed pro
+  con    24     8  13
+  mixed   8    13  11
+  pro    10     9  64
+> 
+> ### Chi Square Test
+> result=chisq.test(critique)
+> result
+
+	Pearson's Chi-squared test
+
+data:  critique 
+X-squared = 45.3569, df = 4, p-value = 3.351e-09
+
+> 
+> ### Likelihood Ratio Chi-Square Statistic
+> LRresult=2*sum(critique*log(critique/result$expected))
+> 
+> ### p-value for the Likelihood Ratio Chi-Square Test
+> LRchisq=1-pchisq(LRresult,df=4)
+> LRresult
+[1] 43.23254
+> LRchisq
+[1] 9.25963e-09
+> 
+> ### Simple Kappa Coefficient
+> ### Using a function Kappa() in package vcd. 
+> ### Please first load packages VR, colorspace and grid and finally load vcd.
+> library(vcd)
+> kappa=Kappa(critique)
+> kappa
+               value        ASE
+Unweighted 0.3888385 0.06321653
+Weighted   0.4268740 0.10061911

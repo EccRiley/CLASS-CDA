@@ -153,8 +153,8 @@ seed <- 42; set.seed(seed)
 #" _Generating a collection of random normal deviates (i.e., data-points generated from the normal distribution) to use for testing plots_
 #'
 Rx <- rnorm(1000)
-# plot(Rx, main = expression(paste("Multiline &\nPlot Title")), col = mypal, xlab = expression(paste("X-Axis Label With Math: ", hat(Y), " = ", sum(x[i], i==1, n))))
-# plot(Rx, main = expression(paste(sum(codes))), col = mypal, xlab = expression(paste(N[Items])), ylab = expression(paste('%'[Codebook])))
+# plot(Rx, main = expression(paste("Multiline &\nPlot Title")), col = pal_my, xlab = expression(paste("X-Axis Label With Math: ", hat(Y), " = ", sum(x[i], i==1, n))))
+# plot(Rx, main = expression(paste(sum(codes))), col = pal_my, xlab = expression(paste(N[Items])), ylab = expression(paste('%'[Codebook])))
 #'
 #'
 #'
@@ -197,15 +197,15 @@ showtext.auto(enable = TRUE)
 
 #' # My color pallettes
 #'
-#' ## `mypal`
+#' ## `pal_my`
 #'
-mypal <- c("#ffffff", "#d1d6dc", "#da00d1", "#a700a0", "#74006f", "#f5ff02", "#dee800", "#08ff8f", "#00f485", "#00b965", "#35f8fe", "#00d8d8", "#008b8b", "#053efa", "#0434d4", "#021860", "#7a8998", "#56636f", "#2e363e", "#181C20")
-mypal3 <- mypal[3:16] ## NO WHITE, GRAY, NOR BLACK ##
-mypal2 <- mypal[c(4, 9, 12, 15)]
+pal_my <- c("#ffffff", "#d1d6dc", "#da00d1", "#a700a0", "#74006f", "#f5ff02", "#dee800", "#08ff8f", "#00f485", "#00b965", "#35f8fe", "#00d8d8", "#008b8b", "#053efa", "#0434d4", "#021860", "#7a8998", "#56636f", "#2e363e", "#181C20")
+mypal3 <- pal_my[3:16] ## NO WHITE, GRAY, NOR BLACK ##
+mypal2 <- pal_my[c(4, 9, 12, 15)]
 mypal22 <- c("#29B78B", "#0434D4", "#00E6AE", "#01AFD7", "#A700A0")
-mypal.a75 <- sapply(mypal, adjustcolor, alpha.f = 0.75)
-mypal.a50 <- sapply(mypal, adjustcolor, alpha.f = 0.50)
-mb <- colorRampPalette(mypal[c(5, 16)])
+pal_my.a75 <- sapply(pal_my, adjustcolor, alpha.f = 0.75)
+pal_my.a50 <- sapply(pal_my, adjustcolor, alpha.f = 0.50)
+mb <- colorRampPalette(pal_my[c(5, 16)])
 magblu <- mb(10)
 #'
 #' ## `pdxpal`
@@ -214,19 +214,19 @@ pdxpal <- c("#8b9535", "#ffffff", "#373737") ## dark/hunter green, white, very d
 #'
 #' ## BIP Study Palettes
 #'
-ynpal <- mypal[c(10, 1, 2)]
-bmon_pal <- mypal[c(16, 1, 17)]
-bmon_pal2 <- mypal[c(16, 18, 17)]
-bstds_pal <- mypal[c(5, 1, 17)]
-bstds_pal2 <- mypal[c(5, 18, 17)]
-stmon_pal <- mypal[c(17, 16, 5)]
-bmon_palX <- mypal[c(17, 16)]
-bstds_palX <- mypal[c(17, 5)]
+ynpal <- pal_my[c(10, 1, 2)]
+bmon_pal <- pal_my[c(16, 1, 17)]
+bmon_pal2 <- pal_my[c(16, 18, 17)]
+bstds_pal <- pal_my[c(5, 1, 17)]
+bstds_pal2 <- pal_my[c(5, 18, 17)]
+stmon_pal <- pal_my[c(17, 16, 5)]
+bmon_palX <- pal_my[c(17, 16)]
+bstds_palX <- pal_my[c(17, 5)]
 R.adjCol <- function(x, a){adjustcolor(x, alpha = a)}
 stmon_pal2 <- as.character(lapply(stmon_pal, R.adjCol, a = 0.9))
-stmon_pal.ls <- list("Standards" = mypal[17], ##Creating Primarily as a Reference
-                     "Monitoring" = mypal[16],
-                     "Standards \\&\nMonitoring" = mypal[5])
+stmon_pal.ls <- list("Standards" = pal_my[17], ##Creating Primarily as a Reference
+                     "Monitoring" = pal_my[16],
+                     "Standards \\&\nMonitoring" = pal_my[5])
 
 #'
 #' `pal_HC & pal_HCd`
@@ -243,25 +243,25 @@ pal_HCd <- c("#2b908f", "#90ee7e", "#f45b5b", "#7798BF", "#aaeeee", "#ff0066", "
 mpal2 <- colorRampPalette(mypal22[3:5])
 colsHC <- colorRampPalette(pal_HC, alpha = T)
 colsHCd <- colorRampPalette(pal_HCd, alpha = T)
-mag <- colorRampPalette(mypal[c(1, 5)], alpha = 0.75) ## "#ffdafd" = very pale magenta ##
-mag2 <- colorRampPalette(mypal[c(18, 5)], alpha = 0.75) ## "#ffdafd" = very pale magenta ##
-## "#575e6e" = muted dark grayish magenta (created using colorRampPalette(mypal[c(18, 5)](100)[1, 5] ##
-## "#c8c0ce" = muted rosy gray  (created using colorRampPalette(mypal[c(2, 5)])
-blues <- colorRampPalette(c(mypal[c(1, 15)]), alpha = T) ## "#d9e1fe" = light grayish blue ##
-cyans <- colorRampPalette(c(mypal[1], mypal[2], mypal[11]), alpha = T)
-grblues <- colorRampPalette(c(mypal[17], mypal[16]), alpha = T)
-grays <- colorRampPalette(mypal[c(2, 18, 19)], alpha = T)
-grays2 <- colorRampPalette(mypal[c(1, 18, 20)], alpha = T)
-grblues2 <- colorRampPalette(c("#d9e1fe", mypal[16]), alpha=T)
-blues2 <- colorRampPalette(c("#ffffff", mypal[14]), alpha = T) ## "#d9e1fe" = light grayish blue ##
-whcybl <- colorRampPalette(mypal[c(1, 12, 16)], alpha = T)
-whblmg <- colorRampPalette(mypal[c(1, 16, 4)], alpha = T)
-blgrmg <- colorRampPalette(mypal[c(16, 2, 5)], alpha = T)
-cols <- colorRampPalette(mypal, alpha = T)
-cols1 <- colorRampPalette(mypal[3:19], alpha = T)
+mag <- colorRampPalette(pal_my[c(1, 5)], alpha = 0.75) ## "#ffdafd" = very pale magenta ##
+mag2 <- colorRampPalette(pal_my[c(18, 5)], alpha = 0.75) ## "#ffdafd" = very pale magenta ##
+## "#575e6e" = muted dark grayish magenta (created using colorRampPalette(pal_my[c(18, 5)](100)[1, 5] ##
+## "#c8c0ce" = muted rosy gray  (created using colorRampPalette(pal_my[c(2, 5)])
+blues <- colorRampPalette(c(pal_my[c(1, 15)]), alpha = T) ## "#d9e1fe" = light grayish blue ##
+cyans <- colorRampPalette(c(pal_my[1], pal_my[2], pal_my[11]), alpha = T)
+grblues <- colorRampPalette(c(pal_my[17], pal_my[16]), alpha = T)
+grays <- colorRampPalette(pal_my[c(2, 18, 19)], alpha = T)
+grays2 <- colorRampPalette(pal_my[c(1, 18, 20)], alpha = T)
+grblues2 <- colorRampPalette(c("#d9e1fe", pal_my[16]), alpha=T)
+blues2 <- colorRampPalette(c("#ffffff", pal_my[14]), alpha = T) ## "#d9e1fe" = light grayish blue ##
+whcybl <- colorRampPalette(pal_my[c(1, 12, 16)], alpha = T)
+whblmg <- colorRampPalette(pal_my[c(1, 16, 4)], alpha = T)
+blgrmg <- colorRampPalette(pal_my[c(16, 2, 5)], alpha = T)
+cols <- colorRampPalette(pal_my, alpha = T)
+cols1 <- colorRampPalette(pal_my[3:19], alpha = T)
 cols2 <- colorRampPalette(mypal2, alpha = T)
-cols3 <- colorRampPalette(mypal[3:16], alpha = T)
-cols4 <- colorRampPalette(mypal[c(3:5, 10, 12:16)], alpha = T)
+cols3 <- colorRampPalette(pal_my[3:16], alpha = T)
+cols4 <- colorRampPalette(pal_my[c(3:5, 10, 12:16)], alpha = T)
 pdxcols <- colorRampPalette(pdxpal[c(3, 1)], alpha = T)
 #'
 #' ## **`mpal()`**
@@ -301,25 +301,25 @@ thm_tft <- function(base_size = 12, base_family = "ETBembo", lpos = "right", ldi
     require(grid)
     thm <- theme_grey(base_size, base_family) %+replace%
         theme(plot.background = element_rect(colour = "transparent", fill = 'transparent'),
-              plot.title = element_text(size = rel(1.25), face = "italic", colour = mypal[19]),
+              plot.title = element_text(size = rel(1.25), face = "italic", colour = pal_my[19]),
               plot.margin = unit(rep(0.15, 4), "cm"),
-              panel.margin = unit(0.15, "cm"),
+              panel.spacing = unit(0.15, "cm"),
               panel.background = element_blank(),
               panel.border = element_blank(),
-              strip.text = element_text(size = rel(0.7), colour = mypal[20]),
+              strip.text = element_text(size = rel(0.7), colour = pal_my[20]),
               legend.position = lpos,
               legend.direction = ldir,
               legend.key.width = unit(0.15, "cm"),
               legend.key.height = unit(0.25, "cm"),
-              legend.text = element_text(size = rel(0.75), colour = mypal[20]),
-              legend.title = element_text(face = "italic", colour = mypal[19]),
-              axis.ticks = element_line(size = 0.25, colour = mypal[20]),
-              axis.title.x = element_text(size = rel(1), face = "italic", margin = margin(t = 10), colour = mypal[20]),
-              axis.title.y = element_text(size = rel(1), face = "italic", angle = 90, margin = margin(r = 10), colour = mypal[20], vjust = 1),
-              axis.text.y = element_text(size = rel(1), hjust = 1, margin = margin(r = 2), colour = mypal[20]),
-              axis.text.x = element_text(size = rel(1), colour = mypal[20]), #, margin = margin(t = 2)
-              axis.line.x = element_line(size = 0.1, colour = mypal[20]),
-              axis.line.y = element_line(size = 0.1, colour = mypal[20]),
+              legend.text = element_text(size = rel(0.75), colour = pal_my[20]),
+              legend.title = element_text(face = "italic", colour = pal_my[19]),
+              axis.ticks = element_line(size = 0.25, colour = pal_my[20]),
+              axis.title.x = element_text(size = rel(1), face = "italic", margin = margin(t = 10), colour = pal_my[20]),
+              axis.title.y = element_text(size = rel(1), face = "italic", angle = 90, margin = margin(r = 10), colour = pal_my[20], vjust = 1),
+              axis.text.y = element_text(size = rel(1), hjust = 1, margin = margin(r = 2), colour = pal_my[20]),
+              axis.text.x = element_text(size = rel(1), colour = pal_my[20]), #, margin = margin(t = 2)
+              axis.line.x = element_line(size = 0.1, colour = pal_my[20]),
+              axis.line.y = element_line(size = 0.1, colour = pal_my[20]),
               complete = TRUE)
     if (!ticks) {thm <- thm + theme(axis.ticks.x = element_blank())}
     if (!xtext) {thm <- thm + theme(axis.text.x = element_blank())}
@@ -336,8 +336,8 @@ thm_tft <- function(base_size = 12, base_family = "ETBembo", lpos = "right", ldi
 thm_tft2 <- function(base_size = 12, base_family = "ETBembo", lpos = "right", ldir = "vertical", ltitle = element_blank()) {
     require(grid)
     theme_tufte(base_size, base_family) %+replace%
-        theme(plot.background = element_rect(colour = mypal[19], fill = 'transparent'),
-              panel.background = element_rect(colour = mypal[19], fill = 'transparent'),
+        theme(plot.background = element_rect(colour = pal_my[19], fill = 'transparent'),
+              panel.background = element_rect(colour = pal_my[19], fill = 'transparent'),
               legend.position = lpos,
               legend.direction = ldir,
               legend.title = ltitle,
@@ -357,11 +357,11 @@ thm_cl_tft <- function(base_size = 11, base_family = "ETBembo", lpos = "right", 
               panel.background = element_blank(),
               legend.position = lpos,
               legend.direction = ldir,
-              legend.text = element_text(size = rel(0.65), colour = mypal[20]),
+              legend.text = element_text(size = rel(0.65), colour = pal_my[20]),
               legend.key.width = unit(0.15, "cm"),
               legend.key.height = unit(0.25, "cm"),
-              legend.title = element_text(face = "italic", colour = mypal[19]),
-              plot.title = element_text(face = "italic", colour = mypal[19], size = rel(1)),
+              legend.title = element_text(face = "italic", colour = pal_my[19]),
+              plot.title = element_text(face = "italic", colour = pal_my[19], size = rel(1)),
               panel.grid = element_blank(),
               axis.title = element_blank(),
               axis.text = element_blank(),
@@ -386,37 +386,37 @@ thm_cl <- function(base_size = 12, base_family = "ETBembo") {
               legend.key.size = unit(0.35, "cm"),
               strip.text = element_text(colour = "#3d3d3d",size = rel(.85)),
               strip.background = element_rect(colour = "#708090", fill = "#ffffff"),
-              panel.margin = unit(0.2, "lines"),
+              panel.spacing = unit(0.2, "lines"),
               plot.margin = unit(c(0.2, 0.2, 0.2, 0.2), "lines"),
               complete = TRUE)
 }
 
 thm_tr <- function(base_size = 12, base_family = "Helvetica") {
     theme(
-        axis.ticks = element_line(colour = mypal[20], size = 0.2),
-        axis.text = element_text(size = rel(0.8), colour = mypal[20], vjust = 1),
-        axis.ticks = element_line(colour = mypal[20], size = 0.2),
-        axis.title = element_text(colour = mypal[20], vjust = 1),
-        axis.title.y = element_text(angle = 90, vjust = 0.5, colour = mypal[20]),
+        axis.ticks = element_line(colour = pal_my[20], size = 0.2),
+        axis.text = element_text(size = rel(0.8), colour = pal_my[20], vjust = 1),
+        axis.ticks = element_line(colour = pal_my[20], size = 0.2),
+        axis.title = element_text(colour = pal_my[20], vjust = 1),
+        axis.title.y = element_text(angle = 90, vjust = 0.5, colour = pal_my[20]),
         axis.ticks.length = unit(0.3, "lines"),
-        legend.background = element_rect(colour = mypal[20], fill = 'transparent'),
-        legend.key = element_rect(colour = mypal[20], fill = 'transparent'),
+        legend.background = element_rect(colour = pal_my[20], fill = 'transparent'),
+        legend.key = element_rect(colour = pal_my[20], fill = 'transparent'),
         legend.key.size = unit(1.2, "lines"),
         legend.key.height = NULL,
         legend.key.width = NULL,
-        legend.text = element_text(size = rel(0.8), colour = mypal[20]),
-        legend.title = element_text(size = rel(0.8), face = "bold", hjust = 0, colour = mypal[20]),
+        legend.text = element_text(size = rel(0.8), colour = pal_my[20]),
+        legend.title = element_text(size = rel(0.8), face = "bold", hjust = 0, colour = pal_my[20]),
         legend.position = "right",
         legend.text.align = NULL,
         legend.title.align = NULL,
         #   legend.direction = "vertical",
         legend.box = NULL,
-        panel.background = element_rect(fill = "transparent", colour = mypal[20]),
-        panel.border = element_rect(fill = NA, colour = mypal[20]),
+        panel.background = element_rect(fill = "transparent", colour = pal_my[20]),
+        panel.border = element_rect(fill = NA, colour = pal_my[20]),
         #   panel.grid.major = element_line(colour = "grey20", size = 0.2),
         #   panel.grid.minor = element_line(colour = "grey5", size = 0.5),
-        #   panel.margin = unit(0.25, "lines"),
-        strip.background = element_rect(fill = mypal[20], colour = mypal[20]),
+        #   panel.spacing = unit(0.25, "lines"),
+        strip.background = element_rect(fill = pal_my[20], colour = pal_my[20]),
         strip.text = element_text(size = rel(0.8), colour = 'white'),
         strip.text.y = element_text(angle = -90, colour = 'white'),
         plot.background = element_rect(colour = NA, fill = 'transparent'),
@@ -432,43 +432,43 @@ thm_tr <- function(base_size = 12, base_family = "Helvetica") {
 thm_A <- function(base_size = 12, base_family = "Helvetica") {
     require( grid) # Needed for unit() function
     theme_grey(base_size) %+replace%
-        theme(plot.background = element_rect(colour = mypal[20], fill = 'transparent'),
-              panel.background = element_rect(colour = mypal[20], fill = 'transparent'),
+        theme(plot.background = element_rect(colour = pal_my[20], fill = 'transparent'),
+              panel.background = element_rect(colour = pal_my[20], fill = 'transparent'),
               panel.grid.minor = element_blank(),
-              panel.grid.major.y = element_line(colour = mypal[20], size = 0.1, linetype = "dashed"),
+              panel.grid.major.y = element_line(colour = pal_my[20], size = 0.1, linetype = "dashed"),
               panel.grid.major.x = element_blank(),
-              axis.title = element_text(colour = mypal[20], size = rel(.8), margin = margin(0,0,5,0), face = "bold"),
+              axis.title = element_text(colour = pal_my[20], size = rel(.8), margin = margin(0,0,5,0), face = "bold"),
               axis.text.x = element_blank(),
-              axis.text.y = element_text(colour = mypal[20], size = rel(.7)),
-              axis.line = element_line(colour = mypal[20], size = 0.15),
+              axis.text.y = element_text(colour = pal_my[20], size = rel(.7)),
+              axis.line = element_line(colour = pal_my[20], size = 0.15),
               axis.ticks.length = unit(0.1, "cm"),
-              axis.ticks = element_line(size = 0.1, colour = mypal[20]),
+              axis.ticks = element_line(size = 0.1, colour = pal_my[20]),
               legend.title = element_text(face = "bold", size = rel(0.8)),
-              legend.text = element_text(colour = mypal[20], size = rel(0.6)),
+              legend.text = element_text(colour = pal_my[20], size = rel(0.6)),
               legend.key.size = unit(0.35, "cm"),
-              legend.background = element_rect(colour = mypal[20], size = 0.25, linetype = "dotted", fill = 'transparent'),
+              legend.background = element_rect(colour = pal_my[20], size = 0.25, linetype = "dotted", fill = 'transparent'),
               legend.position = "right",
-              strip.background = element_rect(fill = mypal[20], colour = mypal[20]),
-              strip.text.x = element_text(colour = mypal[1], size = rel(0.85), margin = margin(1,0,1,0), face = 'bold'),
-              strip.text.y = element_text(angle = -90, colour = mypal[1], size = rel(0.85), margin = margin(1,0,1,0), face = 'bold'),
-              panel.margin = unit(0.2, "lines"),
+              strip.background = element_rect(fill = pal_my[20], colour = pal_my[20]),
+              strip.text.x = element_text(colour = pal_my[1], size = rel(0.85), margin = margin(1,0,1,0), face = 'bold'),
+              strip.text.y = element_text(angle = -90, colour = pal_my[1], size = rel(0.85), margin = margin(1,0,1,0), face = 'bold'),
+              panel.spacing = unit(0.2, "lines"),
               plot.margin = unit(c(0.75, 0.5, 0, 0.5), "lines"), #top, right, bottom, left
-              plot.title = element_text(size = rel(1), colour = mypal[20], margin = margin(0,0,10,0), face = "bold"), #,
+              plot.title = element_text(size = rel(1), colour = pal_my[20], margin = margin(0,0,10,0), face = "bold"), #,
               complete = TRUE)
 }
 
 thm_B <- function(base_size = 12) {
     require(grid)#Neededforunit()function
     thm_A(base_size) %+replace%
-        theme(axis.text.x = element_text(colour = mypal[20], size = rel(.75)))#,)
+        theme(axis.text.x = element_text(colour = pal_my[20], size = rel(.75)))#,)
 }
 
 thm_C <- function(base_size = 12) {
     require(grid)
     thm_A(base_size) %+replace%
-        theme(axis.text.x = element_text(colour = mypal[20], size = rel(.65)),
+        theme(axis.text.x = element_text(colour = pal_my[20], size = rel(.65)),
               legend.title = element_blank(),
-              legend.text = element_text(colour = mypal[20], size = rel(0.65)),
+              legend.text = element_text(colour = pal_my[20], size = rel(0.65)),
               legend.key.size = unit(0.25, "cm"),
               legend.position = "bottom", legend.direction = "vertical")
 }
@@ -649,7 +649,7 @@ show_colR <- function(colours, labels = TRUE, borders = NULL, ...) { ## modified
 #'
 #' ## **`R.pathDia()`**
 #'
-R.pathDia <- function(manifest, latent, direct = c("east", "west"), xlim = c(-0.5, 1.25), ylim = c(-0.5, 1.25), bg = NA, arrcol = mypal[20], ptitle = NULL, lwd = 1.5, lty = 2, ...) { ## manifest and latent = lists of lengths 1:n containing objects of class "manifest" or "latent", respectively, direct is used for the arros ##
+R.pathDia <- function(manifest, latent, direct = c("east", "west"), xlim = c(-0.5, 1.25), ylim = c(-0.5, 1.25), bg = NA, arrcol = pal_my[20], ptitle = NULL, lwd = 1.5, lty = 2, ...) { ## manifest and latent = lists of lengths 1:n containing objects of class "manifest" or "latent", respectively, direct is used for the arros ##
     ## save number of latent and manifest vars defined in user's latent var list ##
     nlat <- length(latent)
     nmani <- length(manifest)
@@ -666,7 +666,7 @@ R.pathDia <- function(manifest, latent, direct = c("east", "west"), xlim = c(-0.
 #'
 #' ## **`R.mpathDia()`**
 #'
-R.mpathDia <- function(ivars, mvars, dvars, direct = c("east", "west"), xlim = c(-0.5, 1.25), ylim = c(-0.5, 1.25), bg = NA, arrcol = mypal[20], ptitle = NULL, lwd = 1, ...) { ## ivars and dvars = lists of lengths 1:n containing objects of class "manifest" or "latent", respectively... dir is used for the arrows, the remaining args set various graphical parameter options ##
+R.mpathDia <- function(ivars, mvars, dvars, direct = c("east", "west"), xlim = c(-0.5, 1.25), ylim = c(-0.5, 1.25), bg = NA, arrcol = pal_my[20], ptitle = NULL, lwd = 1, ...) { ## ivars and dvars = lists of lengths 1:n containing objects of class "manifest" or "latent", respectively... dir is used for the arrows, the remaining args set various graphical parameter options ##
     ## save number of independent, mediator, and dependent vars, respectively ##
     ndep <- length(dvars)
     nind <- length(ivars)
@@ -960,7 +960,7 @@ R.Evenn <- function(x, vcol,
     evenn <- venneuler(c(A = A, "A&B" = AB))
     evenn$labels <- c("", "")
     plot(evenn, col = vcol, alpha = al, ...)
-    text(evenn$centers, labels = labs, col = mypal[1], cex = lcex,
+    text(evenn$centers, labels = labs, col = pal_my[1], cex = lcex,
          adj = adj)
     return(evenn)
 }
@@ -974,7 +974,7 @@ R.EvennA <- function(x, ffamily = "ETBembo", vcol = mypal1[c(21,22)],
                      labs = rev(names(x)), al = 0.5, lcex = 1,
                      ltextx = evenn$centers[, 1], ltexty = evenn$centers[, 2],
                      ptextx = 0.4, ptexty = 0.45, pmain = NULL, pmcex = 0.95, pmfont = 3, keep = FALSE, ...){
-    palette(mypal)
+    palette(pal_my)
     par(family = ffamily, mar = (c(2, 0.75, 0.75, 0.75) + 0.1))
     A <- x[[2]]
     AB <- x[[1]]
@@ -984,8 +984,8 @@ R.EvennA <- function(x, ffamily = "ETBembo", vcol = mypal1[c(21,22)],
     ABperc <- paste0(ABperc, "%")
     plot(evenn, col = vcol, alpha = al, main = pmain, cex.main = pmcex, font.main = pmfont)
     box(lwd = 0.5, col = 20)
-    text(x = ltextx, y = ltexty, labels = labs, col = mypal[1], cex = lcex)
-    text(ptextx, ptexty, labels = ABperc, col = mypal[1], cex = lcex, font = 3)
+    text(x = ltextx, y = ltexty, labels = labs, col = pal_my[1], cex = lcex)
+    text(ptextx, ptexty, labels = ABperc, col = pal_my[1], cex = lcex, font = 3)
     if (keep == TRUE) {
     return(evenn)
     }
@@ -1180,7 +1180,7 @@ R.rspss <- function(x, vlabs = FALSE, df = TRUE){
 #'
 knitr::knit_hooks$set(Rplot = function(before, options, envir) { ## SETTING UP A CHUNK HOOK FOR SETTING PLOT PARAMS CORRESPONDING TO '`ggthemes::theme_tufte()`' WHEN USING BASE GRAPHICS ##
     if (before) {
-        palette(mypal)
+        palette(pal_my)
         par(bg = "transparent", font.main = 3, family = "ETBembo")
     }})
 knitr::knit_hooks$set(Rrule = function(before, options, envir) {

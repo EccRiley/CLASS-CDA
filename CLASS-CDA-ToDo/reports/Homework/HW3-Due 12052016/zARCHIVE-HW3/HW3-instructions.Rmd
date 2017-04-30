@@ -1,0 +1,95 @@
+---
+title: "Homework 3-Instructions"
+author: "Riley Smith"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+---
+
+```{r setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache=FALSE}
+source("../SETUP.R")
+knitr::opts_chunk$set(tidy = FALSE, echo = TRUE, cache = FALSE, fig.keep = 'high', fig.show = 'hold', results = 'asis', autodep = TRUE, Rplot = TRUE, dev = 'pdf', fig.path = 'graphics/HW3/rplot-q1-', fig.width = 7, fig.height = 7, out.width = "\\linewidth", echo = FALSE)
+```
+
+`r tufte::newthought("\\LARGE{Outline}")`
+
+
+# **Question-1:** Early Head Start Program
+
+- **1.a.** Mediation model using bootstrap logistic regression.
+- **1.b.** Multiple logistic regression diagnostics
+
+# **Question-2:** Social Relationships Among Recent Widows (Morgan & Neal)
+
+- **2.a.** Lagged regression model
+- **2.b.** Cumulative logistic model
+- **2.c.** Ordinal probit model
+
+# **Question-3:** National BIP Standards & Monitoring Study (Mankowski)
+
+- **3.a.** Logistic regression model diagnostics
+- **3.b.** Probit regression model
+
+\newpage
+`r tufte::newthought("\\LARGE{Question-1: Early Head Start Program}")`
+
+-----
+
+Use the _second_ Early Head Start data set (**`child2.sav`**)^[See `Homework 2 Problem 2d`] for the following problems. The variable `NEGLECT`, which is a $count$ of the number of child neglect reports, has been added to this data set.
+
+# Question-$1.a.$
+
+`r tufte::margin_note("\\textsc{\\textcolor{dred}{Include:}}\\\\ \\textit{\\textcolor{dred}{1.} Direct effect regression coefficients}\\\\ \\textit{\\textcolor{dred}{2.} Indirect effect coefficient}\\\\ \\textit{\\textcolor{dred}{3.} Bootstrap confidence limits}")`
+
+`r tufte::newthought("Test a hypothesized mediational model")` _in which the race/ethnicity of the mother (`WHITE`) leads to child neglect reports (`NEGLECT`) which leads a higher risk of reported abuse (`ABUSE`)._
+
+# Question-$1.b.$
+
+`r tufte::newthought("Conduct a multiple logistic regression")` _predicting ABUSE with `PROGRAM`, `BOYFRIEND`, `WHITE`, and `WELFARE` as predictors_ (same as HW 2, problem 2d).
+
+`r tufte::margin_note("\\textsc{\\textcolor{dred}{Report:}}\\\\ \\textit{\\textcolor{dred}{1.} What each diagnostic test tells you}\\\\ \\textit{\\textcolor{dred}{2.} The diagnostic values for any cases that you judge to be possible outliers or influential data points}")`
+
+`r tufte::newthought("Obtain a residual plot")` _with standardized residuals on the y-axis and predicted probabilities on the x-axis, and casewise values for $\Delta\chisq$ or $\Delta D$ and $\Delta\beta$ to check for outliers and influential data points._ State what each diagnostic test tells you and describe your findings.
+
+\newpage
+`r tufte::newthought("\\LARGE{Question-2: Social Relationships Among Recent Widows (Morgan \\& Neal)}")`
+
+-----
+
+For the problem below, a new data set (**`widow.sav`**) was taken from a study conducted by David Morgan and Margaret Neal that examined social relationships among recent widows. A $yes/no$ question about whether the respondent felt lonely was asked at two different time points (`LONELY1`, `LONELY2`), each six months apart. `AGE1` is the age of the respondent at Time 1 and `EDUC1` is the years of education. A question about income adequacy (`INCADQ1`), a $4-point rating$ of the extent to which she felt she had enough money each month to get by, and self-rated health (`HEALTH1`) were both assessed at the first time point.
+
+# Question-$2.a.$
+
+`r tufte::margin_note("\\textsc{\\textcolor{dred}{Include:}}\\\\ \\textit{\\textcolor{dred}{1.} Regression coefficients}\\\\ \\textit{\\textcolor{dred}{2.} Odds ratios}\\\\ \\textit{\\textcolor{dred}{3.} Confidence limits}\\\\ \\textit{\\textcolor{dred}{4.} Model fit information}\\\\ \\textit{\\textcolor{dred}{5.} A \\textit{pseudo}-$R\\sq$ measure.}")`
+
+`r tufte::newthought("Test a lagged regression model")` to investigate whether income adequacy (`INCADQ1`) and health (`HEALTH1`) predicted loneliness at Time 2 (`LONELY2`) after controlling for loneliness at Time 1 (`LONELY1`). _**Pay special attention to the interpretation of the longitudinal model.**_
+
+
+# Question-$2.b.$
+
+`r tufte::margin_note("\\textsc{\\textcolor{dred}{Include:}}\\\\ \\textit{\\textcolor{dred}{1.} Regression coefficients}\\\\ \\textit{\\textcolor{dred}{2.} Odds ratios}\\\\ \\textit{\\textcolor{dred}{3.} Confidence limits}\\\\ \\textit{\\textcolor{dred}{4.} Model fit information}\\\\ \\textit{\\textcolor{dred}{5.} A \\textit{pseudo}-$R\\sq$ measure.}")`
+
+`r tufte::newthought("Test a cumulative logistic model")` predicting the ordinal variable income adequacy (`INCADQ1`) with age (`AGE1`), education (`EDUC1`), and health (`HEALTH1`) as predictors.
+
+# Question-$2.c.$
+
+`r tufte::margin_note("\\textsc{\\textcolor{dred}{Include:}}\\\\ \\textit{\\textcolor{dred}{1.} Regression coefficients}\\\\ \\textit{\\textcolor{dred}{2.} Confidence limits}\\\\ \\textit{\\textcolor{dred}{3.} Model fit information}\\\\ \\textit{\\textcolor{dred}{4.} A \\textit{pseudo}-$R\\sq$ measure.}\\\\ \\textit{\\textcolor{dred}{5.} One or two sentences about how your results and conclusions compare to the logistic model above.}")`
+
+`r tufte::newthought("Test an ordinal probit model")` with the same outcome and predictors as you used in the cumulative logistic model.
+
+\newpage
+`r tufte::newthought("\\LARGE{Question-3: National BIP Standards \\& Monitoring Study (Mankowski)}")`
+
+-----
+
+You used your own data set for Problem 3 in HW 2. Do the following analyses with the same variables and the same data set.
+
+# Question-$3.a.$
+
+`r tufte::margin_note("\\textsc{\\textcolor{dred}{Report:}}\\\\ \\textit{\\textcolor{dred}{1.} What each diagnostic test tells you}\\\\ \\textit{\\textcolor{dred}{2.} The diagnostic values for any cases that you judge to be possible outliers or influential data points}")`
+
+`r tufte::newthought("Test a logistic regression model")`^[Use the _same model_ you tested in `Problem 3 of Homework 2`], and obtain a residual plot with standardized residuals on the y-axis and predicted probabilities on the x-axis, and casewise values for $\Delta\chisq$ or $\Delta D$ and $\Delta\beta$ to check for outliers and influential data points.
+
+# Question-$3.b.$
+
+`r tufte::margin_note("\\textsc{\\textcolor{dred}{Include:}}\\\\ \\textit{\\textcolor{dred}{1.} Regression coefficients}\\\\ \\textit{\\textcolor{dred}{2.} Confidence limits}\\\\ \\textit{\\textcolor{dred}{3.} Model fit information}\\\\ \\textit{\\textcolor{dred}{4.} A \\textit{pseudo}-$R\\sq$ measure.}\\\\ \\textit{\\textcolor{dred}{5.} One or two sentences about how your results and conclusions compare to the logistic model above.}")`
+
+`r tufte::newthought("Replicate the regression model in $3.a.$")`, but this time test a probit model.

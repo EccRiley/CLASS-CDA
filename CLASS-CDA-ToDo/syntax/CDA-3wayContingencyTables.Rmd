@@ -1,0 +1,77 @@
+---
+title: "Three-Way Contingency Table Analysis"
+author: "Riley Smith"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+---
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE, cache=FALSE}
+source("../SETUP.R")
+options(width = 70)
+knitr::opts_chunk$set(
+    tidy = FALSE,
+    echo = TRUE,
+    cache = FALSE,
+    fig.keep = 'high',
+    fig.show = 'asis',
+    results = 'asis',
+    autodep = T,
+    Rplot = TRUE,
+    dev = 'pdf',
+    fig.path = 'graphics/reuters/rplot_',
+    fig.width = 7,
+    fig.asp = 1,
+    out.width = "\\linewidth"
+    )
+library(foreign) ## read.spss() ##
+library(car) ## recode() ##
+```
+
+
+```{r}
+cnt <- array( ## What we want to generate directly from the data ##
+    c(100, 139, 106, 128, 157, 140, 89, 77),
+    dim = c(2, 2, 2),
+    dimnames = list(
+    sex = c("Male", "Female"),
+    ind = c("Affiliate", "Independent"),
+    response = c("Clinton", "Trump")
+))
+library(DescTools)
+## what the results of the BD & MH tests should be: ##
+BreslowDayTest(cnt, correct = FALSE)
+mantelhaen.test(cnt, correct = TRUE) ## For comparison only, since JTN's handout
+                                    ## uses the default MH test method, which
+                                    ## includes Yate's correction ##
+mantelhaen.test(cnt, correct = FALSE)
+
+dat <- R.rspss("data/cnnpoll.sav", vlabs = T)
+ft <- with(dat, {
+    ftable(dat, row.vars = 1:2, col.vars = 3)
+})
+ft
+
+ftc <- matrix(ft, nrow = 4, byrow = T)
+ftc
+ftc.a <- array(ftc, dim = c(2, 2, 2), dimnames = list(
+    Gender = c("Male", "Female"),
+    Independence = c("Affiliate", "Independent"),
+    Response = c("Clinton", "Trump")))
+ftc.a[,,"Clinton"]
+format(ftc.a[,,"Trump"])
+
+mosaicplot(ftc.a, type = "deviance", las = 2, 
+           color = pal_my.a75[c(5, 16)], 
+           main = "Visual 2-x-2-x-2 Cross-Tabulation:\n
+           Party Affiliate-x-Gender-x-Response")
+
+str(BreslowDayTest(ftc.a, correct = FALSE))
+mantelhaen.test(ftc.a, correct = TRUE) ## For comparison only, since JTN's handout
+                                    ## uses the default MH test method, which
+                                    ## includes Yate's correction ##
+mantelhaen.test(ftc.a, correct = FALSE)
+
+```
+
+
+\newpage
+# References`r R.cite_r("~/GitHub/auxDocs/REFs.bib", footnote = TRUE)`
