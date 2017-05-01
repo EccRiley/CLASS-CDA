@@ -8,3 +8,5 @@ auxDocs/tufte.css
 auxDocs/tufteR.css
 
 auxDocs/tufterhandout.css
+
+*.DS_Store
